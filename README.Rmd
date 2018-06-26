@@ -21,12 +21,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-### ***rocTree***: ROC-guided survival trees and forests
+### ROC-guided survival trees and forests
 ***
 
 ## Development
 
-The package is still under active development.
+This package is working in progress.
 
 #### Installation
 

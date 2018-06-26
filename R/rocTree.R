@@ -123,6 +123,7 @@ rocTree <- function(formula, data, id, subset, control = list()) {
     out$Frame <- Frame
     out$ctrl <- ctrl
     out$terms <- attr(m, "terms")
+    attr(out$terms, "id") <- Call[[match("id", names(Call))]]
     class(out) <- "rocTree"
     return(out)
 }
