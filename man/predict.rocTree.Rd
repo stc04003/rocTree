@@ -10,7 +10,8 @@
 \item{x}{an \code{rocTree} object.}
 
 \item{newdata}{an optional data frame in which to look for variables with which to predict.
-If omitted, the fitted predictors are used.}
+If omitted, the fitted predictors are used.
+If the covariate observation time is not supplied, covariates will be treated as at baseline.}
 }
 \description{
 The function gives predicted values.
