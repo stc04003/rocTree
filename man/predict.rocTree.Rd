@@ -18,6 +18,9 @@ If the covariate observation time is not supplied, covariates will be treated as
 
 \item{...}{for future developments.}
 }
+\value{
+Returns a \code{data.frame} of the predicted survival probabilities or cumulative hazard.
+}
 \description{
 The function gives predicted values.
 }

@@ -8,6 +8,8 @@
 #' If the covariate observation time is not supplied, covariates will be treated as at baseline.
 #' @param type is an optional character string specifying whether to predict the survival probability or the hazard rate.
 #' @param ... for future developments.
+#'
+#' @return Returns a \code{data.frame} of the predicted survival probabilities or cumulative hazard. 
 #' 
 #' @importFrom stats model.frame
 #' @export
@@ -64,7 +66,15 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...
         }
     }
     dfPred[is.na(object$xlist[[1]])] <- NA
-    
+    if (type == "survival") {
+        pred <- data.frame(Time = sort(unique(newdata$Y)),
+                           Surv = rowMeans(apply(dfPred, 2, function(x) exp(-cumsum(x))), na.rm = TRUE))
+    }
+    if (type == "hazard") {
+        pred <- data.frame(Time = sort(unique(newdata$Y)),
+                           cumHaz = rowMeans(apply(dfPred, 2, function(x) cumsum(x)), na.rm = TRUE))
+    }
+    return(pred)
 }
 
 myFindInt <- function(x, y) {
