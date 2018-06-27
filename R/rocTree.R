@@ -91,6 +91,7 @@ rocTree <- function(formula, data, id, subset, control = list()) {
     if (is.null(ctrl$disc)) ctrl$disc <- rep(0, p)
     if (length(ctrl$disc) == 1) ctrl$disc <- rep(ctrl$disc, p)
     xlist <- sapply(1:p, function(z) rocTree.Xlist(X[,z], ctrl$disc[z], Y, id), simplify = FALSE)
+    xlist0 <- sapply(1:p, function(z) rocTree.Xlist(X[,z], 1, Y, id), simplify = FALSE) ## for prediction
     Y0 <- unlist(lapply(split(Y, id), max), use.names = FALSE)
     E0 <- unlist(lapply(split(Status, id), max), use.names = FALSE)
     ## Grow
@@ -104,6 +105,7 @@ rocTree <- function(formula, data, id, subset, control = list()) {
     out$Y0 <- Y0
     out$E0 <- E0
     out$xlist <- xlist
+    out$xlist0 <- xlist0
     out$vNames <- vNames
     ## Create Frame for print and plot
     ## Prepare Frame and remove nodes after considering ndFinal

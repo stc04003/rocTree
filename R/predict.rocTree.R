@@ -20,9 +20,28 @@ predict.rocTree <- function(x, newdata, type = c("survival", "hazard"), ...) {
         if (all(is.na(newdata[,names(newdata) == res]))) res <- NULL
         if (all(is.na(newdata[,names(newdata) == id]))) id <- NULL
         newdata <- model.frame(paste(res, "~", paste(c(x$vNames, id), collapse = "+")), newdata)
-        if (!(x$terms[[2]][[2]] %in% names(newdata))) newdata$Y <- min(x$Y0)
-        if (!(attr(x$terms, "id") %in% names(newdata))) newdata$id <- 1:nrow(newdata)
-        else names(newdata)[which(names(newdata) == attr(x$terms, "id"))] <- "id"
+        res <- x$terms[[2]][[2]]
+        id <- attr(x$terms, "id")
+        if (!any(res == names(newdata))) newdata$Y <- min(x$Y0)
+        else names(newdata)[which(names(newdata) == res)] <- "Y"
+        if (!any(id == names(newdata))) newdata$id <- 1:nrow(newdata)
+        else names(newdata)[which(names(newdata) == id)] <- "id"
+        p <- length(x$vNames)
+        X <- model.frame(delete.response(x$terms), newdata)
+        xlist <- list(matrix(NA, length(unique(newdata$Y)), length(unique(newdata$id))),
+                      matrix(NA, length(unique(newdata$Y)), length(unique(newdata$id))))
+        for (i in unique(newdata$id)) {
+            
+        }
+        
     }
 }
 
+findInterval(100, 1:10, left.open = TRUE, rightmost.closed = TRUE)
+
+findInterval(100, 1:10, left.open = TRUE, rightmost.closed = TRUE)
+
+
+## To-do
+## (Y, ID) = ~~(yes, yes)~~, (no, yes), (yes, no), (no, no).
+## When Y is not given, assume the same covariates is observed through out?
