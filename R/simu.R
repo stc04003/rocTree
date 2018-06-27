@@ -1,29 +1,35 @@
+globalVariables(c("n", "cen")) ## global variables for simu
+
 #' Function to generate simulated data used in the manuscript.
 #'
 #' This function is used to generate simulated data in the manuscript.
 #' The underlying model is
-#' \deqn{lambda(t, Z) = \lambda_0(t) \exp{(\beta_1 * Z_1 + \beta_2 * Z_2)},}
+#' \deqn{\lambda(t, Z) = \lambda_0(t) e^{(\beta_1 * Z_1 + \beta_2 * Z_2)},}
 #' where \eqn{\lambda_0(t)} is the baseline hazard function,
 #' (\eqn{b_1, b_2}) is the regression coefficient, and
 #' \eqn{Z_1} and \eqn{Z_2} are the covariates.
 #' When time varying covariate is involved (scenario 2), only \eqn{Z_1} is assumed to dependent on time.
-#' 
-#' @param n is the number of subject
-#' @param cen is the censoring percentage; right now it can be either 0%, 25%, or 50%.
-#' @param scenario can be numeric or character string.
-#' This indicates the simulation scenario noted in the manuscript.
+#'
 #' The following scenarios are included.
 #' \describe{
 #' \item{Scenario 1}{assumes time independent covariates with \eqn{\Lambda(0) = 2t}:}
 #' \describe{
-#' \item{1.1}{assumes \eqn{\lambda(t, Z) = \lambda_0(t) \exp{(2Z_1 + 2Z_2)}}.}
-#' \item{1.2}{assumes \eqn{\lambda(t, Z) = \lambda_0(t) \exp{[2sin(2\pi Z_1) + 2|Z_2 - 0.5]}}.}
+#' \item{1.1}{assumes \eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2)}}.}
+#' \item{1.2}{assumes \eqn{\lambda(t, Z) = \lambda_0(t) e^{[2sin(2\pi Z_1) + 2|Z_2 - 0.5|]}}.}
 #' }
 #' \item{Scenario 2}{assumes time dependent covariate (\eqn{Z_1}) with \eqn{\Lambda(0) = 2t}:}
 #' \describe{
-#' \item{2.1}{}
+#' \item{2.1}{assumes}
+#' \item{2.2}{assumes}
 #' }
 #' }
+#' 
+#' @param n is the number of subject
+#' @param cen is the censoring percentage; right now it can be either 0\%, 25\%, or 50\%.
+#' @param scenario can be numeric or character string.
+#' This indicates the simulation scenario noted in the manuscript.
+#' See \bold{Details} for all options.
+#' @importFrom stats delete.response rexp rgamma rnorm runif
 #' @export
 #' 
 simu <- function(n, cen, scenario) {

@@ -169,37 +169,11 @@ rownames(dat0) <- rownames(dat.test) <- rownames(dat.test0) <- NULL
 ## -------------------------------------------------------------------------------------------
 system.time(foo <- rocTree(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat))
 
-xlist <- rep(list(matrix(NA, length(unique(newdata$Y)), length(unique(newdata$id)))), p)
-now <- proc.time()
-for (i in unique(newdata$id)) {
-    newdatai <- subset(newdata, id == i)
-    Xi <- model.frame(delete.response(x$terms), newdatai)
-    yind <- findInterval(newdatai$Y, x$Y0, left.open = TRUE, all.inside = TRUE)
-    for (j in 1:p) {
-        tmp <- sapply(1:length(yind), function(z)
-            x$xlist[[j]][yind[z], findInterval(Xi[z, p], sort(x$xlist0[[j]][yind[z],]),
-                                               left.open = TRUE, all.inside = TRUE)])
-        xlist[[j]][1:length(tmp), i] <- tmp
-    }
-}
-proc.time() - now
+debug(predict)
+str(predict(foo, dat.test))
 
+t1 <- predict(foo, dat)
 
-lapply(split(c(unique(yind), Xi[,j]), c(unique(yind), yind)),
-       function(z) x$xlist[[j]][z[1], sum(is.na(x$xlist0[[j]][z[1],])) +
-                                      findInterval(z[-1], sort(x$xlist0[[j]][z[1],]),
-                                                   left.open = TRUE, all.inside = TRUE)])
-
-brk <- split(Xi[,j], yind)
-sapply(unique(yind), function(z)
-    x$xlist[[j]][z, sum(is.na(x$xlist0[[j]][z,])) +
-                          findInterval(brk[[z]], sort(x$xlist0[[j]][z,1]),
-                                       left.open = TRUE, all.inside = TRUE)])
-
-
-system.time(sapply(1:length(yind), function(z)
-    x$xlist[[j]][yind[z], findInterval(Xi[z, p], sort(x$xlist[[j]][yind[z],]),
-                                       left.open = TRUE, all.inside = TRUE)]))
 e
 
 ## -------------------------------------------------------------------------------------------
@@ -244,4 +218,46 @@ for (i in 1:n3) {
   SY3r[i,] <- fr3(tt)
   SY3c[i,] <- fc3(tt)
   SY3[i,] <- sapply(tt, function(u)  exp(-c(sum(dl3[Y <= u, i]))))
+}
+
+
+
+
+## 
+set.seed(12)
+dat <- datGen(10)[,-6]
+head(dat)
+
+system.time(foo <- rocTree(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat))
+
+t1 <- predict(foo, dat)
+foo$xlist[[1]]
+t1[[1]][, order(colSums(is.na(t1[[1]])), decreasing = TRUE)]
+foo$xlist[[1]] - t1[[1]][, order(colSums(is.na(t1[[1]])), decreasing = TRUE)]
+
+foo$xlist[[2]]
+t1[[2]][, order(colSums(is.na(t1[[2]])), decreasing = TRUE)]
+foo$xlist[[2]] - t1[[2]][, order(colSums(is.na(t1[[2]])), decreasing = TRUE)]
+
+
+foo$Frame
+
+ndInd <- matrix(1, 10, 10)
+for (i in 1:dim(foo$Frame)[1]) {
+    if (foo$Frame$terminal[i] == 0) {
+        ind <- foo$xlist[[foo$Frame$p[i]]] <= foo$Frame$cut[i]
+        ndInd[ndInd == foo$Frame$nd[i] & ifelse(is.na(ind), FALSE, ind)] <- foo$Frame$nd[i] * 2
+        ndInd[ndInd == foo$Frame$nd[i] & ifelse(is.na(ind), FALSE, !ind)] <- foo$Frame$nd[i] * 2 + 1
+    }
+}
+
+ndInd[is.na(foo$xlist[[1]])] <- NA
+ndInd
+
+dfPred <- matrix(0, 10, 10)
+n <- 10
+for (i in 1:n) {
+    for (k in 1:length(foo$ndFinal)) {
+        dfPred[i, ndInd[i,] == foo$ndFinal[k]] <- foo$dfFinal[i, k]
+    }
 }

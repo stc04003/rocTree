@@ -4,14 +4,19 @@
 \alias{predict.rocTree}
 \title{Predicting based on a \code{rocTree} model.}
 \usage{
-\method{predict}{rocTree}(x, newdata, type = c("survival", "hazard"), ...)
+\method{predict}{rocTree}(object, newdata, type = c("survival", "hazard"),
+  ...)
 }
 \arguments{
-\item{x}{an \code{rocTree} object.}
+\item{object}{is an \code{rocTree} object.}
 
-\item{newdata}{an optional data frame in which to look for variables with which to predict.
+\item{newdata}{is an optional data frame in which to look for variables with which to predict.
 If omitted, the fitted predictors are used.
 If the covariate observation time is not supplied, covariates will be treated as at baseline.}
+
+\item{type}{is an optional character string specifying whether to predict the survival probability or the hazard rate.}
+
+\item{...}{for future developments.}
 }
 \description{
 The function gives predicted values.

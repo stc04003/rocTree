@@ -243,6 +243,10 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
             break
         }
     }
+    if (all(is.na(treeMat$p))) {
+        cat("\nNo splits.\n")
+        return(NULL)
+    }
     ## prune
     treeMatTerm <- treeMat[treeMat[, 2] >= 1 & is.na(treeMat[, 5]), 1]
     ## sort the node
