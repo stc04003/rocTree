@@ -311,3 +311,7 @@ sim3.3 <- function(n, cen = 0) {
 sim3.1(5, 0)
 sim3.1(5, 0.25)
 sim3.1(5, 0.5)
+
+library(parallel)
+cl <- makeCluster(2)
+parLapply(cl, 2:4, function(exponent) 2^exponent)
