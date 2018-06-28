@@ -193,10 +193,7 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
     STree2[1, ] <- rowMeans(Smat2)[EE2]
     fTree3[1, ] <- rowMeans(fmat3)[EE2]
     STree3[1, ] <- rowMeans(Smat3)[EE2]
-    treeMat <- matrix(nrow = M, ncol = 6)
-    colnames(treeMat) <- c("nd", "terminal", "u", "u2", "p", "cut")
-    treeMat[, 1] <- 1:M
-    treeMat[, 2] <- 0
+    treeMat <- data.frame(nd = 1:M, terminal = 0, u = NA, u2 = NA, p = NA, cut = NA)
     treeMat[1, ] <- c(1, 1, 1, 1, NA, NA)
     ndInd1 <- matrix(1, N1, N1)
     ndInd2 <- matrix(1, N2, N2)
@@ -205,7 +202,7 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
     ndInd2[lower.tri(ndInd2)] <- 0
     ndInd12[is.na(X12.list[[1]])] <- 0
     tlst <- which(Y1 >= tau)[1] - 1
-    while (sum(treeMat[, 2] == 1) > 0) {
+    while (sum(treeMat$terminal == 1) > 0) {
         sp <- split3(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd1, const, fTree, STree, control)
         if (sp[1] * 2 < M & !is.na(sp[2])) {
             ndInd1[ndInd1 == sp[1] & X1.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
@@ -238,20 +235,19 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
             treeMat[sp[1] * 2 + 1, ] <- c(sp[1] * 2 + 1, 1,
                                           mean(diag(ndInd1) == (sp[1] * 2 + 1) & EE1),
                                           min(rowMeans(ndInd1[Y1 <= tau, ] == sp[1] * 2 + 1)), NA, NA)
-            treeMat[treeMat[, 3] <= minsp / N1 & treeMat[, 4] <= minsp2 / N1, 2] <- 2
+            treeMat$terminal[which(treeMat$u <= minsp / N1 & treeMat$u2 <= minsp2 / N1), 2] <- 2
             ## conTree <- conTree + sp[4]
         } else {
-            treeMat[treeMat[, 1] == sp[1], 2] <- 2
+            treeMat$terminal[treeMat$nd == sp[1]] <- 2
             break
         }
     }
-    treeMat <- data.frame(treeMat)
     if (all(is.na(treeMat$p))) {
         cat("\nNo splits.\n")
         return(NULL)
     }
     ## prune
-    treeMatTerm <- treeMat[treeMat$terminal >= 1 & is.na(treeMat$p), 1]
+    treeMatTerm <- treeMat$nd[treeMat$terminal >= 1 & is.na(treeMat$p)]
     ## sort the node
     left <- 2 ^ round(max(log(treeMatTerm, 2)))
     right <- 2 * left - 1
@@ -317,12 +313,12 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
                 termMat <- rbind(termMat, ndNew)
                 indMat <- rbind(indMat, indNew)
                 num <- num + 1
-                fuTerm <- fTree[treeMat[, 1] %in% ndNew, ]
-                SuTerm <- STree[treeMat[, 1] %in% ndNew, ]
-                fuTerm2 <- fTree2[treeMat[, 1] %in% ndNew, ]
-                SuTerm2 <- STree2[treeMat[, 1] %in% ndNew, ]
-                fuTerm3 <- fTree3[treeMat[, 1] %in% ndNew, ]
-                SuTerm3 <- STree3[treeMat[, 1] %in% ndNew, ]
+                fuTerm <- fTree[treeMat$nd %in% ndNew, ]
+                SuTerm <- STree[treeMat$nd %in% ndNew, ]
+                fuTerm2 <- fTree2[treeMat$nd %in% ndNew, ]
+                SuTerm2 <- STree2[treeMat$nd %in% ndNew, ]
+                fuTerm3 <- fTree3[treeMat$nd %in% ndNew, ]
+                SuTerm3 <- STree3[treeMat$nd %in% ndNew, ]
                 consub <- c(consub, .C("con", 
                                        as.integer(length(fuTerm) / sum(EE1)),
                                        as.integer(sum(EE1)),
@@ -513,20 +509,17 @@ grow3 <- function(Y, E, X.list, control) {
     fTree[1, ] <- rowMeans(fmat)[EE]
     STree[1, ] <- rowMeans(Smat)[EE]
     ## Define a tree object
-    treeMat <- matrix(nrow = M, ncol = 6)
-    colnames(treeMat) <- c("nd", "terminal", "u", "u2", "p", "cut")
+    treeMat <- data.frame(nd = 1:M, terminal = 0, u = NA, u2 = NA, p = NA, cut = NA)
     ## terminal = 0 - internal
     ## terminal = 1 - terminal can be split
     ## terminal = 2 - terminal cannot be split
-    treeMat[, 1] <- 1:M
-    treeMat[, 2] <- 0
     treeMat[1, ] <- c(1, 1, 1, 1, NA, NA)
     ## node number of each observation
     ndInd <- matrix(1, N, N)
     ndInd[lower.tri(ndInd)] <- 0
     ## ndInd is N N matrix
     conTree <- sum(0.5 * const * ss * rowMeans(fmat)[EE])
-    while (sum(treeMat[, 2] == 1) > 0) {
+    while (sum(treeMat$terminal == 1) > 0) {
         sp <- split3(X.list, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, control)
         if (sp[1] * 2 < M & !is.na(sp[2])) {
             ndInd[ndInd == sp[1] & X.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
@@ -544,16 +537,16 @@ grow3 <- function(Y, E, X.list, control) {
                                           mean(diag(ndInd) == sp[1] * 2 + 1 & EE),
                                           min(rowMeans(ndInd[Y <= tau, ] == sp[1] * 2 + 1)), NA, NA)
             ## mean(ndInd[tlst,] == sp[1]*2)
-            treeMat[treeMat[, 3] < minsp / N & treeMat[, 4] < minsp2 / N, 2] <- 2
+            treeMat$terminal[which(treeMat$u < minsp / N & treeMat$u2 < minsp2 / N)] <- 2
             conTree <- conTree + sp[4]
         } else {
-            treeMat[treeMat[, 1] == sp[1], 2] <- 2
+            treeMat[treeMat$nd == sp[1], 2] <- 2
             break
         }
         if (control$Trace) print(sp)
     }
     ## prune
-    treeMatTerm <- treeMat[treeMat[, 2] >= 1 & is.na(treeMat[, 5]), 1]
+    treeMatTerm <- treeMat$nd[treeMat$terminal >= 1 & is.na(treeMat$p)]
     ## sort the node
     left <- 2 ^ round(log(max(treeMatTerm), 2))
     right <- 2 * left - 1
@@ -642,7 +635,7 @@ grow3 <- function(Y, E, X.list, control) {
     beta.seq <- sqrt(abs(res[,2] * c(res[-1, 2], Inf)))
     list(beta.seq = beta.seq,
          optTree.seq = optTreeList[res[, 1]],
-         treeMat = data.frame(treeMat))
+         treeMat = treeMat)
 }
 
 #' Function used to in the splitting procedure
@@ -712,7 +705,7 @@ split3 <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, con
     M <- control$M
     tau <- control$tau
     ## all the terminal nodes that can be split; not all the terminal nodes
-    nd.terminal <- treeMat[treeMat[, 2] == 1, 1]
+    nd.terminal <- treeMat[treeMat$terminal == 1, 1]
     sopt <- matrix(NA, M, 2)
     dconopt <- rep(0, M)
     ## lnd <- length(nd.terminal)-1
@@ -721,8 +714,8 @@ split3 <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, con
         ## need to change with discrete data
         dconList <- list()
         cutList <- list()
-        f <- fTree[(treeMat[, 2] >= 1) & (treeMat[, 1] != m), ]
-        S <- STree[(treeMat[, 2] >= 1) & (treeMat[, 1] != m), ]
+        f <- fTree[(treeMat$terminal >= 1) & (treeMat$nd != m), ]
+        S <- STree[(treeMat$terminal >= 1) & (treeMat$nd != m), ]
         ## size of nodes
         fm <- fTree[m, ]
         Sm <- STree[m, ]
@@ -763,7 +756,7 @@ split3 <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, con
                                     as.double(t(S)), ## length(nd.terminal) by Ny
                                     as.double(t(ifelse(r == Inf, 99999, r))), ## length(nd.terminal) by Ny
                                     as.double(ifelse(rm == Inf | is.na(rm), 99999, rm)), ## Ny by 1
-                                    as.integer(sum(treeMat[,2] >= 1 & treeMat[,1] != m)), ## sum(treeMat[,2] >= 1 & treeMat[,1] != m)
+                                    as.integer(sum(treeMat$terminal >= 1 & treeMat$nd != m)), ## sum(treeMat[,2] >= 1 & treeMat[,1] != m)
                                     out = double(length(cutAll)), PACKAGE = "rocTree")$out
             if (control$split.method == "dCON") 
                 dconList[[p]] <- .C("cutSearch2", as.integer(N), as.integer(length(cutAll)), as.integer(m),
@@ -776,7 +769,7 @@ split3 <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, con
                                     as.double(const), as.double(t(f)), as.double(t(S)), 
                                     as.double(t(ifelse(r == Inf, 99999, r))),
                                     as.double(ifelse(rm == Inf | is.na(rm), 99999, rm)), 
-                                    as.integer(sum(treeMat[,2] >= 1 & treeMat[,1] != m)),
+                                    as.integer(sum(treeMat$terminal >= 1 & treeMat$nd != m)),
                                     out = double(length(cutAll)), PACKAGE = "rocTree")$out
         } ## end P
         dconmaxP <- unlist(lapply(dconList, max))
