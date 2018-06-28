@@ -1,7 +1,7 @@
 Package: rocTree
 Title: Receiver Operating Characteristic (ROC)-Guided Classification
         and Survival Tree
-Version: 0.99.6
+Version: 0.99.7
 Authors@R: c(person("Yifei", "Sun", email = "ys3072@cumc.columbia.edu", role = "aut"),
 	   person("Mei-Cheng", "Wang", email = "mcwang@jhu.edu", role = "aut"),
 	   person("Sy Han", "Chiou", email = "schiou@utdallas", role = c("aut", "cre")))
@@ -14,7 +14,7 @@ RoxygenNote: 6.0.1
 Imports: DiagrammeR (>= 1.0.0), parallel, data.tree (>= 0.7.5),
         graphics, stats, survival (>= 2.38)
 NeedsCompilation: yes
-Packaged: 2018-06-26 06:09:40 UTC; schiou
+Packaged: 2018-06-28 06:09:40 UTC; schiou
 Author: Yifei Sun [aut],
   Mei-Cheng Wang [aut],
   Sy Han Chiou [aut, cre]

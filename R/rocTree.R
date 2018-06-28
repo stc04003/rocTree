@@ -203,7 +203,7 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
     ndInd12[is.na(X12.list[[1]])] <- 0
     tlst <- which(Y1 >= tau)[1] - 1
     while (sum(treeMat$terminal == 1) > 0) {
-        sp <- split(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd1, const, fTree, STree, control)
+        sp <- splitTree(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd1, const, fTree, STree, control)
         if (sp[1] * 2 < M & !is.na(sp[2])) {
             ndInd1[ndInd1 == sp[1] & X1.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
             ndInd1[ndInd1 == sp[1] & X1.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1
@@ -235,7 +235,7 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
             treeMat[sp[1] * 2 + 1, ] <- c(sp[1] * 2 + 1, 1,
                                           mean(diag(ndInd1) == (sp[1] * 2 + 1) & EE1),
                                           min(rowMeans(ndInd1[Y1 <= tau, ] == sp[1] * 2 + 1)), NA, NA)
-            treeMat$terminal[which(treeMat$u <= minsp / N1 & treeMat$u2 <= minsp2 / N1), 2] <- 2
+            treeMat$terminal[which(treeMat$u <= minsp / N1 & treeMat$u2 <= minsp2 / N1)] <- 2
             ## conTree <- conTree + sp[4]
         } else {
             treeMat$terminal[treeMat$nd == sp[1]] <- 2
@@ -515,7 +515,7 @@ grow <- function(Y, E, X.list, control) {
     ## ndInd is N N matrix
     conTree <- sum(0.5 * const * ss * rowMeans(fmat)[EE])
     while (sum(treeMat$terminal == 1) > 0) {
-        sp <- split(X.list, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, control)
+        sp <- splitTree(X.list, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, control)
         if (sp[1] * 2 < M & !is.na(sp[2])) {
             ndInd[ndInd == sp[1] & X.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
             ndInd[ndInd == sp[1] & X.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1
@@ -691,7 +691,7 @@ grow <- function(Y, E, X.list, control) {
 #' 
 #' @keywords internal
 #' @noRd 
-split <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, control, randP = NULL)  {
+splitTree <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, control, randP = NULL)  {
     N <- dim(X[[1]])[1]
     P <- length(X)
     if (is.null(randP)) randP <- P
@@ -768,7 +768,8 @@ split <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, cont
                                     as.integer(sum(treeMat$terminal >= 1 & treeMat$nd != m)),
                                     out = double(length(cutAll)), PACKAGE = "rocTree")$out
         } ## end P
-        dconmaxP <- unlist(lapply(dconList, max))
+        ## dconmaxP <- unlist(lapply(dconList, max))
+        dconmaxP <- unlist(lapply(dconList, function(x) max(x, -1)))
         if (max(dconmaxP) < 0) {
             sopt[m, ] <- c(P + 1, 999)
             dconopt[m] <- -1

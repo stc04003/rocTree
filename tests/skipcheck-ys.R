@@ -60,7 +60,8 @@ foo
 ##          ¦--14) X1 <= 0.71000*
 ##          °--15) X1 > 0.71000* 
 
-system.time(foo1 <- rocTree(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat, control = list(split.method = "dCON")))
+system.time(foo1 <- rocTree(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat,
+                            control = list(split.method = "dCON")))
 ##   user  system elapsed 
 ##  0.273   0.036   0.314
 
@@ -79,7 +80,7 @@ foo1
 ##      °--7) X1 > 0.71000*
 
 ## ------------------------------------------------------------------------------------------------
-## Timing comparison
+## Timing comparison between the two spliting algorithms
 ## ------------------------------------------------------------------------------------------------
 do <- function(n, smethod) {
     dat <- datGen(n)
@@ -115,11 +116,13 @@ summary(t(replicate(100, do(200))))
 ## ------------------------------------------------------------------------------------------------
 
 set.seed(1)
-system.time(foo <- rocTree(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat, control = list(CV = TRUE, nflds = 10)))
+system.time(foo <- rocTree(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat,
+                           control = list(CV = TRUE, nflds = 10)))
 
 ## Parallel computing is only faster for large n or large number of nflds
 set.seed(1)
-system.time(foo2 <- rocTree(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat, control = list(CV = TRUE, nflds = 10, parallel = TRUE)))
+system.time(foo2 <- rocTree(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat,
+                            control = list(CV = TRUE, nflds = 10, parallel = TRUE)))
 
 identical(foo, foo2) ## True
 
@@ -141,8 +144,6 @@ plot(foo2, output = "visNetwork", control = list(nodeOnly = TRUE, shape = "box")
 
 ## Plot hazard functions
 plotTreeHaz(foo2)
-
-
 
 ###############################################################################################
 ## fitting rpart and party; using covariates at baseline.
@@ -227,91 +228,13 @@ dat <- datGen(10)[,-6]
 head(dat)
 
 system.time(foo <- rocTree(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat))
+str(predict(foo, dat))
 
-predict(foo, dat)
+system.time(fooForest <- rocForest(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat))
+length(fooForest)
 
-sim3.1 <- function(n, cen = 0) {
-    e <- rbinom(n, 1, .5)
-    u <- rexp(n, 5)
-    z2 <- runif(n)
-    Time <- rep(NA, n)    
-    for (i in 1:n) {
-        sol <- rexp(1)
-        if (e[i] == 1)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u[i]) * .1 * exp(z2[i]) * x -
-                (x >= u[i]) * .1 * exp(z2[i]) * (u[i] + exp(1) * (x - u[i])),
-                interval = c(0, 50))$root
-        if (e[i] == 0)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u[i]) * .1 * exp(z2[i] + 1) * x -
-                (x > u[i]) * .1 * exp(z2[i]) * (exp(1) * u[i] + x + u[i]),
-                interval = c(0, 50))$root
-    }
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 1.73)
-    if (cen == .50) cens <- runif(n, 0, 0.83)
-    Y <- pmin(Time, cens)
-    dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = 1 * (Time[x] <= cens[x]), z2 = z2[x], e = e[x], u = u[x])))
-    dat$z1 <- with(dat, e * (Y < u) + (1 - e) * (Y >= u))
-    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u")])
-}
+fooForest
+print(fooForest, 12)
+plot(fooForest)
+plot(fooForest, 12)
 
-sim3.2 <- function(n, cen = 0) {
-    e <- rbinom(n, 1, .5)
-    u <- matrix(rexp(3 * n, 5), n)
-    u1 <- u[,1]
-    u2 <- u[,2]
-    u3 <- u[,3]
-    z2 <- runif(n)
-    Time <- rep(NA, n)
-    for (i in 1:n) {
-        sol <- rexp(1)
-        if (e[i] == 1)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u1[i]) * .1 * exp(z2[i]) * x - 
-                (x >= u1[i]) * (x < u2[i]) * .1 * exp(z2[i]) * (u1[i] + exp(1) * (x - u1[i])) -
-                (x >= u2[i]) * (x < u3[i]) * .1 * exp(z2[i]) * (u1[i] + exp(1) * (u2[i] - u1[i]) + x - u2[i]) -
-                (x >= u3[i]) * .1 * exp(z2[i]) * (u1[i] + u3[i] - u2[i] + exp(1) * (u2[i] - u1[i] + x - u3[i])),
-                interval = c(0, 50))$root
-        if (e[i] == 0)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u1[i]) * .1 * exp(z2[i]) * exp(1) * x -
-                (x >= u1[i]) * (x < u2[i]) * .1 * exp(z2[i]) * (exp(1) * u1[i] + x - u1[i]) - 
-                (x >= u2[i]) * (x < u3[i]) * .1 * exp(z2[i]) * (exp(1) * (u1[i] + x - u2[i]) + u2[i] - u1[i]) -
-                (x >= u3[i]) * .1 * exp(z2[i]) * (exp(1) * (u1[i] + u3[i] - u2[i]) + u2[i] - u1[i] - u3[i] + x),
-                interval = c(0, 50))$root
-    }
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 2.11)
-    if (cen == .50) cens <- runif(n, 0, 1.02)
-    Y <- pmin(Time, cens)
-    dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = 1 * (Time[x] <= cens[x]), z2 = z2[x], e = e[x], u1 = u1[x], u2 = u2[x], u3 = u3[x])))
-    dat$z1 <- with(dat, e * (u1 <= Y) * (Y < u2) + e * (u3 <= Y) + (1 - e) * (Y < u1) + (1 - e) * (u2 <= Y) * (Y < u3))
-    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u1", "u2", "u3")])
-}
-
-sim3.3 <- function(n, cen = 0) {
-    k <- runif(n, 1, 2)
-    b <- runif(n, 1, 2)
-    z2 <- runif(n)
-    Time <- log(10 * rexp(n) * exp(-z2 - b) * k + 1) / k
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 1.11)
-    if (cen == .50) cens <- runif(n, 0, 0.56)
-    Y <- pmin(Time, cens)
-    dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = 1 * (Time[x] <= cens[x]), z2 = z2[x], k = k[x], b = b[x])))
-    dat$z1 <- with(dat, k * Time + b)
-    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
-}
-
-sim3.1(5, 0)
-sim3.1(5, 0.25)
-sim3.1(5, 0.5)
-
-library(parallel)
-cl <- makeCluster(2)
-parLapply(cl, 2:4, function(exponent) 2^exponent)

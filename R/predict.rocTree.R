@@ -10,7 +10,8 @@
 #' @param ... for future developments.
 #'
 #' @return Returns a \code{data.frame} of the predicted survival probabilities or cumulative hazard. 
-#' 
+#'
+#' @seealso \code{\link{predict.rocForest}}
 #' @importFrom stats model.frame
 #' @export
 predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...) {
@@ -33,7 +34,7 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...
         else names(newdata)[which(names(newdata) == id)] <- "id"
         p <- length(object$vNames)
         n <- length(unique(newdata$Y))
-        newdata$yind <- myFindInt(newdata$Y, object$Y0)
+        newdata$yind <- findInt(newdata$Y, object$Y0)
         newdata <- newdata[order(newdata$yind, newdata$Y),]
         X <- cbind(yind = newdata$yind, model.frame(delete.response(object$terms), newdata))
         xlist <- rep(list(matrix(NA, n, length(unique(newdata$id)))), p)
@@ -42,7 +43,7 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...
             tmp <- sptdat[[z]]
             ind <- tmp[1,1]
             sapply(1:p, function(y)
-                object$xlist[[y]][ind, myFindInt.X(tmp[,y+1], object$xlist0[[y]][ind,])])
+                object$xlist[[y]][ind, findInt.X(tmp[,y+1], object$xlist0[[y]][ind,])])
         })
         X.path <- data.frame(do.call(rbind, X.path))
         for (i in 1:p) {
@@ -77,11 +78,17 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...
     return(pred)
 }
 
-myFindInt <- function(x, y) {
+#' findInterval with 0 replaced with 1
+#' @keywords internal
+#' @noRd
+findInt <- function(x, y) {
     pmax(1, findInterval(x, sort(y)))
 }
 
-myFindInt.X <- function(x, y) {
+#' findInterval with 0 replaced with 1, works with NA's in y
+#' @keywords internal
+#' @noRd
+findInt.X <- function(x, y) {
     order(y)[pmax(1, findInterval(x, sort(y)))]
 }
 

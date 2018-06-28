@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.rocTree.R
 \name{plot.rocTree}
 \alias{plot.rocTree}
-\title{Plotting an rocTree object}
+\title{Plotting an \code{rocTree} object}
 \usage{
 \method{plot}{rocTree}(x, output = c("graph", "visNetwork"), digits = 4,
   control = list(), ...)
@@ -19,7 +19,7 @@
 \item{...}{arguments to be passed to or from other methods.}
 }
 \description{
-Plots an rocTree object. The function uses a \code{dgr_graph} object, render the graph in the RStudio Viewer.
+Plots an \code{rocTree} object. The function uses a \code{dgr_graph} object, render the graph in the RStudio Viewer.
 }
 \details{
 The argument \code{control} consists of some options to be passed down to \code{render_graph} of the \code{DiagrammeR} package.

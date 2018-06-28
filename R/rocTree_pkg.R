@@ -28,7 +28,8 @@
 #' @importFrom stats model.extract model.matrix model.response
 #' @importFrom utils tail
 #' @importFrom survival survfit Surv
-#' @importFrom parallel detectCores makeCluster setDefaultCluster clusterExport parSapply stopCluster
+#' @importFrom parallel detectCores makeCluster setDefaultCluster clusterExport stopCluster
+#' @importFrom parallel parSapply parLapply
 #' @importFrom graphics legend lines plot
 #' @importFrom data.tree Node ToDataFrameTree ToDiagrammeRGraph SetGraphStyle SetNodeStyle
 #' @importFrom DiagrammeR render_graph %>% export_graph

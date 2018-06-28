@@ -51,7 +51,7 @@ grow2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, control) {
     ndInd2[outer(Y, Y2, FUN = ">")] <- 0
     conTree <- sum(0.5 * const * ss * rowMeans(fmat)[EE1])
     while (sum(treeMat[, 2] == 1) > 0) {
-        sp <- split3(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd, const, fTree, STree, control, round(length(X1.list) / 2))
+        sp <- splitTree(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd, const, fTree, STree, control, round(length(X1.list) / 2))
         if (sp[1] * 2 < M & !is.na(sp[2])) {
             ndInd[ndInd == sp[1] & X1.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
             ndInd[ndInd == sp[1] & X1.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1
@@ -153,18 +153,26 @@ rocForest <- function(formula, data, id, subset, control = list()) {
     xlist0 <- sapply(1:p, function(z) rocTree.Xlist(X[,z], 1, Y, id), simplify = FALSE) ## for prediction
     Y0 <- unlist(lapply(split(Y, id), max), use.names = FALSE)
     E0 <- unlist(lapply(split(Status, id), max), use.names = FALSE)
-    
-    if (!control$parallel) out <- lapply(1:control$B, function(x) forest1(Y0, E0, xlist, control))
-    if (control$parallel) {
-        cl <- makeCluster(control$parCluster)
+    out <- NULL
+    out$Y0 <- Y0
+    out$E0 <- E0
+    out$xlist <- xlist
+    out$xlist0 <- xlist0
+    out$vNames <- vNames    
+    if (!ctrl$parallel) out$forest <- lapply(1:ctrl$B, function(x) forest1(Y0, E0, xlist, ctrl))
+    if (ctrl$parallel) {
+        cl <- makeCluster(ctrl$parCluster)
         clusterExport(cl = cl, 
-                      varlist = c("Y0", "E0", "xlist", "control"),
+                      varlist = c("Y0", "E0", "xlist", "ctrl"),
                       envir = environment())
-        out <- parLapply(cl, 1:control$B, function(x) forest1(Y0, E0, xlist, control))
+        out$forest <- parLapply(cl, 1:ctrl$B, function(x) forest1(Y0, E0, xlist, ctrl))
         stopCluster(cl)
     }
-    out
+    class(out) <- "rocForest"
+    return(out)
 }
+
+is.rocForest <- function(x) inherits(x, "rocForest")
 
 #' This function provides one tree in \code{rocForest}
 #'
@@ -185,49 +193,49 @@ forest1 <- function(Y, E, xlist, control) {
 }
 
 
-## Terminal nodes 
-    ndTerm <- treeMat$nd[treeMat$terminal == 2]
+## ## Terminal nodes 
+##     ndTerm <- treeMat$nd[treeMat$terminal == 2]
 
-    tree2 <- treeMat[!is.na(treeMat[,3]),]
+##     tree2 <- treeMat[!is.na(treeMat[,3]),]
     
-    ## ################# Return here? ####################  Return tree2 (Frame)
-    ## SzL2 is a matrix for L2, counting the size of terminal nodes at each time point
-    ## each col is for one terminal node
-    ## each row is for one time point
-    SzL2 <- matrix(ncol = length(ndTerm), nrow = N)
-    for(k in 1:length(ndTerm)) {
-        SzL2[,k] <- apply(ndInd2, 1, function(x){sum(x==ndTerm[k])})
-    }
-    ## final tree
-    tree2 <- treeMat[!is.na(treeMat[,3]),]
-    ## find the node label of the new observations in the tree
-    ndInd32 <- matrix(1, N, N3)
-    for(i in 1:dim(tree2)[1]) {
-        sp <- tree2[i,c(1,5:6,2)]
-        if(sp[4] == 0)
-        {
-            ndInd32[ndInd32 == sp[1] & X32.list[[sp[2]]]<=sp[3]] <- sp[1]*2
-            ndInd32[ndInd32 == sp[1] & X32.list[[sp[2]]]>sp[3]] <- sp[1]*2+1
-        }else{
-            ## If it is a terminal node, do nothing
-            ## Nodes who are descendents of the terminal nodes will not appear
-        }
-    }
-    ## W2 is an 3d array, W2[i,,] is the weight matrix for the ith new obs.
-    ## each row is one subject
-    W2 <- array(0, dim = c(N3,N,N))
-    for(i in 1:N3)
-    {
-        ndi <- ndInd32[,i]
-        ## the nodes over time of the ith subjects (new obs.)
-        for(j in 1:N)
-        {
-            ## at jth time point, subject i enters node ndi[j]
-            ## update the weights for observations in L2 that falls into ndi[j]
-            ## If the observation falls into a node that no data from L2 is in that node, this 
-            ## means that there is no neighbor in L2, so the weight is 0 (later we do normalization so that the sum is 1)
-            W2[i,j,idb2[ndInd2[j,] == ndi[j]]] <- 1/SzL2[j,ndTerm == ndi[j]]
-        }
-    }
-    list(treeMat = tree2, W2 = W2)
-}
+##     ## ################# Return here? ####################  Return tree2 (Frame)
+##     ## SzL2 is a matrix for L2, counting the size of terminal nodes at each time point
+##     ## each col is for one terminal node
+##     ## each row is for one time point
+##     SzL2 <- matrix(ncol = length(ndTerm), nrow = N)
+##     for(k in 1:length(ndTerm)) {
+##         SzL2[,k] <- apply(ndInd2, 1, function(x){sum(x==ndTerm[k])})
+##     }
+##     ## final tree
+##     tree2 <- treeMat[!is.na(treeMat[,3]),]
+##     ## find the node label of the new observations in the tree
+##     ndInd32 <- matrix(1, N, N3)
+##     for(i in 1:dim(tree2)[1]) {
+##         sp <- tree2[i,c(1,5:6,2)]
+##         if(sp[4] == 0)
+##         {
+##             ndInd32[ndInd32 == sp[1] & X32.list[[sp[2]]]<=sp[3]] <- sp[1]*2
+##             ndInd32[ndInd32 == sp[1] & X32.list[[sp[2]]]>sp[3]] <- sp[1]*2+1
+##         }else{
+##             ## If it is a terminal node, do nothing
+##             ## Nodes who are descendents of the terminal nodes will not appear
+##         }
+##     }
+##     ## W2 is an 3d array, W2[i,,] is the weight matrix for the ith new obs.
+##     ## each row is one subject
+##     W2 <- array(0, dim = c(N3,N,N))
+##     for(i in 1:N3)
+##     {
+##         ndi <- ndInd32[,i]
+##         ## the nodes over time of the ith subjects (new obs.)
+##         for(j in 1:N)
+##         {
+##             ## at jth time point, subject i enters node ndi[j]
+##             ## update the weights for observations in L2 that falls into ndi[j]
+##             ## If the observation falls into a node that no data from L2 is in that node, this 
+##             ## means that there is no neighbor in L2, so the weight is 0 (later we do normalization so that the sum is 1)
+##             W2[i,j,idb2[ndInd2[j,] == ndi[j]]] <- 1/SzL2[j,ndTerm == ndi[j]]
+##         }
+##     }
+##     list(treeMat = tree2, W2 = W2)
+## }

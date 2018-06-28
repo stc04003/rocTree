@@ -1,6 +1,6 @@
-#' Plotting an rocTree object
+#' Plotting an \code{rocTree} object
 #'
-#' Plots an rocTree object. The function uses a \code{dgr_graph} object, render the graph in the RStudio Viewer.
+#' Plots an \code{rocTree} object. The function uses a \code{dgr_graph} object, render the graph in the RStudio Viewer.
 #'
 #' The argument \code{control} consists of some options to be passed down to \code{render_graph} of the \code{DiagrammeR} package.
 #' The argument defaults to a list with the following values:

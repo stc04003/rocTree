@@ -40,8 +40,8 @@ globalVariables(c("n", "cen")) ## global variables for simu
 #' @param scenario can be numeric or character string.
 #' This indicates the simulation scenario noted in the manuscript.
 #' See \bold{Details} for all options.
-#' @importFrom stats delete.response rexp rgamma rnorm runif
-#'
+#' @importFrom stats delete.response rexp rgamma rnorm runif rbinom uniroot
+#' 
 #' @return \code{simu} returns a \code{data.frame} in the class of "roc.simu".
 #' This is needed for \code{trueHaz} and \code{trueSurv}.
 #' The returned data.frame consists of columns:
