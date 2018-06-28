@@ -175,6 +175,56 @@ sim2.1 <- function(n, cen = 0) {
     data.frame(Y = pmin(Time, cens), death = 1 * (Time <= cens), z1 = e * (Time < u) + (1 - e) * (Time > u), z2 = z2, e = e, u = u)
 }
 
+sim2.2 <- function(n, cen = 0) {
+    e <- rbinom(n, 1, .5)
+    u <- matrix(rexp(3 * n, 5), n)
+    u1 <- u[,1]
+    u2 <- u[,2]
+    u3 <- u[,3]
+    z2 <- runif(n)
+    Time <- rep(NA, n)
+    for (i in 1:n) {
+        sol <- rexp(1)
+        if (e[i] == 1)
+            Time[i] <- uniroot(f = function(x)
+                sol - (x < u1[i]) * exp(z2[i]) * x^2 - 
+                (x >= u1[i]) * (x < u2[i]) * exp(z2[i]) * (u1[i]^2 + exp(1) * (x^2 - u1[i]^2)) -
+                (x >= u2[i]) * (x < u3[i]) * exp(z2[i]) * (u1[i]^2 + exp(1) * (u2[i]^2 - u1[i]^2) + x^2 - u2[i]^2) -
+                (x >= u3[i]) * exp(z2[i]) * (u1[i]^2 + u3[i]^2 - u2[i]^2 + exp(1) * (u2[i]^2 - u1[i]^2 + x^2 - u3[i]^2)),
+                interval = c(0, 50))$root
+        if (e[i] == 0)
+            Time[i] <- uniroot(f = function(x)
+                sol - (x < u1[i]) * exp(z2[i]) * exp(1) * x^2 -
+                (x >= u1[i]) * (x < u2[i]) * exp(z2[i]) * (exp(1) * u1[i]^2 + x^2 - u1[i]^2) - 
+                (x >= u2[i]) * (x < u3[i]) * exp(z2[i]) * (exp(1) * (u1[i]^2 + x^2 - u2[i]^2) + u2[i]^2 - u1[i]^2) -
+                (x >= u3[i]) * exp(z2[i]) * (exp(1) * (u1[i]^2 + u3[i]^2 - u2[i]^2) + u2[i]^2 - u1[i]^2 - u3[i]^2 + x^2),
+                interval = c(0, 50))$root
+    }
+    if (cen == 0) cens <- Inf
+    if (cen == .25) cens <- runif(n, 0, 2.11)
+    if (cen == .50) cens <- runif(n, 0, 1.02)
+    data.frame(Y = pmin(Time, cens), death = 1 * (Time <= cens),
+               z1 = e * (u1 <= Time) * (Time < u2) + e * (u3 <= Time) + (1 - e) * (Time < u1) + (1 - e) * (u2 <= Time) * (Time < u3),
+               z2 = z2, e = e, u1 = u1, u2 = u2, u3 = u3)
+}
+
+sim2.3 <- function(n, cen = 0) {
+    k <- runif(n, 1, 2)
+    b <- runif(n, 1, 2)
+    z2 <- runif(n)
+    Time <- rep(NA, n)
+    for (i in 1:n) {
+        sol <- rexp(1)
+        Time[i] <- uniroot(f = function(x) sol - 2 * exp(z2[i] + b[i]) * (x * exp(k[i] * x) / k[i] - (exp(k[i] * x) - 1) / k[i]^2),
+                           interval = c(0, 50))$root
+    }
+    if (cen == 0) cens <- Inf
+    if (cen == .25) cens <- runif(n, 0, 1.11)
+    if (cen == .50) cens <- runif(n, 0, 0.56)
+    data.frame(Y = pmin(Time, cens), death = 1 * (Time <= cens),
+               z1 = k * Time + b, z2 = z2, k = k, b = b)
+}
+
 ##############################################################################################################################
 ## setClass("dataSetting",
 ##          representation(n = "numeric", cen = "numeric"),

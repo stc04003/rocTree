@@ -231,28 +231,20 @@ system.time(foo <- rocTree(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat))
 predict(foo, dat)
 
 
-
-
 sim2.1 <- function(n, cen = 0) {
-    e <- rbinom(n, 1, .5)
-    u <- rexp(n, 5)
+    k <- runif(n, 1, 2)
+    b <- runif(n, 1, 2)
     z2 <- runif(n)
     Time <- rep(NA, n)
     for (i in 1:n) {
         sol <- rexp(1)
-        if (e[i] == 1)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u[i]) * exp(z2[i]) * x^2 -
-                (x >= u[i]) * exp(z2[i]) * (x^2 * exp(1) + u[i]^2 * (1 - exp(1))),
-                interval = c(0, 50))$root
-        if (e[i] == 0)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u[i]) * exp(z2[i] + 1) * x^2 -
-                (x > u[i]) * exp(z2[i]) * (exp(1) * x^2 + x^2 - u[i]^2),
-                interval = c(0, 50))$root
+        Time[i] <- uniroot(f = function(x) sol - 2 * exp(z2[i] + b[i]) * (x * exp(k[i] * x) / k[i] - (exp(k[i] * x) - 1) / k[i]^2),
+                           interval = c(0, 50))$root
     }
-    if (cen == 0) cens <- Inf
-    if (cen == .25) cens <- runif(n, 0, 1.73)
-    if (cen == .50) cens <- runif(n, 0, 0.83)
-    data.frame(Y = pmin(Time, cens), death = 1 * (Time <= cens), z1 = e * (Time < u) + (1 - e) * (Time > u), z2 = z2, e = e, u = u)
+    table(Time <= runif(n, 0, cen)) / n
 }
+
+sim2.1(1e4, .5)
+
+t0 <- seq(.4, 1.4, .01)
+cbind(t0, sapply(t0, function(x) sim2.1(1e4, x)[2]))
