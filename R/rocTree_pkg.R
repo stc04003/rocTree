@@ -1,6 +1,6 @@
 #' rocTree:Receiver Operating Characteristic (ROC)-Guided Classification and Survival Tree
 #' 
-#' \code{rocTree} uses a ROC-guided classification algorithm to grow and prun survival trees.
+#' \code{rocTree} uses a ROC-guided classification algorithm to grow and prune survival trees.
 #' Hazards at terminal notes are also computed.
 #'
 #' @aliases rocTree-package

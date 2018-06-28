@@ -109,7 +109,7 @@ rocTree <- function(formula, data, id, subset, control = list()) {
     out$vNames <- vNames
     ## Create Frame for print and plot
     ## Prepare Frame and remove nodes after considering ndFinal
-    Frame <- data.frame(out$treeMat)
+    Frame <- out$treeMat
     Frame <- base::subset(Frame, !is.na(Frame$u))
     if (!is.null(out$ndFinal)) {
         Frame$terminal[which(Frame$nd %in% out$ndFinal)] <- 2
@@ -174,23 +174,25 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
     fmat <- matk <- t(E1 * sapply(ifelse(E1, Y1, NA), K2, vec = Y1, h = hN1) / sc / hN1)
     if (min(rowMeans(fmat)[E1 == 1]) < 0) 
         fmat[E1 == 1 & rowMeans(fmat) < 0, ] <- fmat[which(rowMeans(fmat) > 0)[1], ]
-    const <- 1 / rowMeans(fmat)[Y1 <= tau * E1] / sc[Y1 <= tau * E1] / N1
+    EE1 <- Y1 <= tau * E1
+    EE2 <- Y2 <= tau * E2
+    const <- 1 / rowMeans(fmat)[EE1] / sc[EE1] / N1
     sc2 <- fitc$surv[findInterval(Y2, fitc$time)]
     Smat2 <- matk2 <- outer(ifelse(E2, Y2, NA), Y2, "<=") / matrix(sc2, N2, N2, TRUE)
     fmat2 <- matk <- t(E2 * sapply(ifelse(E2, Y2, NA), K2, vec = Y2, h = hN2) / sc2 / hN2)
     if (min(rowMeans(fmat2)[E2 == 1]) < 0) 
         fmat[E2 == 1 & rowMeans(fmat2) < 0, ] <- fmat2[which(rowMeans(fmat2) > 0)[1], ]
-    const2 <- 1 / rowMeans(fmat2)[Y2 <= tau * E2] / sc2[Y2 <= tau * E2] / N2
+    const2 <- 1 / rowMeans(fmat2)[EE2] / sc2[EE2] / N2
     Smat3 <- outer(ifelse(E2, Y2, NA), Y1, "<=") 
     fmat3 <- t(E1 * sapply(ifelse(E2, Y2, NA), K2, vec = Y1, h = hN1) / hN1)
     fTree <- STree <- matrix(NA, M, sum(Y1 <= E1 * tau))
     fTree2 <- STree2 <- fTree3 <- STree3 <- matrix(NA, M, sum(Y2 <= E2 * tau))
-    fTree[1, ] <- rowMeans(fmat)[Y1 <= tau * E1]
-    STree[1, ] <- rowMeans(Smat)[Y1 <= tau * E1]
-    fTree2[1, ] <- rowMeans(fmat2)[Y2 <= tau * E2]
-    STree2[1, ] <- rowMeans(Smat2)[Y2 <= tau * E2]
-    fTree3[1, ] <- rowMeans(fmat3)[Y2 <= tau * E2]
-    STree3[1, ] <- rowMeans(Smat3)[Y2 <= tau * E2]
+    fTree[1, ] <- rowMeans(fmat)[EE1]
+    STree[1, ] <- rowMeans(Smat)[EE1]
+    fTree2[1, ] <- rowMeans(fmat2)[EE2]
+    STree2[1, ] <- rowMeans(Smat2)[EE2]
+    fTree3[1, ] <- rowMeans(fmat3)[EE2]
+    STree3[1, ] <- rowMeans(Smat3)[EE2]
     treeMat <- matrix(nrow = M, ncol = 6)
     colnames(treeMat) <- c("nd", "terminal", "u", "u2", "p", "cut")
     treeMat[, 1] <- 1:M
@@ -212,29 +214,29 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
             ndInd2[ndInd2 == sp[1] & X2.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1
             ndInd12[ndInd12 == sp[1] & X12.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
             ndInd12[ndInd12 == sp[1] & X12.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1
-            fTree[sp[1] * 2, ] <- rowSums(as.matrix(fmat[Y1 <= tau * E1, diag(ndInd1) == 2 * sp[1]])) / N1
-            fTree[sp[1] * 2 + 1, ] <- rowSums(as.matrix(fmat[Y1 <= tau * E1, diag(ndInd1) == 2 * sp[1] + 1])) / N1
-            STree[sp[1] * 2, ] <- rowSums(as.matrix(Smat * (ndInd1 == 2 * sp[1])))[Y1 <= tau * E1] / N1
-            STree[sp[1] * 2 + 1, ] <- rowSums(as.matrix(Smat * (ndInd1 == 2 * sp[1] + 1)))[Y1 <= tau * E1] / N1
-            fTree2[sp[1] * 2, ] <- rowSums(as.matrix(fmat2[Y2 <= tau * E2, diag(ndInd2) == 2 * sp[1]])) / N2
-            fTree2[sp[1] * 2 + 1, ] <- rowSums(as.matrix(fmat2[Y2 <= tau * E2, diag(ndInd2) == 2 * sp[1] + 1])) / N2
-            STree2[sp[1] * 2, ] <- rowSums(as.matrix(Smat2 * (ndInd2 == 2 * sp[1])))[Y2 <= tau * E2] / N2
-            STree2[sp[1] * 2 + 1, ] <- rowSums(as.matrix(Smat2 * (ndInd2 == 2 * sp[1] + 1)))[Y2 <= tau * E2] / N2
+            fTree[sp[1] * 2, ] <- rowSums(as.matrix(fmat[EE1, diag(ndInd1) == 2 * sp[1]])) / N1
+            fTree[sp[1] * 2 + 1, ] <- rowSums(as.matrix(fmat[EE1, diag(ndInd1) == 2 * sp[1] + 1])) / N1
+            STree[sp[1] * 2, ] <- rowSums(as.matrix(Smat * (ndInd1 == 2 * sp[1])))[EE1] / N1
+            STree[sp[1] * 2 + 1, ] <- rowSums(as.matrix(Smat * (ndInd1 == 2 * sp[1] + 1)))[EE1] / N1
+            fTree2[sp[1] * 2, ] <- rowSums(as.matrix(fmat2[EE2, diag(ndInd2) == 2 * sp[1]])) / N2
+            fTree2[sp[1] * 2 + 1, ] <- rowSums(as.matrix(fmat2[EE2, diag(ndInd2) == 2 * sp[1] + 1])) / N2
+            STree2[sp[1] * 2, ] <- rowSums(as.matrix(Smat2 * (ndInd2 == 2 * sp[1])))[EE2] / N2
+            STree2[sp[1] * 2 + 1, ] <- rowSums(as.matrix(Smat2 * (ndInd2 == 2 * sp[1] + 1)))[EE2] / N2
             ## rTree2[sp[1]*2,] <- fTree2[sp[1]*2,]/STree2[sp[1]*2,]
             ## rTree2[sp[1]*2+1,] <- fTree2[sp[1]*2+1,]/STree2[sp[1]*2+1,]
-            fTree3[sp[1] * 2, ] <- rowSums(as.matrix(fmat3[Y2 <= tau * E2, diag(ndInd1) == 2 * sp[1]])) / N1
-            fTree3[sp[1] * 2 + 1, ] <- rowSums(as.matrix(fmat3[Y2 <= tau * E2, diag(ndInd1) == 2 * sp[1] + 1])) / N1
-            STree3[sp[1] * 2, ] <- rowSums(as.matrix(Smat3 * (ndInd12 == 2 * sp[1])))[Y2 <= tau * E2] / N1
-            STree3[sp[1] * 2 + 1, ] <- rowSums(as.matrix(Smat3 * (ndInd12 == 2 * sp[1] + 1)))[Y2 <= tau * E2] / N1
+            fTree3[sp[1] * 2, ] <- rowSums(as.matrix(fmat3[EE2, diag(ndInd1) == 2 * sp[1]])) / N1
+            fTree3[sp[1] * 2 + 1, ] <- rowSums(as.matrix(fmat3[EE2, diag(ndInd1) == 2 * sp[1] + 1])) / N1
+            STree3[sp[1] * 2, ] <- rowSums(as.matrix(Smat3 * (ndInd12 == 2 * sp[1])))[EE2] / N1
+            STree3[sp[1] * 2 + 1, ] <- rowSums(as.matrix(Smat3 * (ndInd12 == 2 * sp[1] + 1)))[EE2] / N1
             ## rTree3[sp[1]*2,] <- fTree3[sp[1]*2,]/STree3[sp[1]*2,]
             ## rTree3[sp[1]*2+1,] <- fTree3[sp[1]*2+1,]/STree3[sp[1]*2+1,]
             treeMat[sp[1], 2] <- 0
             treeMat[sp[1], 5:6] <- sp[2:3]
             treeMat[sp[1] * 2, ] <- c(sp[1] * 2, 1,
-                                      mean(diag(ndInd1) == sp[1] * 2 & Y1 <= tau * E1),
+                                      mean(diag(ndInd1) == sp[1] * 2 & EE1),
                                       min(rowMeans(ndInd1[Y1 <= tau, ] == sp[1] * 2)), NA, NA)
             treeMat[sp[1] * 2 + 1, ] <- c(sp[1] * 2 + 1, 1,
-                                          mean(diag(ndInd1) == (sp[1] * 2 + 1) & Y1 <= tau * E1),
+                                          mean(diag(ndInd1) == (sp[1] * 2 + 1) & EE1),
                                           min(rowMeans(ndInd1[Y1 <= tau, ] == sp[1] * 2 + 1)), NA, NA)
             treeMat[treeMat[, 3] <= minsp / N1 & treeMat[, 4] <= minsp2 / N1, 2] <- 2
             ## conTree <- conTree + sp[4]
@@ -243,12 +245,13 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
             break
         }
     }
+    treeMat <- data.frame(treeMat)
     if (all(is.na(treeMat$p))) {
         cat("\nNo splits.\n")
         return(NULL)
     }
     ## prune
-    treeMatTerm <- treeMat[treeMat[, 2] >= 1 & is.na(treeMat[, 5]), 1]
+    treeMatTerm <- treeMat[treeMat$terminal >= 1 & is.na(treeMat$p), 1]
     ## sort the node
     left <- 2 ^ round(max(log(treeMatTerm, 2)))
     right <- 2 * left - 1
@@ -274,15 +277,15 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
     fuTerm3 <- fTree3[ndTerm[order(ndTerm)], ]
     SuTerm3 <- STree3[ndTerm[order(ndTerm)], ]
     conList[[1]] <- .C("con", 
-                       as.integer(length(fuTerm) / sum(Y1 <= tau * E1)),
-                       as.integer(sum(Y1 <= tau * E1)),
+                       as.integer(length(fuTerm) / sum(EE1)),
+                       as.integer(sum(EE1)),
                        as.double(t(fuTerm)),
                        as.double(t(SuTerm)),
                        as.double(const), 
                        double(1))[[6]]
     conList2[[1]] <- .C("con3", 
-                        as.integer(length(fuTerm2) / sum(Y2 <= tau * E2)),
-                        as.integer(sum(Y2 <= tau * E2)),
+                        as.integer(length(fuTerm2) / sum(EE2)),
+                        as.integer(sum(EE2)),
                         as.double(t(fuTerm2)),
                         as.double(t(SuTerm2)),
                         as.double(t(fuTerm3)),
@@ -321,15 +324,15 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
                 fuTerm3 <- fTree3[treeMat[, 1] %in% ndNew, ]
                 SuTerm3 <- STree3[treeMat[, 1] %in% ndNew, ]
                 consub <- c(consub, .C("con", 
-                                       as.integer(length(fuTerm) / sum(Y1 <= tau * E1)),
-                                       as.integer(sum(Y1 <= tau * E1)),
+                                       as.integer(length(fuTerm) / sum(EE1)),
+                                       as.integer(sum(EE1)),
                                        as.double(t(fuTerm)),
                                        as.double(t(SuTerm)),
                                        as.double(const), 
                                        double(1))[[6]])
                 con2sub <- c(con2sub, .C("con3", 
-                                         as.integer(length(fuTerm2) / sum(Y2 <= tau * E2)),
-                                         as.integer(sum(Y2 <= tau * E2)),
+                                         as.integer(length(fuTerm2) / sum(EE2)),
+                                         as.integer(sum(EE2)),
                                          as.double(t(fuTerm2)),
                                          as.double(t(SuTerm2)),
                                          as.double(t(fuTerm3)),
@@ -639,7 +642,7 @@ grow3 <- function(Y, E, X.list, control) {
     beta.seq <- sqrt(abs(res[,2] * c(res[-1, 2], Inf)))
     list(beta.seq = beta.seq,
          optTree.seq = optTreeList[res[, 1]],
-         treeMat = treeMat)
+         treeMat = data.frame(treeMat))
 }
 
 #' Function used to in the splitting procedure

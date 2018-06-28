@@ -2,9 +2,15 @@
 % Please edit documentation in R/simu.R
 \name{simu}
 \alias{simu}
+\alias{trueHaz}
+\alias{trueSurv}
 \title{Function to generate simulated data used in the manuscript.}
 \usage{
 simu(n, cen, scenario)
+
+trueHaz(tt, scenario)
+
+trueSurv(tt, scenario)
 }
 \arguments{
 \item{n}{is the number of subject}
@@ -14,25 +20,53 @@ simu(n, cen, scenario)
 \item{scenario}{can be numeric or character string.
 This indicates the simulation scenario noted in the manuscript.
 See \bold{Details} for all options.}
+
+\item{tt}{is a numerical vector, specifying where to evaluate at.}
+}
+\value{
+\code{simu} returns a \code{data.frame} in the class of "roc.simu".
+This is needed for \code{trueHaz} and \code{trueSurv}.
+The returned data.frame consists of columns:
+\describe{
+\item{Y}{is the observed follow-up time.}
+\item{death}{is the death indicator; death = 0 if censored.}
+\item{z1}{is the time-independent covariate.}
+\item{z2}{is the secondary covariate. It is time-independent in Scenario 1 and time-dependent in Scenario 2 and 3.}
+}
 }
 \description{
 This function is used to generate simulated data in the manuscript.
-The underlying model is
+The underlying model is assumed to be
 \deqn{\lambda(t, Z) = \lambda_0(t) e^{(\beta_1 * Z_1 + \beta_2 * Z_2)},}
 where \eqn{\lambda_0(t)} is the baseline hazard function,
 (\eqn{b_1, b_2}) is the regression coefficient, and
 \eqn{Z_1} and \eqn{Z_2} are the covariates.
 When time varying covariate is involved (scenario 2), only \eqn{Z_1} is assumed to dependent on time.
+
+This function is used to generate the true cumulative hazard function used in the simulation.
+
+This function is used to generate the true survival function used in the simulation.
 }
 \details{
 The following scenarios are included.
 \describe{
 \item{Scenario 1}{assumes time independent covariates with \eqn{\Lambda(0) = 2t}:}
 \describe{
-\item{1.1}{assumes \eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2)}}.}
-\item{1.2}{assumes \eqn{\lambda(t, Z) = \lambda_0(t) e^{[2sin(2\pi Z_1) + 2|Z_2 - 0.5|]}}.}
+\item{1.1}{Proportional hazards model:
+\eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2)}}.}
+\item{1.2}{Proportional hazards model with nonlinear covariate effects:
+\eqn{\lambda(t, Z) = \lambda_0(t) e^{[2\sin(2\pi Z_1) + 2|Z_2 - 0.5|]}}.}
+\item{1.3}{Accelerated failure time model:
+\eqn{\log(T) = -2 + 2Z_1 + 2Z_2 + \epsilon}, where \eqn{\epsilon} follows \eqn{N(0, 0.5^2)}.}
+\item{1.4}{Generalized gamma family:
+\eqn{T = e^{\sigma\omega}} with \eqn{\omega = \log(Q^2 g) / Q}, \eqn{g} follows Gamma(\eqn{Q^{-2}, 1}),
+\eqn{\sigma = 2Z_1, Q = 2Z_2}.}
+\item{1.5}{Proportional hazards model with noise variable:
+\eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2 + 0Z_3 + 0Z_4 + 0Z_5)}}.}
 }
-\item{Scenario 2}{assumes time dependent covariate (\eqn{Z_1}) with \eqn{\Lambda(0) = 2t}:}
+\item{Scenario 2}{assumes time dependent covariate (\eqn{Z_1}) with \eqn{\Lambda(0) = 2t}.
+The survival times are generated from the hazard \eqn{\lambda(t, Z(t)) = \lambda_0(t)e^{Z_1(t) + Z_2}},
+where \eqn{Z_1(t)} is the time-dependent covariate.}
 \describe{
 \item{2.1}{assumes}
 \item{2.2}{assumes}
