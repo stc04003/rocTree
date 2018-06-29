@@ -219,9 +219,6 @@ for (i in 1:n3) {
   SY3[i,] <- sapply(tt, function(u)  exp(-c(sum(dl3[Y <= u, i]))))
 }
 
-
-
-
 ## 
 set.seed(12)
 dat <- datGen(10)[,-6]
@@ -232,22 +229,3 @@ str(predict(foo, dat))
 
 system.time(fooForest <- rocForest(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat))
 length(fooForest)
-
-<<<<<<< HEAD
-sim3.1(5, 0)
-sim3.1(5, 0.25)
-sim3.1(5, 0.5)
-
-sim3.2(5, 0)
-sim3.2(5, 0.25)
-sim3.2(5, 0.5)
-
-sim3.3(5, 0)
-sim3.3(5, 0.25)
-sim3.3(5, 0.5)
-=======
-fooForest
-print(fooForest, 12)
-plot(fooForest)
-plot(fooForest, 12)
->>>>>>> 5f3d0eed4def21ed3fd500ec942d71cccf4593a8
