@@ -40,8 +40,8 @@ globalVariables(c("n", "cen")) ## global variables for simu
 #' @param scenario can be numeric or character string.
 #' This indicates the simulation scenario noted in the manuscript.
 #' See \bold{Details} for all options.
-#' @importFrom stats delete.response rexp rgamma rnorm runif
-#'
+#' @importFrom stats delete.response rexp rgamma rnorm runif rbinom uniroot
+#' 
 #' @return \code{simu} returns a \code{data.frame} in the class of "roc.simu".
 #' This is needed for \code{trueHaz} and \code{trueSurv}.
 #' The returned data.frame consists of columns:
@@ -174,7 +174,8 @@ sim2.1 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 0.83)
     Y <- pmin(Time, cens)
     dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = 1 * (Time[x] <= cens[x]), z2 = z2[x], e = e[x], u = u[x])))
+        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+                   z2 = z2[x], e = e[x], u = u[x])))
     dat$z1 <- with(dat, e * (Y < u) + (1 - e) * (Y >= u))
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u")])
 }
@@ -209,7 +210,8 @@ sim2.2 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 1.02)
     Y <- pmin(Time, cens)
     dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = 1 * (Time[x] <= cens[x]), z2 = z2[x], e = e[x], u1 = u1[x], u2 = u2[x], u3 = u3[x])))
+        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+                   z2 = z2[x], e = e[x], u1 = u1[x], u2 = u2[x], u3 = u3[x])))
     dat$z1 <- with(dat, e * (u1 <= Y) * (Y < u2) + e * (u3 <= Y) + (1 - e) * (Y < u1) + (1 - e) * (u2 <= Y) * (Y < u3))
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u1", "u2", "u3")])
 }
@@ -229,7 +231,8 @@ sim2.3 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 0.56)
     Y <- pmin(Time, cens)
     dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = 1 * (Time[x] <= cens[x]), z2 = z2[x], k = k[x], b = b[x])))
+        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+                   z2 = z2[x], k = k[x], b = b[x])))
     dat$z1 <- with(dat, k * Time + b)
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
 }
@@ -257,7 +260,8 @@ sim3.1 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 0.83)
     Y <- pmin(Time, cens)
     dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = 1 * (Time[x] <= cens[x]), z2 = z2[x], e = e[x], u = u[x])))
+        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+                   z2 = z2[x], e = e[x], u = u[x])))
     dat$z1 <- with(dat, e * (Y < u) + (1 - e) * (Y >= u))
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u")])
 }
@@ -292,7 +296,8 @@ sim3.2 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 1.02)
     Y <- pmin(Time, cens)
     dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = 1 * (Time[x] <= cens[x]), z2 = z2[x], e = e[x], u1 = u1[x], u2 = u2[x], u3 = u3[x])))
+        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+                   z2 = z2[x], e = e[x], u1 = u1[x], u2 = u2[x], u3 = u3[x])))
     dat$z1 <- with(dat, e * (u1 <= Y) * (Y < u2) + e * (u3 <= Y) + (1 - e) * (Y < u1) + (1 - e) * (u2 <= Y) * (Y < u3))
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u1", "u2", "u3")])
 }
@@ -307,7 +312,7 @@ sim3.3 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 0.56)
     Y <- pmin(Time, cens)
     dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = 1 * (Time[x] <= cens[x]), z2 = z2[x], k = k[x], b = b[x])))
+        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z2 = z2[x], k = k[x], b = b[x])))
     dat$z1 <- with(dat, k * Time + b)
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
 }

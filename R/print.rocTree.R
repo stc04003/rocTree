@@ -1,4 +1,4 @@
-#' Printing an rocTree object
+#' Printing an \code{rocTree} object
 #'
 #' The function prints an \code{rocTree} object. It is a method for the generic function print of class "\code{rocTree}".
 #'
@@ -17,7 +17,7 @@
 #' print(fit, tree = FALSE)
 
 print.rocTree <- function(x, digits = 5, dt = TRUE, ...) {
-    if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object")
+    if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object.")
     ## digits = getOption("digits")
     Frame <- x$Frame
     ## create data.tree

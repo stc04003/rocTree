@@ -24,3 +24,6 @@ Returns a \code{data.frame} of the predicted survival probabilities or cumulativ
 \description{
 The function gives predicted values.
 }
+\seealso{
+\code{\link{predict.rocForest}}
+}

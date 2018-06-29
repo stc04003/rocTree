@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.rocTree.R
 \name{print.rocTree}
 \alias{print.rocTree}
-\title{Printing an rocTree object}
+\title{Printing an \code{rocTree} object}
 \usage{
 \method{print}{rocTree}(x, digits = 5, dt = TRUE, ...)
 }

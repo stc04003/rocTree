@@ -233,21 +233,7 @@ str(predict(foo, dat))
 system.time(fooForest <- rocForest(Surv(Time, Status) ~ X1 + X2, id = ID, data = dat))
 length(fooForest)
 
-<<<<<<< HEAD
-sim3.1(5, 0)
-sim3.1(5, 0.25)
-sim3.1(5, 0.5)
-
-sim3.2(5, 0)
-sim3.2(5, 0.25)
-sim3.2(5, 0.5)
-
-sim3.3(5, 0)
-sim3.3(5, 0.25)
-sim3.3(5, 0.5)
-=======
 fooForest
 print(fooForest, 12)
 plot(fooForest)
 plot(fooForest, 12)
->>>>>>> 5f3d0eed4def21ed3fd500ec942d71cccf4593a8
