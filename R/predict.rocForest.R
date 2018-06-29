@@ -11,12 +11,14 @@
 #'
 #' @seealso \code{\link{predict.rocTree}}
 #' @export
-predict.rocForest <- function(object, newdata, ype = c("survival", "hazard"), ...) {
+predict.rocForest <- function(object, newdata, type = c("survival", "hazard"), ...) {
     if (!is.rocTree(object)) stop("Response must be a \"rocForest\" object")
     type <- match.arg(type)
     ctrl <- object$ctrl
     if (missing(newdata)) {
         xlist <- object$xlist
+        Y <- object$Y0
+        n <- length(Y)
     } else {
         res <- object$terms[[2]][[2]]
         id <- attr(object$terms, "id")
@@ -30,9 +32,10 @@ predict.rocForest <- function(object, newdata, ype = c("survival", "hazard"), ..
         if (!any(id == names(newdata))) newdata$id <- 1:nrow(newdata)
         else names(newdata)[which(names(newdata) == id)] <- "id"
         p <- length(object$vNames)
-        n <- length(unique(newdata$Y))
-        newdata$yind <- findInt(newdata$Y, object$Y0)
-        newdata <- newdata[order(newdata$yind, newdata$Y),]
+        Y <- newdata$Y
+        n <- length(unique(Y))
+        newdata$yind <- findInt(Y, object$Y0)
+        newdata <- newdata[order(newdata$yind, Y),]
         X <- cbind(yind = newdata$yind, model.frame(delete.response(object$terms), newdata))
         xlist <- rep(list(matrix(NA, n, length(unique(newdata$id)))), p)
         sptdat <- split(X, newdata$yind)
@@ -40,12 +43,14 @@ predict.rocForest <- function(object, newdata, ype = c("survival", "hazard"), ..
             tmp <- sptdat[[z]]
             ind <- tmp[1,1]
             sapply(1:p, function(y)
-                object$xlist[[y]][ind, findInt.X(tmp[,y+1], object$xlist0[[y]][ind,])])
+                ## object$xlist[[y]][ind, findInt.X(tmp[,y+1], object$xlist0[[y]][ind,])])
+                cbind(0, object$xlist[[y]])[ind, findInt.X(tmp[,y+1], object$xlist0[[y]][ind,])]) ## mimicking ecdf
         })
         X.path <- data.frame(do.call(rbind, X.path))
         for (i in 1:p) {
             xlist[[i]] <- do.call(cbind, lapply(split(X.path[,i], newdata$id), function(z) c(z, rep(NA, n - length(z)))))
         }
     }
-    
-}
+    ndInd <- matrix(1, n, dim(xlist[[1]])[2])
+    dfPred <- ndInd - 1
+}  

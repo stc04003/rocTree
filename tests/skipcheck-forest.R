@@ -63,12 +63,31 @@ summary(c(foo$xlist0[[2]]))
 ## checking new data (testing set)
 ## constructing new data
 set.seed(1)
-newdata <- data.frame(id = rep(1:20, each = length(unique(dat$Time))),
+newdata <- data.frame(ID = rep(1:20, each = length(unique(dat$Time))),
                       Time = sort(unique(dat$Time)),
                       X1 = rep(runif(20), each = length(unique(dat$Time))))
 ## newdata$X2 <- newdata$Time * seq(1, 2, length = 20) + seq(1, 2, length = 20)
-newdata$X2 <- newdata$Time * rep(seq(1, 2, length = 20), each = 20) + rep(seq(1, 2, length = 20), each = 20)
+newdata$X2 <- newdata$Time * rep(seq(1, 2, length = 20), each = 200) +
+    rep(seq(1, 2, length = 20), each = 200)
 
 unique(newdata$X1)
 summary(newdata$X2)
-length(unique(newdata$X2))
+##  Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+## 1.001   1.413   1.717   1.736   2.017   3.267 
+## Checked
+
+## checking xlist with X32.list
+str(predict(foo, newdata))
+tmp <- predict(foo, newdata)
+str(tmp$xlist)
+summary(c(tmp$xlist[[1]]))
+summary(c(tmp$xlist[[2]]))
+## checked
+
+set.seed(1)
+system.time(foo2 <- rocForest(Surv(Time, Status) ~ X1 + X2, data = dat, id = ID))
+
+set.seed(1)
+system.time(foo22 <- rocForest(Surv(Time, Status) ~ X1 + X2, data = dat, id = ID,
+                               control = list(parallel = TRUE)))
+

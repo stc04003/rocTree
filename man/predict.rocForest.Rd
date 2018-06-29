@@ -4,7 +4,7 @@
 \alias{predict.rocForest}
 \title{Predicting based on a \code{rocForest} model.}
 \usage{
-\method{predict}{rocForest}(object, newdata, ype = c("survival", "hazard"),
+\method{predict}{rocForest}(object, newdata, type = c("survival", "hazard"),
   ...)
 }
 \arguments{
@@ -14,9 +14,9 @@
 If omitted, the fitted predictors are used.
 If the covariate observation time is not supplied, covariates will be treated as at baseline.}
 
-\item{...}{for future developments.}
-
 \item{type}{is an optional character string specifying whether to predict the survival probability or the hazard rate.}
+
+\item{...}{for future developments.}
 }
 \description{
 The function gives predicted values.

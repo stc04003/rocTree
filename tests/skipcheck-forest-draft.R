@@ -84,7 +84,7 @@ for(p in 1:P1) {
 for(p in (P1+1):P2)
 {
     X32.list[[p]] <- matrix(NA, ncol = N3, nrow = N)
-    X32.list[[p]] <- matrix(rep(Y,N3), ncol = N3, nrow = N)*matrix(rep(k3,each = N), ncol = N3, nrow = N)+matrix(rep(it3,each = N), ncol = N3, nrow = N)
+    X32.list[[p]] <- matrix(rep(Y,N3), ncol = N3, nrow = N)*matrix(rep(k3,each = N), ncol = N3, nrow = N) + matrix(rep(it3,each = N), ncol = N3, nrow = N)
     if(disc[p] == 0)
     {
         for(j in 1:N)

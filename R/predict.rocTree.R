@@ -20,6 +20,8 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...
     ctrl <- object$ctrl
     if (missing(newdata)) {
         xlist <- object$xlist
+        Y <- object$Y0
+        n <- length(Y)
     } else {
         res <- object$terms[[2]][[2]]
         id <- attr(object$terms, "id")
@@ -33,9 +35,10 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...
         if (!any(id == names(newdata))) newdata$id <- 1:nrow(newdata)
         else names(newdata)[which(names(newdata) == id)] <- "id"
         p <- length(object$vNames)
-        n <- length(unique(newdata$Y))
-        newdata$yind <- findInt(newdata$Y, object$Y0)
-        newdata <- newdata[order(newdata$yind, newdata$Y),]
+        Y <- newdata$Y
+        n <- length(unique(Y))
+        newdata$yind <- findInt(Y, object$Y0)
+        newdata <- newdata[order(newdata$yind, Y),]
         X <- cbind(yind = newdata$yind, model.frame(delete.response(object$terms), newdata))
         xlist <- rep(list(matrix(NA, n, length(unique(newdata$id)))), p)
         sptdat <- split(X, newdata$yind)
@@ -43,39 +46,41 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...
             tmp <- sptdat[[z]]
             ind <- tmp[1,1]
             sapply(1:p, function(y)
-                object$xlist[[y]][ind, findInt.X(tmp[,y+1], object$xlist0[[y]][ind,])])
-        })
+                ## object$xlist[[y]][ind, findInt.X(tmp[,y+1], object$xlist0[[y]][ind,])])
+                cbind(0, object$xlist[[y]])[ind, findInt.X(tmp[,y+1], object$xlist0[[y]][ind,])]) ## mimicking ecdf
+            })
         X.path <- data.frame(do.call(rbind, X.path))
         for (i in 1:p) {
             xlist[[i]] <- do.call(cbind, lapply(split(X.path[,i], newdata$id), function(z) c(z, rep(NA, n - length(z)))))
         }
     }
-    ndInd <- matrix(1, n, length(unique(newdata$id)))
+    ndInd <- matrix(1, n, dim(xlist[[1]])[2])
+    dfPred <- ndInd - 1
     Frame <- object$Frame
     for (i in 1:nrow(Frame)) {
         if (Frame$terminal[i] == 0) {
-            ind <- object$xlist[[Frame$p[i]]] <= Frame$cut[i]
+            ind <- xlist[[Frame$p[i]]] <= Frame$cut[i]
             ndInd[ndInd == Frame$nd[i] & ifelse(is.na(ind), FALSE, ind)] <- Frame$nd[i] * 2
             ndInd[ndInd == Frame$nd[i] & ifelse(is.na(ind), FALSE, !ind)] <- Frame$nd[i] * 2 + 1
         }
     }
-    ndInd[is.na(object$xlist[[1]])] <- NA
-    dfPred <- matrix(0, n, length(unique(newdata$id)))
+    ndInd[is.na(xlist[[1]])] <- NA
     for (i in 1:n) {
         for (k in 1:length(object$ndFinal)) {
             dfPred[i, ndInd[i,] == object$ndFinal[k]] <- object$dfFinal[i, k]
         }
     }
-    dfPred[is.na(object$xlist[[1]])] <- NA
+    dfPred[is.na(xlist[[1]])] <- NA
     if (type == "survival") {
-        pred <- data.frame(Time = sort(unique(newdata$Y)),
+        pred <- data.frame(Time = sort(unique(Y)),
                            Surv = rowMeans(apply(dfPred, 2, function(x) exp(-cumsum(x))), na.rm = TRUE))
     }
     if (type == "hazard") {
-        pred <- data.frame(Time = sort(unique(newdata$Y)),
+        pred <- data.frame(Time = sort(unique(Y)),
                            cumHaz = rowMeans(apply(dfPred, 2, function(x) cumsum(x)), na.rm = TRUE))
     }
-    return(pred)
+    for (i in 1:length(xlist)) attr(xlist[[i]], "dimnames") <- NULL
+    return(list(predition = pred, type = type, xlist = xlist))
 }
 
 #' findInterval with 0 replaced with 1
@@ -89,7 +94,8 @@ findInt <- function(x, y) {
 #' @keywords internal
 #' @noRd
 findInt.X <- function(x, y) {
-    order(y)[pmax(1, findInterval(x, sort(y)))]
+    order(c(0, y))[pmax(1, findInterval(x, sort(c(0, y))))]
+    ## order(y)[pmax(1, findInterval(x, sort(y)))]
 }
 
 ## This is a working version for simulation, still need to think about how to make it more general.
