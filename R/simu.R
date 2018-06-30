@@ -98,31 +98,36 @@ sim1.1 <- function(n, cen = 0) {
     z1 <- runif(n)
     z2 <- runif(n)
     Time <- sqrt(rexp(n) * exp(-2 * z1 - 2 * z2))
-    if (cen == 0) cens <- Inf
+    if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 1.41)
     if (cen == .50) cens <- runif(n, 0, 0.66)
-    data.frame(Y = pmin(Time, cens), death = 1 * (Time <= cens), z1 = z1, z2 = z2)
+    Y <- pmin(Time, cens)
+    do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
 sim1.2 <- function(n, cen = 0) {
     z1 <- runif(n)
     z2 <- runif(n)
     Time <- sqrt(rexp(n) * exp(-2 * sin(2 * pi * z1) - 2 * abs(z2 - .5)))
-    if (cen == 0) cens <- Inf
+    if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 1.23)
     if (cen == .50) cens <- runif(n, 0, 0.59)
-    data.frame(Y = pmin(Time, cens), death = 1 * (Time <= cens), z1 = z1, z2 = z2)    
+    Y <- pmin(Time, cens)
+    do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
 sim1.5 <- function(n, cen = 0) {
     z1 <- runif(n)
     z2 <- runif(n)
     Time <- sqrt(rexp(n) * exp(-2 * z1 - 2 * z2))
-    if (cen == 0) cens <- Inf
+    if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 1.41)
     if (cen == .50) cens <- runif(n, 0, 0.66)
-    data.frame(Y = pmin(Time, cens), death = 1 * (Time <= cens),
-               z1 = z1, z2 = z2, z3 = runif(n), z4 = runif(n), z5 = runif(n))
+    Y <- pmin(Time, cens)
+    do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
 sim1.3 <- function(n, cen = 0) {
@@ -130,10 +135,12 @@ sim1.3 <- function(n, cen = 0) {
     z2 <- runif(n)
     Time <- exp(-2 + 2 * z1 + 2 * z2 + rnorm(n, sd = .5))
     cens <- runif(n, 0, cen)
-    if (cen == 0) cens <- Inf
+    if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 6.00)
     if (cen == .50) cens <- runif(n, 0, 2.40)
-    data.frame(Y = pmin(Time, cens), death = 1 * (Time <= cens), z1 = z1, z2 = z2)    
+    Y <- pmin(Time, cens)
+    do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
 sim1.4 <- function(n, cen = 0) {
@@ -145,10 +152,12 @@ sim1.4 <- function(n, cen = 0) {
     w <- log(Q^2 * g) / Q
     Time <- exp(sig * w)
     cens <- runif(n, 0, cen)
-    if (cen == 0) cens <- Inf
+    if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 4.12)
     if (cen == .50) cens <- runif(n, 0, 1.63)
-    data.frame(Y = pmin(Time, cens), death = 1 * (Time <= cens), z1 = z1, z2 = z2)    
+    Y <- pmin(Time, cens)
+    do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
 sim2.1 <- function(n, cen = 0) {

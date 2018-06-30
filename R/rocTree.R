@@ -55,6 +55,7 @@ rocTree <- function(formula, data, id, subset, control = list()) {
     if (!all(namc %in% names(ctrl))) 
         stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
     ctrl[namc] <- control
+    if (!(ctrl$splitBy %in% c("CON", "dCON"))) stop("'splitBy' should be one of \"CON\", \"dCON\".")
     Call <- match.call()
     indx <- match(c("formula", "data", "id", "subset"), names(Call), nomatch = 0L)
     if (indx[1] == 0L) stop("A 'formula' argument is required")
@@ -133,10 +134,10 @@ rocTree <- function(formula, data, id, subset, control = list()) {
 rocTree.control <- function(tau = 0.4, M = 1000, hN = tau / 20, h = hN,
                             minsp = 20, minsp2 = 5, disc = 0, nflds = 10, CV = FALSE, Trace = FALSE,
                             parallel = FALSE, parCluster = detectCores() / 2, ghN = 0.2, B = 500,
-                            split.method = c("CON", "dCON")) {
+                            splitBy = c("CON", "dCON")) {
     list(tau = tau, M = M, hN = hN, h = h, minsp = minsp, minsp2 = minsp2, disc = disc,
          nflds = nflds, CV = CV, Trace = Trace, parallel = parallel, parCluster = parCluster, ghN = ghN,
-         B = B, split.method = match.arg(split.method))
+         B = B, splitBy = match.arg(splitBy))
 }
 
 rocTree.Xlist <- function(x, disc, y, id) {
@@ -151,10 +152,13 @@ rocTree.Xlist <- function(x, disc, y, id) {
 
 is.rocTree <- function(x) inherits(x, "rocTree")
 
-## ---------------------------------------------------------------------------------------
-## If CV == TURE
-## ---------------------------------------------------------------------------------------
-
+#' Cross-validation, evaluated when CV = TRUE
+#'
+#' The resulting tree should be smaller than the full grew tree in rocTree.
+#' This is the same procedure with splitBy = "dCON" or "CON".
+#'
+#' @keywords internal
+#' @noRd
 CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
     ## hN1 <- hN2 <- control$hN
     hN1 <- hN2 <- control$h * 1.2
@@ -238,7 +242,8 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
             treeMat$terminal[which(treeMat$u <= minsp / N1 & treeMat$u2 <= minsp2 / N1)] <- 2
             ## conTree <- conTree + sp[4]
         } else {
-            treeMat$terminal[treeMat$nd == sp[1]] <- 2
+            if (sum(!is.na(treeMat$p)) > 1) break ## this happens when all smaller trees have too few samples
+            else treeMat$terminal[treeMat$nd == sp[1]] <- 2
             break
         }
     }
@@ -519,8 +524,8 @@ grow <- function(Y, E, X.list, control) {
         if (sp[1] * 2 < M & !is.na(sp[2])) {
             ndInd[ndInd == sp[1] & X.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
             ndInd[ndInd == sp[1] & X.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1
-            fTree[sp[1] * 2, ] <- rowSums(fmat[EE, diag(ndInd) == 2 * sp[1]]) / N
-            fTree[sp[1] * 2 + 1, ] <- rowSums(fmat[EE, diag(ndInd) == 2 * sp[1] + 1]) / N
+            fTree[sp[1] * 2, ] <- rowSums(fmat[EE, diag(ndInd) == 2 * sp[1], drop = FALSE]) / N
+            fTree[sp[1] * 2 + 1, ] <- rowSums(fmat[EE, diag(ndInd) == 2 * sp[1] + 1, drop = FALSE]) / N
             STree[sp[1] * 2, ] <- rowSums(Smat * (ndInd == 2 * sp[1]))[EE] / N
             STree[sp[1] * 2 + 1, ] <- rowSums(Smat * (ndInd == 2 * sp[1] + 1))[EE] / N
             treeMat[sp[1], 2] <- 0
@@ -534,7 +539,8 @@ grow <- function(Y, E, X.list, control) {
             treeMat$terminal[which(treeMat$u < minsp / N & treeMat$u2 < minsp2 / N)] <- 2
             conTree <- conTree + sp[4]
         } else {
-            treeMat$terminal[treeMat$nd == sp[1]] <- 2
+            if (sum(!is.na(treeMat$p)) > 1) break ## this happens when all smaller trees have too few samples
+            else treeMat$terminal[treeMat$nd == sp[1]] <- 2
             break
         }
         if (control$Trace) print(sp)
@@ -701,7 +707,7 @@ splitTree <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, 
     M <- control$M
     tau <- control$tau
     ## all the terminal nodes that can be split; not all the terminal nodes
-    nd.terminal <- treeMat[treeMat$terminal == 1, 1]
+    nd.terminal <- treeMat$nd[treeMat$terminal == 1]
     sopt <- matrix(NA, M, 2)
     dconopt <- rep(0, M)
     ## lnd <- length(nd.terminal)-1
@@ -718,7 +724,7 @@ splitTree <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, 
         rm <- fm / Sm
         r <- f / S
         r[is.na(r)] <- Inf
-        rm[is.na(r)] <- Inf
+        rm[is.na(rm)] <- Inf 
         for (p in sample(1:P, randP)) {
             if (disc[p] == 0) {
                 cutAll <- sort(unique(X[[p]][1, ndInd[1, ] == m]))
@@ -733,7 +739,7 @@ splitTree <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, 
                 next
             }
             cutList[[p]] <- cutAll
-            if (control$split.method == "CON") 
+            if (control$splitBy == "CON") 
                 dconList[[p]] <- .C("cutSearch",
                                     as.integer(N), ## n
                                     as.integer(length(cutAll)), ## cL
@@ -751,10 +757,10 @@ splitTree <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, 
                                     as.double(t(f)), ## length(nd.terminal) by Ny
                                     as.double(t(S)), ## length(nd.terminal) by Ny
                                     as.double(t(ifelse(r == Inf, 99999, r))), ## length(nd.terminal) by Ny
-                                    as.double(ifelse(rm == Inf | is.na(rm), 99999, rm)), ## Ny by 1
+                                    as.double(ifelse(rm == Inf , 99999, rm)), ## Ny by 1
                                     as.integer(sum(treeMat$terminal >= 1 & treeMat$nd != m)), ## sum(treeMat[,2] >= 1 & treeMat[,1] != m)
                                     out = double(length(cutAll)), PACKAGE = "rocTree")$out
-            if (control$split.method == "dCON") 
+            if (control$splitBy == "dCON") 
                 dconList[[p]] <- .C("cutSearch2", as.integer(N), as.integer(length(cutAll)), as.integer(m),
                                     as.integer(which(Y <= tau * E) - 1), as.integer(sum(Y <= tau * E)), 
                                     as.double(minsp), as.double(minsp2), 
@@ -764,7 +770,7 @@ splitTree <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, 
                                     as.double(ifelse(is.na(Smat), 0, Smat)), 
                                     as.double(const), as.double(t(f)), as.double(t(S)), 
                                     as.double(t(ifelse(r == Inf, 99999, r))),
-                                    as.double(ifelse(rm == Inf | is.na(rm), 99999, rm)), 
+                                    as.double(ifelse(rm == Inf, 99999, rm)), 
                                     as.integer(sum(treeMat$terminal >= 1 & treeMat$nd != m)),
                                     out = double(length(cutAll)), PACKAGE = "rocTree")$out
         } ## end P
