@@ -720,7 +720,6 @@ splitTree <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, 
         r[is.na(r)] <- Inf
         rm[is.na(r)] <- Inf
         for (p in sample(1:P, randP)) {
-            ## if discrete
             if (disc[p] == 0) {
                 cutAll <- sort(unique(X[[p]][1, ndInd[1, ] == m]))
             } else {
@@ -728,6 +727,7 @@ splitTree <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, 
             }
             cutAll <- cutAll[-length(cutAll)]
             ## if there is no potential cut off, skip
+            ## need to add check l2 size
             if (length(cutAll) == 0) {
                 dconList[[p]] <- -1
                 next
