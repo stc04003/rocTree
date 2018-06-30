@@ -29,7 +29,7 @@ print.rocForest <- function(x, tree = 1L, digits = 5, dt = TRUE, ...) {
         eval(parse(text = paste0("Node", Frame$nd[i], "<-", parent,
                                  "$AddChild(display, type = type, nd = Frame$nd[i])")))
     }
-    if (!dt) classic.rocTree(x, ...)
+    if (!dt) classic.rocTree(Frame, ...)
     else{
         toPrint <- ToDataFrameTree(root)[[1]]
         cat(" ROC-guided survival forest: tree #", tree, "\n")

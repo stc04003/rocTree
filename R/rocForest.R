@@ -171,6 +171,7 @@ grow2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, control) {
     }
     treeMat <- treeMat[!is.na(treeMat$u),]
     ndTerm <- treeMat$nd[treeMat$terminal == 2]
+    if (nrow(treeMat) == 1) ndTerm <- 1
     szL2 <- sapply(ndTerm, function(x) rowSums(ndInd2 == x))
     list(treeMat = treeMat, szL2 = szL2, ndInd2 = ndInd2)
 }

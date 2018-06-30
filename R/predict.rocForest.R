@@ -91,6 +91,7 @@ oneWeight <- function(ndInd, xlist, tree) {
     idB2 <- tree$idB2
     Frame <- tree$treeMat
     ndTerm <- Frame$nd[Frame$terminal == 2]
+    if (nrow(Frame) == 1) ndTerm <- 1
     for (i in 1:dim(Frame)[1]) {
         if (Frame$terminal[i] == 0) {
             ndInd[ndInd == Frame$nd[i] & xlist[[Frame$p[i]]] <= Frame$cut[i]] <- Frame$nd[i] * 2
