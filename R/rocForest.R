@@ -1,3 +1,87 @@
+#' ROC-guided Regression Forest
+#'
+#' Fits a "\code{rocForest}" model.
+#' 
+#' @param formula a formula object, with the response on the left of a '~' operator,
+#' and the terms on the right. The response must be a survival object returned by the
+#' 'Surv' function.
+#' @param data an optional data frame in which to interpret the variables occurring
+#' in the 'formula'.
+#' @param id an optional vector used to identify time dependent covariate.
+#' If missing, then each individual row of 'data' is presumed to represent a distinct
+#' subject and each covariate is treated as a baseline covariate. The length of 'id'
+#' should be the same as the number of observations.
+#' @param subset an optional vector specifying a subset of observations to be used in
+#' the fitting process.
+#' @param control a list of control parameters. See 'details' for important special
+#' features of control parameters.
+#' @export
+#'
+#' @return An object of S3 class "\code{rocForest}" representing the fit, with the following components:
+rocForest <- function(formula, data, id, subset, control = list()) {
+    ctrl <- rocTree.control()
+    namc <- names(control)
+    if (!all(namc %in% names(ctrl))) 
+        stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
+    ctrl[namc] <- control
+    Call <- match.call()
+    indx <- match(c("formula", "data", "id", "subset"), names(Call), nomatch = 0L)
+    if (indx[1] == 0L) stop("A 'formula' argument is required")
+    tmp <- Call[c(1L, indx)]
+    tmp[[1L]] <- quote(stats::model.frame)
+    m <- eval.parent(tmp)
+    Y <- model.response(m)[,1]
+    Status <- model.response(m)[,2]
+    id <- model.extract(m, id)
+    if (is.null(id)) id <- 1:nrow(m)
+    Y0 <- unlist(lapply(split(Y, id), max))
+    DF <- m[unlist(lapply(unique(id)[order(Y0)], function(x) which(id == x))),]
+    rownames(DF) <- NULL
+    Y <- model.response(DF)[,1]
+    Status <- model.response(DF)[,2]
+    id <- model.extract(DF, id)
+    if (is.null(id)) id <- 1:nrow(m)
+    Y0 <- unlist(lapply(split(Y, id), max))
+    if (!any(Y %in% Y0)) {
+        DF <- DF[Y %in% Y0,]
+        Y <- model.response(DF)[,1]
+        id <- model.extract(DF, id)
+    }
+    if (is.null(id)) {id <- 1:nrow(DF)
+    } else {id <- rep(1:length(unique(id)), table(factor(id, levels = unique(id))))}
+    X <- model.matrix(attr(m, "terms"), DF)
+    if (sum(colnames(X) == "(Intercept)") > 0) 
+        X <- as.matrix(X[, -which(colnames(X) == "(Intercept)")])
+    p <- ncol(X)
+    vNames <- colnames(X)
+    if (is.null(ctrl$disc)) ctrl$disc <- rep(0, p)
+    if (length(ctrl$disc) == 1) ctrl$disc <- rep(ctrl$disc, p)
+    xlist <- sapply(1:p, function(z) rocTree.Xlist(X[,z], ctrl$disc[z], Y, id), simplify = FALSE)
+    xlist0 <- sapply(1:p, function(z) rocTree.Xlist(X[,z], 1, Y, id), simplify = FALSE) ## for prediction
+    Y0 <- unlist(lapply(split(Y, id), max), use.names = FALSE)
+    E0 <- unlist(lapply(split(Status, id), max), use.names = FALSE)
+    out <- NULL
+    out$Y0 <- Y0
+    out$E0 <- E0
+    out$xlist <- xlist
+    out$xlist0 <- xlist0
+    out$vNames <- vNames
+    out$ctrl <- ctrl
+    out$terms <- attr(m, "terms")
+    attr(out$terms, "id") <- Call[[match("id", names(Call))]]
+    if (!ctrl$parallel) out$forest <- lapply(1:ctrl$B, function(x) forest1(Y0, E0, xlist, ctrl))
+    if (ctrl$parallel) {
+        cl <- makeCluster(ctrl$parCluster)
+        clusterExport(cl = cl, 
+                      varlist = c("Y0", "E0", "xlist", "ctrl"),
+                      envir = environment())
+        out$forest <- parLapply(cl, 1:ctrl$B, function(x) forest1(Y0, E0, xlist, ctrl))
+        stopCluster(cl)
+    }
+    class(out) <- "rocForest"
+    return(out)
+}
+
 #' Function used to grow tree in forest
 #'
 #' This is an internal function, called by \code{rocForest}.
@@ -88,89 +172,9 @@ grow2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, control) {
     treeMat <- treeMat[!is.na(treeMat$u),]
     ndTerm <- treeMat$nd[treeMat$terminal == 2]
     szL2 <- sapply(ndTerm, function(x) rowSums(ndInd2 == x))
-    list(treeMat = treeMat, szL2 = szL2)
+    list(treeMat = treeMat, szL2 = szL2, ndInd2 = ndInd2)
 }
 
-#' ROC-guided Regression Forest
-#'
-#' Fits a "\code{rocForest}" model.
-#' 
-#' @param formula a formula object, with the response on the left of a '~' operator,
-#' and the terms on the right. The response must be a survival object returned by the
-#' 'Surv' function.
-#' @param data an optional data frame in which to interpret the variables occurring
-#' in the 'formula'.
-#' @param id an optional vector used to identify time dependent covariate.
-#' If missing, then each individual row of 'data' is presumed to represent a distinct
-#' subject and each covariate is treated as a baseline covariate. The length of 'id'
-#' should be the same as the number of observations.
-#' @param subset an optional vector specifying a subset of observations to be used in
-#' the fitting process.
-#' @param control a list of control parameters. See 'details' for important special
-#' features of control parameters.
-#' @export
-#'
-#' @return An object of S3 class "\code{rocForest}" representing the fit, with the following components:
-rocForest <- function(formula, data, id, subset, control = list()) {
-    ctrl <- rocTree.control()
-    namc <- names(control)
-    if (!all(namc %in% names(ctrl))) 
-        stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
-    ctrl[namc] <- control
-    Call <- match.call()
-    indx <- match(c("formula", "data", "id", "subset"), names(Call), nomatch = 0L)
-    if (indx[1] == 0L) stop("A 'formula' argument is required")
-    tmp <- Call[c(1L, indx)]
-    tmp[[1L]] <- quote(stats::model.frame)
-    m <- eval.parent(tmp)
-    Y <- model.response(m)[,1]
-    Status <- model.response(m)[,2]
-    id <- model.extract(m, id)
-    if (is.null(id)) id <- 1:nrow(m)
-    Y0 <- unlist(lapply(split(Y, id), max))
-    DF <- m[unlist(lapply(unique(id)[order(Y0)], function(x) which(id == x))),]
-    rownames(DF) <- NULL
-    Y <- model.response(DF)[,1]
-    Status <- model.response(DF)[,2]
-    id <- model.extract(DF, id)
-    if (is.null(id)) id <- 1:nrow(m)
-    Y0 <- unlist(lapply(split(Y, id), max))
-    if (!any(Y %in% Y0)) {
-        DF <- DF[Y %in% Y0,]
-        Y <- model.response(DF)[,1]
-        id <- model.extract(DF, id)
-    }
-    if (is.null(id)) {id <- 1:nrow(DF)
-    } else {id <- rep(1:length(unique(id)), table(factor(id, levels = unique(id))))}
-    X <- model.matrix(attr(m, "terms"), DF)
-    if (sum(colnames(X) == "(Intercept)") > 0) 
-        X <- as.matrix(X[, -which(colnames(X) == "(Intercept)")])
-    p <- ncol(X)
-    vNames <- colnames(X)
-    if (is.null(ctrl$disc)) ctrl$disc <- rep(0, p)
-    if (length(ctrl$disc) == 1) ctrl$disc <- rep(ctrl$disc, p)
-    xlist <- sapply(1:p, function(z) rocTree.Xlist(X[,z], ctrl$disc[z], Y, id), simplify = FALSE)
-    xlist0 <- sapply(1:p, function(z) rocTree.Xlist(X[,z], 1, Y, id), simplify = FALSE) ## for prediction
-    Y0 <- unlist(lapply(split(Y, id), max), use.names = FALSE)
-    E0 <- unlist(lapply(split(Status, id), max), use.names = FALSE)
-    out <- NULL
-    out$Y0 <- Y0
-    out$E0 <- E0
-    out$xlist <- xlist
-    out$xlist0 <- xlist0
-    out$vNames <- vNames    
-    if (!ctrl$parallel) out$forest <- lapply(1:ctrl$B, function(x) forest1(Y0, E0, xlist, ctrl))
-    if (ctrl$parallel) {
-        cl <- makeCluster(ctrl$parCluster)
-        clusterExport(cl = cl, 
-                      varlist = c("Y0", "E0", "xlist", "ctrl"),
-                      envir = environment())
-        out$forest <- parLapply(cl, 1:ctrl$B, function(x) forest1(Y0, E0, xlist, ctrl))
-        stopCluster(cl)
-    }
-    class(out) <- "rocForest"
-    return(out)
-}
 
 is.rocForest <- function(x) inherits(x, "rocForest")
 
@@ -189,53 +193,8 @@ forest1 <- function(Y, E, xlist, control) {
     Y2 <- Y[idB2]
     X1.list <- lapply(xlist, function(x) x[idB1, idB1])
     X2.list <- lapply(xlist, function(x) x[,idB2])
-    return(grow2(Y1, E1, X1.list, Y2, X2.list, Y, control))
+    out <- grow2(Y1, E1, X1.list, Y2, X2.list, Y, control)
+    out$idB2 <- idB2
+    return(out)
 }
 
-
-## ## Terminal nodes 
-##     ndTerm <- treeMat$nd[treeMat$terminal == 2]
-
-##     tree2 <- treeMat[!is.na(treeMat[,3]),]
-    
-##     ## ################# Return here? ####################  Return tree2 (Frame)
-##     ## SzL2 is a matrix for L2, counting the size of terminal nodes at each time point
-##     ## each col is for one terminal node
-##     ## each row is for one time point
-##     SzL2 <- matrix(ncol = length(ndTerm), nrow = N)
-##     for(k in 1:length(ndTerm)) {
-##         SzL2[,k] <- apply(ndInd2, 1, function(x){sum(x==ndTerm[k])})
-##     }
-##     ## final tree
-##     tree2 <- treeMat[!is.na(treeMat[,3]),]
-##     ## find the node label of the new observations in the tree
-##     ndInd32 <- matrix(1, N, N3)
-##     for(i in 1:dim(tree2)[1]) {
-##         sp <- tree2[i,c(1,5:6,2)]
-##         if(sp[4] == 0)
-##         {
-##             ndInd32[ndInd32 == sp[1] & X32.list[[sp[2]]]<=sp[3]] <- sp[1]*2
-##             ndInd32[ndInd32 == sp[1] & X32.list[[sp[2]]]>sp[3]] <- sp[1]*2+1
-##         }else{
-##             ## If it is a terminal node, do nothing
-##             ## Nodes who are descendents of the terminal nodes will not appear
-##         }
-##     }
-##     ## W2 is an 3d array, W2[i,,] is the weight matrix for the ith new obs.
-##     ## each row is one subject
-##     W2 <- array(0, dim = c(N3,N,N))
-##     for(i in 1:N3)
-##     {
-##         ndi <- ndInd32[,i]
-##         ## the nodes over time of the ith subjects (new obs.)
-##         for(j in 1:N)
-##         {
-##             ## at jth time point, subject i enters node ndi[j]
-##             ## update the weights for observations in L2 that falls into ndi[j]
-##             ## If the observation falls into a node that no data from L2 is in that node, this 
-##             ## means that there is no neighbor in L2, so the weight is 0 (later we do normalization so that the sum is 1)
-##             W2[i,j,idb2[ndInd2[j,] == ndi[j]]] <- 1/SzL2[j,ndTerm == ndi[j]]
-##         }
-##     }
-##     list(treeMat = tree2, W2 = W2)
-## }

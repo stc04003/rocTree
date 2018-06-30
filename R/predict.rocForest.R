@@ -12,7 +12,7 @@
 #' @seealso \code{\link{predict.rocTree}}
 #' @export
 predict.rocForest <- function(object, newdata, type = c("survival", "hazard"), ...) {
-    if (!is.rocTree(object)) stop("Response must be a \"rocForest\" object")
+    if (!is.rocForest(object)) stop("Response must be a \"rocForest\" object")
     type <- match.arg(type)
     ctrl <- object$ctrl
     if (missing(newdata)) {
@@ -51,6 +51,50 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard"), .
             xlist[[i]] <- do.call(cbind, lapply(split(X.path[,i], newdata$id), function(z) c(z, rep(NA, n - length(z)))))
         }
     }
-    ndInd <- matrix(1, n, dim(xlist[[1]])[2])
+    nID <- dim(xlist[[1]])[2]
+    ndInd <- matrix(1, n, nID)
     dfPred <- ndInd - 1
+    W <- oneWeight(ndInd, xlist, object$forest[[1]])
+    for (i in 2:nID) {
+        tmp <- oneWeight(ndInd, xlist, object$forest[[i]])
+        W <- sapply(1:nID, function(x) tmp[[x]] + W[[x]])
+    }
+    dfPred[is.na(xlist[[1]])] <- NA
+    if (type == "survival") {
+        pred <- data.frame(Time = sort(unique(Y)),
+                           Surv = rowMeans(apply(dfPred, 2, function(x) exp(-cumsum(x))), na.rm = TRUE))
+    }
+    if (type == "hazard") {
+        pred <- data.frame(Time = sort(unique(Y)),
+                           cumHaz = rowMeans(apply(dfPred, 2, function(x) cumsum(x)), na.rm = TRUE))
+    }
+    for (i in 1:length(xlist)) attr(xlist[[i]], "dimnames") <- NULL
+    list(xlist = xlist, W = W)
 }  
+
+#' This function provides one weight matrix using a tree from the forest
+#'
+#' @keywords internal
+#' @noRd
+oneWeight <- function(ndInd, xlist, tree) {
+    szL2 <- tree$szL2
+    ndInd2 <- tree$ndInd2
+    idB2 <- tree$idB2
+    Frame <- tree$treeMat
+    ndTerm <- Frame$nd[Frame$terminal == 2]
+    for (i in 1:dim(Frame)[1]) {
+        if (Frame$terminal[i] == 0) {
+            ndInd[ndInd == Frame$nd[i] & xlist[[Frame$p[i]]] <= Frame$cut[i]] <- Frame$nd[i] * 2
+            ndInd[ndInd == Frame$nd[i] & xlist[[Frame$p[i]]] > Frame$cut[i]] <- Frame$nd[i] * 2 + 1
+        }
+    }
+    n <- dim(xlist[[1]])[1]
+    W <- rep(list(matrix(0, n, n)), dim(xlist[[1]])[2])
+    for (i in 1:length(W)){
+        ndi <- ndInd[,i]
+        for (j in 1:n) {
+            W[[i]][j, idB2[ndInd2[j,] == ndi[j]]] <- 1 / szL2[j, ndTerm == ndi[j]]
+        }
+    }
+    W
+}

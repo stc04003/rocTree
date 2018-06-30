@@ -185,8 +185,8 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
     const2 <- 1 / rowMeans(fmat2)[EE2] / sc2[EE2] / N2
     Smat3 <- outer(ifelse(E2, Y2, NA), Y1, "<=") 
     fmat3 <- t(E1 * sapply(ifelse(E2, Y2, NA), K2, vec = Y1, h = hN1) / hN1)
-    fTree <- STree <- matrix(NA, M, sum(Y1 <= E1 * tau))
-    fTree2 <- STree2 <- fTree3 <- STree3 <- matrix(NA, M, sum(Y2 <= E2 * tau))
+    fTree <- STree <- matrix(NA, M, sum(EE1))
+    fTree2 <- STree2 <- fTree3 <- STree3 <- matrix(NA, M, sum(EE2))
     fTree[1, ] <- rowMeans(fmat)[EE1]
     STree[1, ] <- rowMeans(Smat)[EE1]
     fTree2[1, ] <- rowMeans(fmat2)[EE2]

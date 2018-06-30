@@ -253,7 +253,6 @@ grow4 <- function(Y1, E1, X1.list, X2.list, X32.list, Y, idb2, control) {
   list(treeMat = tree2, W2 = W2)
 }
 
-
 # I think I did not change this function
 split3 <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, control)  {
   N <- dim(X[[1]])[1]
@@ -417,8 +416,7 @@ B <- 500
 ## check the results
   
   
-  Ltrue3 <- function(tt,k0,it0,a0)
-  {
+  Ltrue3 <- function(tt,k0,it0,a0) {
     lambda*exp(beta*a0+betat*it0)*(exp(betat*k0*tt)-1)/(betat*k0)
   }
   
@@ -447,3 +445,75 @@ B <- 500
             col = my_palette, ColSideColors = cbind(color.scale(X.list[[1]][1,]), color.scale(X.list[[2]][1,])))
 
 
+
+###########################################################################
+
+test0 <- test1 <- matrix(0, N, N)
+ndi <- ndInd32[,2]
+for (j in 1:N) test0[j, idb2[ndInd2[j,] == ndi[j]]] <- 1 / SzL2[j, ndTerm == ndi[j]]
+
+
+sapply(1:N, function(x) SzL2[x, ndTerm == ndi[x]])
+t(SzL2)[t(outer(ndi, ndTerm, "=="))]
+colSums(sapply(1:N, function(x) ndInd2[x,] == ndi[x]))
+
+
+identical(sapply(1:N, function(x) SzL2[x, ndTerm == ndi[x]]),
+          t(SzL2)[t(outer(ndi, ndTerm, "=="))])
+
+microbenchmark(sapply(1:N, function(x) SzL2[x, ndTerm == ndi[x]]),
+               t(SzL2)[t(outer(ndi, ndTerm, "=="))],
+               colSums(sapply(1:N, function(x) ndInd2[x,] == ndi[x])))
+
+
+do1 <- function() {
+    WW <- rep(list(matrix(0, N, N)), N3)
+    for (i in 1:N3) {
+        ndi <- ndInd32[,i]    
+        right <- t(SzL2)[t(outer(ndi, ndTerm, "=="))]
+        WW[[i]] <- t(sapply(1:N, function(x) 1:N %in% idb2[ndInd2[x,] == ndi[x]])) / right
+        WW[[i]][is.na(WW[[i]])] <- 0
+    }
+    WW
+}
+
+do2 <- function() {
+    W1 <- rep(list(matrix(0, N, N)), N3)
+    W1 <- lapply(1:N3, function(x) {
+        ndi <- ndInd32[,x]
+        for (j in 1:N) {
+            W1[[x]][j, idb2[ndInd2[j,] == ndi[j]]] <- 1 / SzL2[j, ndTerm == ndi[j]]
+        }
+        W1[[x]]
+    })
+    W1
+}
+
+do3 <- function() {
+    W <- rep(list(matrix(0, N, N)), N3)
+    for (i in 1:length(W)) {
+        ndi <- ndInd32[,i]
+        for (j in 1:N) {
+            W[[i]][j, idb2[ndInd2[j,] == ndi[j]]] <- 1 / SzL2[j, ndTerm == ndi[j]]
+        }
+    }
+    W    
+}
+
+do4 <- function() {
+    WW <- rep(list(matrix(0, N, N)), N3)
+    WW <- lapply(1:N3, function(i) {
+        ndi <- ndInd32[,i]    
+        right <- t(SzL2)[t(outer(ndi, ndTerm, "=="))]
+        tmp <- t(sapply(1:N, function(x) 1:N %in% idb2[ndInd2[x,] == ndi[x]])) / right
+        tmp[is.na(tmp)] <- 0
+        tmp})
+    WW
+}
+
+identical(do1(), do2())
+identical(do1(), do3())
+identical(do2(), do3())
+identical(do2(), do4())
+
+microbenchmark(do1(), do2(), do3(), do4())

@@ -87,7 +87,27 @@ summary(c(tmp$xlist[[2]]))
 set.seed(1)
 system.time(foo2 <- rocForest(Surv(Time, Status) ~ X1 + X2, data = dat, id = ID))
 
+
 set.seed(1)
 system.time(foo22 <- rocForest(Surv(Time, Status) ~ X1 + X2, data = dat, id = ID,
                                control = list(parallel = TRUE)))
 
+str(predict(foo2, newdata))
+identical(predict(foo, newdata)$xlist, predict(foo2, newdata))
+## checked
+
+tree1 <- foo2$forest[[1]]
+str(tree1)
+
+pred <- predict(foo2, newdata)
+
+
+test <- rep(list(matrix(0, 10, 10)), 50)
+lapply(1:50, function(x) {diag(test[[x]]) <- 10; test[[x]]})
+
+ttt <- function() {
+    for (i in 1:50) {
+        diag(test[[i]]) <- 10
+    }
+    test
+}
