@@ -85,6 +85,13 @@ summary(c(tmp$xlist[[2]]))
 ## checked
 
 set.seed(1)
+foo.pred <- predict(foo, newdata)
+foo.pred
+
+predict(foo, newdata, type = "haz")
+
+## Forest
+set.seed(1)
 system.time(foo2 <- rocForest(Surv(Time, Status) ~ X1 + X2, data = dat, id = ID))
 
 
@@ -92,22 +99,40 @@ set.seed(1)
 system.time(foo22 <- rocForest(Surv(Time, Status) ~ X1 + X2, data = dat, id = ID,
                                control = list(parallel = TRUE)))
 
-str(predict(foo2, newdata))
-identical(predict(foo, newdata)$xlist, predict(foo2, newdata))
+## identical(predict(foo, newdata)$xlist, predict(foo2, newdata)$xlist)
 ## checked
 
-tree1 <- foo2$forest[[1]]
-str(tree1)
+system.time(foo2.pred <- predict(foo2, newdata))
+system.time(foo2.pred2 <- predict(foo2))
+foo2.pred
+foo2.pred2
+print(foo2.pred, 5)
+print(foo2.pred2, 5)
 
-pred <- predict(foo2, newdata)
+Ltrue3 <- function(tt, k0, it0, a0) {
+    .1 * exp(a0 + 2 * it0) * (exp(2 * k0 * tt) - 1) / (2 * k0)
+}
+
+head(newdata)
+
+i = 4
+cumHaz0 <- Ltrue3(unique(newdata$Time), seq(1, 2, length = 20)[i],
+                  seq(1, 2, length = 20)[i], unique(newdata$X1)[i])
+
+plot(unique(newdata$Time), exp(-cumHaz0), 'l', ylim = c(0, 1))
+with(foo2.pred$pred[[1]], lines(Time, Surv, 's', col = 2))
 
 
-test <- rep(list(matrix(0, 10, 10)), 50)
-lapply(1:50, function(x) {diag(test[[x]]) <- 10; test[[x]]})
 
-ttt <- function() {
-    for (i in 1:50) {
-        diag(test[[i]]) <- 10
+print0(foo.pred)
+
+print0 <- function(x, tree = 1L, ...) {
+    if (names(x$pred)[[2]] == "Surv") {
+        cat(" Fitted survival probabilities:\n")
     }
-    test
+    if (names(x$pred)[[2]] == "cumHaz") {
+        cat(" Fitted cumulative hazard:\n")
+    }
+    print(head(x$pred, 5))
+    cat("\n")
 }

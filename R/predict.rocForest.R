@@ -55,21 +55,30 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard"), .
     ndInd <- matrix(1, n, nID)
     dfPred <- ndInd - 1
     W <- oneWeight(ndInd, xlist, object$forest[[1]])
-    for (i in 2:nID) {
+    for (i in 2:length(object$forest)) {
         tmp <- oneWeight(ndInd, xlist, object$forest[[i]])
-        W <- sapply(1:nID, function(x) tmp[[x]] + W[[x]])
+        W <- lapply(1:nID, function(x) tmp[[x]] + W[[x]])
     }
-    dfPred[is.na(xlist[[1]])] <- NA
-    if (type == "survival") {
-        pred <- data.frame(Time = sort(unique(Y)),
-                           Surv = rowMeans(apply(dfPred, 2, function(x) exp(-cumsum(x))), na.rm = TRUE))
-    }
-    if (type == "hazard") {
-        pred <- data.frame(Time = sort(unique(Y)),
-                           cumHaz = rowMeans(apply(dfPred, 2, function(x) cumsum(x)), na.rm = TRUE))
+    Y0 <- unique(Y)
+    matk2 <- outer(Y0, Y0, "<=")
+    matk3 <- outer(Y0, Y0, "==") * object$E0
+    pred <- list()
+    for (i in 1:nID) {
+        Wi <- W[[i]] / rowSums(W[[i]])
+        if (type == "survival") {
+            pred[[i]] <- data.frame(Time = Y0, Surv = exp(-cumsum(rowSums(matk3 * Wi) / rowSums(matk2 * Wi))))
+            ## pred[[i]] <- approxfun(Y, surv, yleft = 1, yright = min(surv), method = "constant")
+        }
+        if (type == "hazard") {
+            pred[[i]] <- data.frame(Time = Y0, cumHaz = cumsum(rowSums(matk3 * Wi) / rowSums(matk2 * Wi)))
+            ## pred[[i]] <- approxfun(Y, harz, yleft = 1, yright = min(surv), method = "constant")
+        }
+        pred[[i]] <- pred[[i]][complete.cases(pred[[i]]),]
     }
     for (i in 1:length(xlist)) attr(xlist[[i]], "dimnames") <- NULL
-    list(xlist = xlist, W = W)
+    out <- list(xlist = xlist, W = W, pred = pred)
+    class(out) <- "predict.rocForest"
+    return(out)
 }  
 
 #' This function provides one weight matrix using a tree from the forest

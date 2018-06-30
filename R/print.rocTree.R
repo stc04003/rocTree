@@ -15,7 +15,6 @@
 #' data = simudat, control = list(CV = TRUE, nflds = 10)))
 #' fit
 #' print(fit, tree = FALSE)
-
 print.rocTree <- function(x, digits = 5, dt = TRUE, ...) {
     if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object.")
     ## digits = getOption("digits")
@@ -108,4 +107,17 @@ tree.split.names <- function(nd0, nd, p, cut, xname, digits = getOption("digits"
     } else {
         return(paste(xname[p[ind]], ">", formatC(cut[ind], digits = digits, flag = "#")))
     }
+}
+
+#' @export
+print.predict.rocTree <- function(x, tree = 1L, ...) {
+    if (!is.wholenumber(tree)) stop("Tree number must be an integer.")
+    if (names(x$pred)[[2]] == "Surv") {
+        cat(" Fitted survival probabilities:\n")
+    }
+    if (names(x$pred)[[2]] == "cumHaz") {
+        cat(" Fitted cumulative hazard:\n")
+    }
+    print(head(x$pred, 5))
+    cat("\n")
 }

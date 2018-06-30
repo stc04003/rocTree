@@ -374,16 +374,14 @@ Kq <- function(x, q) {
   # resampling
 B <- 500
 
-  for(b in 1:B) {
-    # subsampling
+for(b in 1:B) {
     S <- round(N*0.5)
     if(S%%2 != 0) {S <- S+1}
     idb <- sample(1:N, size = S)
     # divide the data into two halves
     S1 <- round(S/2)
     id1 <- sample(1:S, size = S1)
-    
-    # idb1 is the id in 1st half
+    ## idb1 is the id in 1st half
     idb1 <- sort(idb[id1])
     idb2 <- sort(idb[-id1])
     
@@ -391,58 +389,56 @@ B <- 500
     E1 <- E[idb1]
     Y2 <- Y[idb2]
     E2 <- E[idb2]
-    # X1.list is the X of L1 on Y1
-    # X2.list is the X of L2 on Y
-    # each row is a time point, each col is a subject
+    ## X1.list is the X of L1 on Y1
+    ## X2.list is the X of L2 on Y
+    ## each row is a time point, each col is a subject
     X1.list <- list()
     X2.list <- list()
-    for(p in 1:P)
-    {
-      Xp <- X.list[[p]]
-      X1p <- Xp[idb1,idb1]
-      X2p <- Xp[,idb2]
-      X1.list[[p]] <- X1p
-      X2.list[[p]] <- X2p
+    for(p in 1:P) {
+        Xp <- X.list[[p]]
+        X1p <- Xp[idb1,idb1]
+        X2p <- Xp[,idb2]
+        X1.list[[p]] <- X1p
+        X2.list[[p]] <- X2p
     }
-    fit4 <- grow4(Y1, E1, X1.list, X2.list, X32.list, Y, idb2, control)
-      ## fit4 <- try(grow4(Y1, E1, X1.list, X2.list, X32.list, Y, idb2, control), silent = TRUE)
-    ### STEVEN: Sometimes I got error messages here, which is from the splitting function
-    ### It might be that the node size is too small for valid calculation. Could you check what went wrong? Thanks!!!
+    ## fit4 <- grow4(Y1, E1, X1.list, X2.list, X32.list, Y, idb2, control)
+    fit4 <- try(grow4(Y1, E1, X1.list, X2.list, X32.list, Y, idb2, control), silent = TRUE)
+### STEVEN: Sometimes I got error messages here, which is from the splitting function
+### It might be that the node size is too small for valid calculation. Could you check what went wrong? Thanks!!!
     if(is.list(fit4))
     {WW <- WW + fit4$W2}
     else{print(paste("error in the ", b, "th subsample, not used for weights", sep = ""))}
-  }
+}
   
 ## check the results
+
+
+Ltrue3 <- function(tt, k0, it0, a0) {
+    lambda * exp(beta * a0 + betat * it0) * (exp(betat * k0 * tt) - 1) / (betat * k0)
+}
   
-  
-  Ltrue3 <- function(tt,k0,it0,a0) {
-    lambda*exp(beta*a0+betat*it0)*(exp(betat*k0*tt)-1)/(betat*k0)
-  }
-  
-  par(mfrow = c(4,5))
-  tt <- Y
-  # prediction for the 20 new observations
-  for(i in 1:N3)
-  {
-    # normalize the weight so the row sum is 1
+par(mfrow = c(4,5))
+tt <- Y
+## prediction for the 20 new observations
+for(i in 1:N3) {
+    ## normalize the weight so the row sum is 1
     Wi <- WW[i,,]/rowSums(WW[i,,])
-    # Spred is our predicted survival function on each time point in Y
+    ## Spred is our predicted survival function on each time point in Y
     Spred <- exp(-cumsum(rowSums(matk3*Wi)/rowSums(matk2*Wi)))
-    # rowSums(matk2*Wi) is actually 1
+    ## rowSums(matk2*Wi) is actually 1
     Strue <- exp(-Ltrue3(tt,k3[i],it3[i],a3[i]))
     plot(tt[tt<tau],Strue[tt<tau], ylim = c(0,1), type = "l")
     points(tt,Spred, col = 2, type = "l")
-  }
-  
-  # check the weight matrix for i th new observation
-  i <- 18
-  Wi <- WW[i,,]/rowSums(WW[i,,])
-  my_palette <- colorRampPalette(c("yellow","red","purple","blue","green"))(n = 1000)
-  library(devtools)
-  source_url("https://raw.githubusercontent.com/obigriffith/biostar-tutorials/master/Heatmaps/heatmap.3.R")
-  heatmap.3(Wi,dendrogram='none', Rowv=FALSE, Colv=FALSE,trace='none', 
-            col = my_palette, ColSideColors = cbind(color.scale(X.list[[1]][1,]), color.scale(X.list[[2]][1,])))
+}
+
+## check the weight matrix for i th new observation
+i <- 18
+Wi <- WW[i,,]/rowSums(WW[i,,])
+my_palette <- colorRampPalette(c("yellow","red","purple","blue","green"))(n = 1000)
+library(devtools)
+source_url("https://raw.githubusercontent.com/obigriffith/biostar-tutorials/master/Heatmaps/heatmap.3.R")
+heatmap.3(Wi,dendrogram='none', Rowv=FALSE, Colv=FALSE,trace='none', 
+          col = my_palette, ColSideColors = cbind(color.scale(X.list[[1]][1,]), color.scale(X.list[[2]][1,])))
 
 
 

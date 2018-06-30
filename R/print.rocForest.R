@@ -32,7 +32,7 @@ print.rocForest <- function(x, tree = 1L, digits = 5, dt = TRUE, ...) {
     if (!dt) classic.rocTree(x, ...)
     else{
         toPrint <- ToDataFrameTree(root)[[1]]
-        cat(" ROC-guided survival tree #", tree, "\n")
+        cat(" ROC-guided survival forest: tree #", tree, "\n")
         cat("\n")
         cat(" node), split\n")
         cat("   * denotes terminal node\n")
@@ -42,3 +42,17 @@ print.rocForest <- function(x, tree = 1L, digits = 5, dt = TRUE, ...) {
 }
 
 is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+
+#' @export
+print.predict.rocForest <- function(x, tree = 1L, ...) {
+    if (!is.wholenumber(tree)) stop("Tree number must be an integer.")
+    if (tree > length(x$pred)) stop("Tree number exceeded the number of subjects in newdata.")
+    if (names(x$pred[[tree]])[[2]] == "Surv") {
+        cat(" Fitted survival probabilities for subject #", tree, ":\n")
+    }
+    if (names(x$pred[[tree]])[[2]] == "cumHaz") {
+        cat(" Fitted cumulative hazard for subject #", tree, ":\n")
+    }
+    print(head(x$pred[[tree]], 5))
+    cat("\n")
+}
