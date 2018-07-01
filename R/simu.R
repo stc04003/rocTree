@@ -98,8 +98,11 @@ simu <- function(n, cen, scenario, summary = FALSE) {
 trueHaz <- function(dat) {
     if (attr(dat, "prepBy") != "rocSimu") stop("Inputed data must be prepared by \"simu\".")
     scenario <- attr(dat, "scenario")
-    if (substr(scenario, 1, 1) == "1")
-        dat <- do.call(rbind, lapply(split(dat, dat$id), function(x) x[which.max(x$Y),]))
+    if (!any(names(dat) == "id")) {
+        dat <- dat %>% arrange(Y)
+        dat$id <- unlist(lapply(split(dat$Y, dat$Y), function(x) 1:length(x)))
+    }
+    ## if (substr(scenario, 1, 1) == "1") dat <- do.call(rbind, lapply(split(dat, dat$id), function(x) x[which.max(x$Y),]))
     eval(parse(text = paste("trueHaz", scenario, "(dat)", sep = "")))    
 }
 
@@ -113,8 +116,11 @@ trueHaz <- function(dat) {
 trueSurv <- function(dat) {
     if (attr(dat, "prepBy") != "rocSimu") stop("Inputed data must be prepared by \"simu\".")
     scenario <- attr(dat, "scenario")
-    if (substr(scenario, 1, 1) == "1")
-        dat <- do.call(rbind, lapply(split(dat, dat$id), function(x) x[which.max(x$Y),]))
+    if (!any(names(dat) == "id")) {
+        dat <- dat %>% arrange(Y)
+        dat$id <- unlist(lapply(split(dat$Y, dat$Y), function(x) 1:length(x)))
+    }
+    ## if (substr(scenario, 1, 1) == "1") dat <- do.call(rbind, lapply(split(dat, dat$id), function(x) x[which.max(x$Y),]))
     eval(parse(text = paste("trueSurv", scenario, "(dat)", sep = "")))    
 }
 
@@ -127,8 +133,9 @@ trueSurv <- function(dat) {
 simuTest <- function(dat) {
     if (attr(dat, "prepBy") != "rocSimu") stop("Inputed data must be prepared by \"simu\".")
     scenario <- attr(dat, "scenario")
-    dat <- as.tibble(eval(parse(text = paste("simTest", scenario, "(dat)", sep = ""))))
+    dat <- as.tibble(eval(parse(text = paste("simuTest", scenario, "(dat)", sep = ""))))
     attr(dat, "prepBy") <- "rocSimu"
+    attr(dat, "scenario") <- scenario
     return(dat)
 }
 
@@ -420,8 +427,7 @@ trueSurv1.5 <- function(dat) trueSurv1.1(dat)
 #' @noRd
 simuTest1.1 <- function(dat) {
     Y <- sort(unique(dat$Y))
-    n <- length(Y)
-    data.frame(Y = Y, z1 = runif(n), z2 = runif(n))
+    data.frame(Y = Y, z1 = runif(1), z2 = runif(1))
 }
 
 simuTest1.2 <- function(dat) simuTest1.1(dat)
@@ -434,7 +440,7 @@ simuTest2.1 <- function(dat) {
     n <- length(Y)
     e <- rbinom(n, 1, .5)
     u <- rexp(n, 5)
-    data.frame(Y = Y, z1 = e * (Y < u) + (1 - e) * (Y >= u), z2 = runif(n))
+    data.frame(Y = Y, z1 = e * (Y < u) + (1 - e) * (Y >= u), z2 = runif(1))
 }
 
 simuTest2.2 <- function(dat) {
@@ -445,7 +451,7 @@ simuTest2.2 <- function(dat) {
     u2 <- u[,2]
     u3 <- u[,3]
     z1 <- e * ((u1 <= Y) * (Y < u2) + (u3 <= Y)) + (1 - e) * ((Y < u1) + (u2 <= Y) * (Y < u3))
-    data.frame(Y = Y, z1 = z1, z2 = runif(n))
+    data.frame(Y = Y, z1 = z1, z2 = runif(1))
 }
 
 simuTest2.3 <- function(dat) {
@@ -453,7 +459,7 @@ simuTest2.3 <- function(dat) {
     n <- length(Y)
     k <- runif(n, 1, 2)
     b <- runif(n, 1, 2)
-    data.frame(Y = Y, z1 = k * Y + b, z2 = runif(n))
+    data.frame(Y = Y, z1 = k * Y + b, z2 = runif(1))
 }
 
 simuTest3.1 <- function(dat) simuTest2.1(dat)
