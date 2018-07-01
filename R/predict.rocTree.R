@@ -30,7 +30,7 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...
         newdata <- model.frame(paste(res, "~", paste(c(object$vNames, id), collapse = "+")), newdata)
         res <- object$terms[[2]][[2]]
         id <- attr(object$terms, "id")
-        if (!any(res == names(newdata))) newdata$Y <- min(object$Y0)
+        if (!any(res == names(newdata))) newdata$Y <- max(object$Y0)
         else names(newdata)[which(names(newdata) == res)] <- "Y"
         if (!any(id == names(newdata))) newdata$id <- 1:nrow(newdata)
         else names(newdata)[which(names(newdata) == id)] <- "id"

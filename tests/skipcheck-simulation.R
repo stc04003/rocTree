@@ -5,9 +5,11 @@
 library(rocTree)
 library(survival)
 
+## scenario 1.1
 dat <- simu(200, 0, 1.1)
-dat
+dat0 <- dat[cumsum(with(dat, unlist(lapply(split(id, id), length), use.names = FALSE))),]
 
+    
 system.time(foo <- rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id))
 system.time(foo.cv <- rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id, control = list(CV = TRUE)))
 
@@ -21,10 +23,21 @@ foo.dcon
 foo.cv
 foo.dcon.cv
 
+system.time(pred.rt <- predict(foo, dat.test))
+system.time(pred.rt2 <- predict(foo, dat.test0))
+
+
+tt <- seq(0, 1.5, .01)
+with(pred.rt$pred, plot(Time, Surv, 's'))
+lines(tt, trueSurv(dat.test)(tt), col = 2)
+
+with(dat.test, plot(Y, exp(-Y^2 * exp(2 * z1 + 2 * z2)), col = 2, cex = .2))
+with(pred.rt$pred, lines(Time, Surv, 's', lwd = 2))
 
 
 
-
+with(pred.rt2$pred, lines(Time, Surv, 's', col = 3))
+with(pred.rt2$pred, plot(Time, Surv, 's', col = 2))
 e
 ########################################################################
 
@@ -34,11 +47,4 @@ rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id, control = list(splitBy = 
 
 
 tt <- seq(0, 1, .01)
-
-plot(tt, trueHaz(dat)(tt), 's')
-for (i in 11:15/10) {
-    for (j in 0:2 * .25) {
-        lines(tt, trueHaz(simu(200, j, i))(tt) , lwd = 1.2, col = "gray65")
-    }
-}
 

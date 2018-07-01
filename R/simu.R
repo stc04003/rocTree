@@ -64,7 +64,8 @@ simu <- function(n, cen, scenario, summary = FALSE) {
     if (!(cen %in% c(0, .25, .50)))
         stop("Only 3 levels of censoring rates (0%, 25%, 50%) are allowed.")
     if (!(scenario %in% paste(rep(1:3, each = 6), rep(1:6, 3), sep = ".")))
-        stop("See ?simu for scenario definition")
+        stop("See ?simu for scenario definition.")
+    if (n > 1e4) stop("Sample size too large.")
     dat <- as.tibble(eval(parse(text = paste("sim", scenario, "(n = ", n, ", cen = ", cen, ")", sep = ""))))
     if (summary) {
         cat("\n")
@@ -117,6 +118,21 @@ trueSurv <- function(dat) {
     eval(parse(text = paste("trueSurv", scenario, "(dat)", sep = "")))    
 }
 
+#' Function to generate testing sets given training data.
+#'
+#' This function is used to generate testing sets for each scenario.
+#'
+#' @rdname simu
+#' @export
+simuTest <- function(dat) {
+    if (attr(dat, "prepBy") != "rocSimu") stop("Inputed data must be prepared by \"simu\".")
+    scenario <- attr(dat, "scenario")
+    dat <- as.tibble(eval(parse(text = paste("simTest", scenario, "(dat)", sep = ""))))
+    attr(dat, "prepBy") <- "rocSimu"
+    return(dat)
+}
+
+#' ##########################################################################################
 #' Background functions for simulation
 #' @keywords internal
 #' @noRd
@@ -128,8 +144,9 @@ sim1.1 <- function(n, cen = 0) {
     if (cen == .25) cens <- runif(n, 0, 1.41)
     if (cen == .50) cens <- runif(n, 0, 0.66)
     Y <- pmin(Time, cens)
+    d <- 1 * (Time <= cens)
     do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
+        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), d[x]),  z1 = z1[x], z2 = z2[x])))
 }
 
 sim1.2 <- function(n, cen = 0) {
@@ -268,7 +285,7 @@ sim2.3 <- function(n, cen = 0) {
     dat <- do.call(rbind, lapply(1:n, function(x)
         data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
                    z2 = z2[x], k = k[x], b = b[x])))
-    dat$z1 <- with(dat, k * Time + b)
+    dat$z1 <- with(dat, k * Y + b)
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
 }
 
@@ -397,3 +414,48 @@ trueSurv1.4 <- function(dat) {
 
 trueHaz1.5 <- function(dat) trueHaz1.1(dat)
 trueSurv1.5 <- function(dat) trueSurv1.1(dat)
+
+#' Background functions for generating testing sets given training data
+#' @keywords internal
+#' @noRd
+simuTest1.1 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    n <- length(Y)
+    data.frame(Y = Y, z1 = runif(n), z2 = runif(n))
+}
+
+simuTest1.2 <- function(dat) simuTest1.1(dat)
+simuTest1.3 <- function(dat) simuTest1.1(dat)
+simuTest1.4 <- function(dat) simuTest1.1(dat)
+simuTest1.5 <- function(dat) simuTest1.1(dat)
+
+simuTest2.1 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    n <- length(Y)
+    e <- rbinom(n, 1, .5)
+    u <- rexp(n, 5)
+    data.frame(Y = Y, z1 = e * (Y < u) + (1 - e) * (Y >= u), z2 = runif(n))
+}
+
+simuTest2.2 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    e <- rbinom(n, 1, .5)
+    u <- matrix(rexp(3 * n, 5), n)
+    u1 <- u[,1]
+    u2 <- u[,2]
+    u3 <- u[,3]
+    z1 <- e * ((u1 <= Y) * (Y < u2) + (u3 <= Y)) + (1 - e) * ((Y < u1) + (u2 <= Y) * (Y < u3))
+    data.frame(Y = Y, z1 = z1, z2 = runif(n))
+}
+
+simuTest2.3 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    n <- length(Y)
+    k <- runif(n, 1, 2)
+    b <- runif(n, 1, 2)
+    data.frame(Y = Y, z1 = k * Y + b, z2 = runif(n))
+}
+
+simuTest3.1 <- function(dat) simuTest2.1(dat)
+simuTest3.2 <- function(dat) simuTest2.2(dat)
+simuTest3.3 <- function(dat) simuTest2.3(dat)
