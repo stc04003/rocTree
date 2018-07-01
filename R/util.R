@@ -109,11 +109,17 @@ K1 <- function(u) {
   0.75 * (1 - u ^ 2) * (abs(u) < 1)
 }
 
+## K2 <- function(s, vec, h) {
+##     if (is.na(s)) return(rep(NA, length(vec)))
+##     if (s < h) return(Kq((s - vec) / h, s / h))
+##     else return(K1((s - vec) / h))
+##     ## if (s < h) return(K1((h - vec) / h)) ## use for data
+## }
+
 K2 <- function(s, vec, h) {
     if (is.na(s)) return(rep(NA, length(vec)))
-    if (s < h) return(Kq((s - vec) / h, s / h))
+    if (s < h) return(K1((h - vec) / h))
     else return(K1((s - vec) / h))
-    ## if (s < h) return(K1((h - vec) / h)) ## use for data
 }
 
 Kq <- function(x, q) {
@@ -121,4 +127,3 @@ Kq <- function(x, q) {
     2 / (q + 1) * K1(2 / (q + 1) * (x - (q - 1) / 2)) *
         (1 + ((q - 1) / (q + 1) / sigk1) ^ 2 + 2 / sigk1 ^ 2 * (1 - q) / (1 + q) ^ 2 * x)
 }
-
