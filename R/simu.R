@@ -1,4 +1,4 @@
-globalVariables(c("n", "cen")) ## global variables for simu
+globalVariables(c("n", "cen", "Y", "id")) ## global variables for simu
 
 #' Function to generate simulated data used in the manuscript.
 #'
@@ -40,7 +40,11 @@ globalVariables(c("n", "cen")) ## global variables for simu
 #' @param scenario can be numeric or character string.
 #' This indicates the simulation scenario noted in the manuscript.
 #' See \bold{Details} for all options.
+#' @param summary a logical value indicating whether a brief data summary will be printed.
+#' 
 #' @importFrom stats delete.response rexp rgamma rnorm runif rbinom uniroot
+#' @importFrom tibble as.tibble
+#' @importFrom dplyr "%>%" arrange
 #' 
 #' @return \code{simu} returns a \code{data.frame} in the class of "roc.simu".
 #' This is needed for \code{trueHaz} and \code{trueSurv}.
@@ -56,26 +60,46 @@ globalVariables(c("n", "cen")) ## global variables for simu
 #' @rdname simu
 #' @export
 #' 
-simu <- function(n, cen, scenario) {
+simu <- function(n, cen, scenario, summary = FALSE) {
     if (!(cen %in% c(0, .25, .50)))
         stop("Only 3 levels of censoring rates (0%, 25%, 50%) are allowed.")
     if (!(scenario %in% paste(rep(1:3, each = 6), rep(1:6, 3), sep = ".")))
         stop("See ?simu for scenario definition")
-    eval(parse(text = paste("sim", scenario, "(n = ", n, ", cen = ", cen, ")", sep = "")))
+    dat <- as.tibble(eval(parse(text = paste("sim", scenario, "(n = ", n, ", cen = ", cen, ")", sep = ""))))
+    if (summary) {
+        cat("\n")
+        cat("Summary results:\n")
+        cat("Number of subjects:", n)
+        cat("\nNumber of subjects experienced death:", sum(dat$death) / n)
+        if (substr(scenario, 1, 1) == "1") {
+            cat("\nTime independent covaraites: z1 and z2.")
+        } else {
+            cat("\nTime independent covaraites: z1.")
+            cat("\nTime dependent covaraites: z2.")
+        }
+        cat("\n\n")
+    }
+    attr(dat, "scenario") <- scenario
+    attr(dat, "prepBy") <- "rocSimu"
+    return(dat %>% arrange(id, Y))
 }
 
 #' Function to generate the true hazard used in the simulation.
 #'
 #' This function is used to generate the true cumulative hazard function used in the simulation.
 #'
-#' @param tt is a numerical vector, specifying where to evaluate at.
-#' 
+#' @param dat is a data.frame prepared by \code{simu}.
+#'
+#' @importFrom stats approxfun complete.cases
+#' @importFrom utils head
 #' @rdname simu
 #' @export
-trueHaz <- function(tt, scenario) {
-    if (!(scenario %in% paste(rep(1:3, each = 6), rep(1:6, 3), sep = ".")))
-        stop("See ?simu for scenario definition")
-    eval(parse(text = paste("trueHaz", scenario, "(n = ", n, ", cen = ", cen, ")", sep = "")))    
+trueHaz <- function(dat) {
+    if (attr(dat, "prepBy") != "rocSimu") stop("Inputed data must be prepared by \"simu\".")
+    scenario <- attr(dat, "scenario")
+    if (substr(scenario, 1, 1) == "1")
+        dat <- do.call(rbind, lapply(split(dat, dat$id), function(x) x[which.max(x$Y),]))
+    eval(parse(text = paste("trueHaz", scenario, "(dat)", sep = "")))    
 }
 
 #' Function to generate the true survival used in the simulation.
@@ -85,15 +109,17 @@ trueHaz <- function(tt, scenario) {
 #' @rdname simu
 #' @export
 #' 
-trueSurv <- function(tt, scenario) {
-    if (!(scenario %in% paste(rep(1:3, each = 6), rep(1:6, 3), sep = ".")))
-        stop("See ?simu for scenario definition")
-    eval(parse(text = paste("trueSurv", scenario, "(n = ", n, ", cen = ", cen, ")", sep = "")))        
+trueSurv <- function(dat) {
+    if (attr(dat, "prepBy") != "rocSimu") stop("Inputed data must be prepared by \"simu\".")
+    scenario <- attr(dat, "scenario")
+    if (substr(scenario, 1, 1) == "1")
+        dat <- do.call(rbind, lapply(split(dat, dat$id), function(x) x[which.max(x$Y),]))
+    eval(parse(text = paste("trueSurv", scenario, "(dat)", sep = "")))    
 }
 
-##############################################################################
-## Backgroud functions
-##############################################################################
+#' Background functions for simulation
+#' @keywords internal
+#' @noRd
 sim1.1 <- function(n, cen = 0) {
     z1 <- runif(n)
     z2 <- runif(n)
@@ -326,9 +352,48 @@ sim3.3 <- function(n, cen = 0) {
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
 }
 
-##############################################################################################################################
-## setClass("dataSetting",
-##          representation(n = "numeric", cen = "numeric"),
-##          prototype(n = 100))
-## setGeneric("simu", function(dataSetting) standardGeneric("simu"))
+#' Background functions for true survival and cumulative hazard curves given case and datasets
+#' @keywords internal
+#' @noRd
+trueHaz1.1 <- function(dat) {
+    cumHaz <- with(dat, Y^2 * exp(2 * z1 + 2 * z2))
+    approxfun(x = dat$Y, y = cumHaz, method = "constant", yleft = 0, yright = max(cumHaz))
+}
 
+trueSurv1.1 <- function(dat) {
+    Surv <- exp(-with(dat, Y^2 * exp(2 * z1 + 2 * z2)))
+    approxfun(x = dat$Y, y = Surv, method = "constant", yleft = 1, yright = min(Surv))
+}
+
+trueHaz1.2 <- function(dat) {
+    cumHaz <- with(dat, Y^2 * exp(2 * sin(2 * pi * dat$z1) + 2 * abs(dat$z2 - .5)))
+    approxfun(x = dat$Y, y = cumHaz, method = "constant", yleft = 0, yright = max(cumHaz)) 
+}
+
+trueSurv1.2 <- function(dat) {
+    Surv <- with(dat, exp(-Y^2 * exp(2 * sin(2 * pi * dat$z1) + 2 * abs(dat$z2 - .5))))
+    approxfun(x = dat$Y, y = Surv, method = "constant", yleft = 1, yright = min(Surv))
+}
+
+trueHaz1.3 <- function(dat) {
+    cumHaz <- with(dat, -log(pnorm(Y / exp(-2 + 2 * dat$z1 + 2 * dat$z2), sd = .5)))
+    approxfun(x = dat$Y, y = cumHaz, method = "constant", yleft = 0, yright = max(cumHaz))
+}
+
+trueSurv1.3 <- function(dat) {
+    Surv <- with(dat, pnorm(Y / exp(-2 + 2 * dat$z1 + 2 * dat$z2), sd = .5))
+    approxfun(x = dat$Y, y = Surv, method = "constant", yleft = 1, yright = min(Surv))
+}
+
+trueHaz1.4 <- function(dat) {
+    cumHaz <- with(dat, -log(pgamma(exp(z2 * Y / z1) / 4 / z2^2, 1 / 4 / z2^2, 1)))
+    approxfun(x = dat$Y, y = cumHaz, method = "constant", yleft = 0, yright = max(cumHaz))
+}
+
+trueSurv1.4 <- function(dat) {
+    Surv <- with(dat, pgamma(exp(z2 * Y / z1) / 4 / z2^2, 1 / 4 / z2^2, 1))
+    approxfun(x = dat$Y, y = Surv, method = "constant", yleft = 1, yright = min(Surv))
+}
+
+trueHaz1.5 <- function(dat) trueHaz1.1(dat)
+trueSurv1.5 <- function(dat) trueSurv1.1(dat)

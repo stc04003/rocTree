@@ -6,11 +6,11 @@
 \alias{trueSurv}
 \title{Function to generate simulated data used in the manuscript.}
 \usage{
-simu(n, cen, scenario)
+simu(n, cen, scenario, summary = FALSE)
 
-trueHaz(tt, scenario)
+trueHaz(dat)
 
-trueSurv(tt, scenario)
+trueSurv(dat)
 }
 \arguments{
 \item{n}{is the number of subject}
@@ -21,7 +21,9 @@ trueSurv(tt, scenario)
 This indicates the simulation scenario noted in the manuscript.
 See \bold{Details} for all options.}
 
-\item{tt}{is a numerical vector, specifying where to evaluate at.}
+\item{summary}{a logical value indicating whether a brief data summary will be printed.}
+
+\item{dat}{is a data.frame prepared by \code{simu}.}
 }
 \value{
 \code{simu} returns a \code{data.frame} in the class of "roc.simu".

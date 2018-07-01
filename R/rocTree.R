@@ -39,6 +39,8 @@
 #' following components:
 #' \describe{
 #' \item{Frame}{is a data frame describe the resulting tree.}
+#' \item{r2Final}{estimated hazards at all terminal nodes.}
+#' \item{tt}{time values to estimate hazard. Default length is 500. }
 #' }
 #' @references Sun Y. and Wang, M.C. (2018+). ROC-guided classification and survival trees. \emph{Technical report}.
 #' @keywords rocTree

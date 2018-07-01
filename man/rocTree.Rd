@@ -30,6 +30,8 @@ An object of S3 class "\code{rocTree}" representing the fit, with the
 following components:
 \describe{
 \item{Frame}{is a data frame describe the resulting tree.}
+\item{r2Final}{estimated hazards at all terminal nodes.}
+\item{tt}{time values to estimate hazard. Default length is 500. }
 }
 }
 \description{
