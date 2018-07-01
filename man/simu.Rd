@@ -4,6 +4,7 @@
 \alias{simu}
 \alias{trueHaz}
 \alias{trueSurv}
+\alias{simuTest}
 \title{Function to generate simulated data used in the manuscript.}
 \usage{
 simu(n, cen, scenario, summary = FALSE)
@@ -11,6 +12,8 @@ simu(n, cen, scenario, summary = FALSE)
 trueHaz(dat)
 
 trueSurv(dat)
+
+simuTest(dat)
 }
 \arguments{
 \item{n}{is the number of subject}
@@ -48,6 +51,8 @@ When time varying covariate is involved (scenario 2), only \eqn{Z_1} is assumed 
 This function is used to generate the true cumulative hazard function used in the simulation.
 
 This function is used to generate the true survival function used in the simulation.
+
+This function is used to generate testing sets for each scenario.
 }
 \details{
 The following scenarios are included.
