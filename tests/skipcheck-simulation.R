@@ -4,27 +4,68 @@
 
 library(rocTree)
 library(survival)
+library(rpart)
+library(party)
+library(partykit)
 
-## scenario 1.1
+#######################################################################
+## Scenario 1.1
+#######################################################################
+
+## Preparing training data and testing data
+## n3 is the number of subjects in testing data
+
 set.seed(123)
 dat <- simu(200, 0, 1.1)
 dat0 <- dat[cumsum(with(dat, unlist(lapply(split(id, id), length), use.names = FALSE))),]
-    
-system.time(foo <- rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id))
-system.time(foo.cv <- rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id, control = list(CV = TRUE)))
+n3 <- 1000
+dat3 <- lapply(1:n3, function(x) cbind(id = x, simuTest(dat)))
+dat.test <- do.call(rbind, dat3)
+dat0.test <- dat.test[cumsum(with(dat.test, unlist(lapply(split(id, id), length), use.names =FALSE))),]
+rownames(dat0.test) <- NULL
+tt <- seq(0, 1.5, .01)
 
-system.time(foo.dcon <- rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id, control = list(splitBy = "dCON")))
-system.time(foo.dcon.cv <- rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id,
+## rocTree and forest    
+system.time(fit <- rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id))
+system.time(fit.cv <- rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id,
+                              control = list(CV = TRUE)))
+system.time(fit.dcon <- rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id,
+                                control = list(splitBy = "dCON")))
+system.time(fit.dcon.cv <- rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id,
                                    control = list(splitBy = "dCON", CV = TRUE)))
 
+## ctree from party
+fit.ctree <- ctree(Surv(Y, death) ~ z1 + z2, data = dat0)
+fit.rpart <- rpart(Surv(Y, death) ~ z1 + z2, data = dat0)
+ft <- fit.rpart$cptable
+cp <- ft[which.min(ft[,4]), 1]
+fit.rpart.prune <- prune(fit.rpart, cp)
+
+## Predicting
+system.time(pred.rt <- predict(fit, dat.test))
+system.time(pred.ctree <- predict(fit.ctree, dat0.test, type = "prob"))
+
+system.time(pred.fit.rpart <- predict(fit.rpart.prune, dat0.test))
+fit.rpart$frame$nd <- 1:dim(fit.rpart$frame)[1]
+df.nd3 <- merge(data.frame(id = 1:n3, pred = pred.fit.rpart),
+                fit.rpart$frame, by.x = "pred", by.y = "yval", sort = FALSE)
+df.nd3 <- df.nd3[order(df.nd3$id),]
+nd3 <- df.nd3$nd
 
 
-dat.test <- simuTest(dat)
-system.time(pred.rt <- predict(foo, dat.test))
+## Get error
+absErr.ctree <- absErr.rpart <- matrix(NA, length(tt), n3)
+for (i in 1:n3) {
+    absErr.ctree[,i] <- stepfun(pred.ctree[[i]]$time, c(1, pred.ctree[[i]]$surv))(tt)
+    km <- survfit(Surv(Y, death) ~ 1, dat0[fit.rpart$where == nd3[i], ])
+    rpart[,i] <- stepfun(km$time, c(1,km$surv))(tt)    
+}
 
+
+## plots
 tt <- seq(0, 1.5, .01)
-with(predict(foo, dat.test)$pred, plot(Time, Surv, 's', col = 2))
-with(predict(foo.cv, dat.test)$pred, lines(Time, Surv, 's', col = 3))
-with(predict(foo.dcon, dat.test)$pred, lines(Time, Surv, 's', col = 4))
-with(predict(foo.dcon.cv, dat.test)$pred, lines(Time, Surv, 's', col = 5))
+with(predict(fit, dat.test)$pred, plot(Time, Surv, 's', col = 2))
+with(predict(fit.cv, dat.test)$pred, lines(Time, Surv, 's', col = 3))
+with(predict(fit.dcon, dat.test)$pred, lines(Time, Surv, 's', col = 4))
+with(predict(fit.dcon.cv, dat.test)$pred, lines(Time, Surv, 's', col = 5))
 lines(tt, trueSurv(dat.test)(tt), col = 1, lwd = 2)

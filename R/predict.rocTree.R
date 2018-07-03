@@ -80,7 +80,7 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...
                            cumHaz = rowMeans(apply(dfPred, 2, function(x) cumsum(x)), na.rm = TRUE))
     }
     for (i in 1:length(xlist)) attr(xlist[[i]], "dimnames") <- NULL
-    out <- list(pred = pred, type = type, xlist = xlist)
+    out <- list(pred = pred, type = type, xlist = xlist, dfPred = dfPred)
     class(out) <- "predict.rocTree"
     return(out)
 }
