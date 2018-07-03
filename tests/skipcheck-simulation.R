@@ -39,13 +39,13 @@ fit.ctree <- ctree(Surv(Y, death) ~ z1 + z2, data = dat0)
 fit.rpart <- rpart(Surv(Y, death) ~ z1 + z2, data = dat0)
 ft <- fit.rpart$cptable
 cp <- ft[which.min(ft[,4]), 1]
-fit.rpart.prune <- prune(fit.rpart, cp)
+fit.rpart <- prune(fit.rpart, cp)
 
 ## Predicting
 system.time(pred.rt <- predict(fit, dat.test))
 system.time(pred.ctree <- predict(fit.ctree, dat0.test, type = "prob"))
+system.time(pred.fit.rpart <- predict(fit.rpart, dat0.test))
 
-system.time(pred.fit.rpart <- predict(fit.rpart.prune, dat0.test))
 fit.rpart$frame$nd <- 1:dim(fit.rpart$frame)[1]
 df.nd3 <- merge(data.frame(id = 1:n3, pred = pred.fit.rpart),
                 fit.rpart$frame, by.x = "pred", by.y = "yval", sort = FALSE)
@@ -54,12 +54,26 @@ nd3 <- df.nd3$nd
 
 
 ## Get error
-absErr.ctree <- absErr.rpart <- matrix(NA, length(tt), n3)
+absErr.ctree <- absErr.rpart <- absErr.rocTree <- matrix(NA, length(tt), n3)
 for (i in 1:n3) {
+    dat.tmp <- dat3[[i]]
+    attr(dat.tmp, "prepBy") <- attr(dat, "prepBy")
+    attr(dat.tmp, "scenario") <- attr(dat, "scenario")
+    truth <- trueSurv(dat.tmp)(tt)
     absErr.ctree[,i] <- stepfun(pred.ctree[[i]]$time, c(1, pred.ctree[[i]]$surv))(tt)
     km <- survfit(Surv(Y, death) ~ 1, dat0[fit.rpart$where == nd3[i], ])
-    rpart[,i] <- stepfun(km$time, c(1,km$surv))(tt)    
+    absErr.rpart[,i] <- stepfun(km$time, c(1,km$surv))(tt)
+    absErr.rocTree[,i] <- stepfun(unique(dat.test$Y), c(1, exp(-cumsum(pred.rt$dfPred[,i]))))(tt)
+    absErr.ctree[,i] <- abs(absErr.ctree[,i]- truth)
+    absErr.rpart[,i] <- abs(absErr.rpart[,i]- truth)
+    absErr.rocTree[,i] <- abs(absErr.rocTree[,i] - truth)
+    if (i %% 100 == 0) print(i)
 }
+
+rowMeans(absErr.ctree)
+rowMeans(absErr.rpart)
+rowMeans(absErr.rocTree)
+
 
 
 ## plots

@@ -142,13 +142,30 @@ rocTree.control <- function(tau = 0.4, M = 1000, hN = tau / 20, h = hN,
          B = B, splitBy = match.arg(splitBy))
 }
 
+#' Prepare xlist in \code{rocTree} and \code{rocForest}
+#' 
+#' An internal function used to prepare \code{x.list}.
+#' This is exported for now to provide transformed covariate path
+#' for fitting rpart and ctree.
+#'
+#' Should this be make public?
+#'
+#' @param x is a covariate vector.
+#' @param disc a binary value indicating whether \code{x} is disctete;
+#' \code{disc = 1} if discrete.
+#' @param y is the ordered event time observed in the data.
+#' @param id subject's id
+#' 
+#' @export
 rocTree.Xlist <- function(x, disc, y, id) {
     yi <- unlist(lapply(split(y, id), max), use.names = FALSE)
     m <- unlist(lapply(split(y, id), length), use.names = FALSE)
     n <- length(unique(id))
-    tmp <- unlist(lapply(split(y, id), function(z) match(yi, z))) + rep(c(0, cumsum(m)[-length(m)]), each = n)
+    tmp <- unlist(lapply(split(y, id), function(z)
+        match(yi, z))) + rep(c(0, cumsum(m)[-length(m)]), each = n)
     xlist <- matrix(x[tmp], n)
-    if (!disc) xlist <- t(apply(xlist, 1, rank, ties.method = "max", na.last = "keep")) / rowSums(!is.na(xlist))
+    if (!disc) xlist <- t(apply(xlist, 1, rank, ties.method = "max", na.last = "keep")) /
+                   rowSums(!is.na(xlist))
     return(xlist)
 }
 
