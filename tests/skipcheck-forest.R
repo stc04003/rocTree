@@ -121,18 +121,3 @@ cumHaz0 <- Ltrue3(unique(newdata$Time), seq(1, 2, length = 20)[i],
 
 plot(unique(newdata$Time), exp(-cumHaz0), 'l', ylim = c(0, 1))
 with(foo2.pred$pred[[1]], lines(Time, Surv, 's', col = 2))
-
-
-
-print0(foo.pred)
-
-print0 <- function(x, tree = 1L, ...) {
-    if (names(x$pred)[[2]] == "Surv") {
-        cat(" Fitted survival probabilities:\n")
-    }
-    if (names(x$pred)[[2]] == "cumHaz") {
-        cat(" Fitted cumulative hazard:\n")
-    }
-    print(head(x$pred, 5))
-    cat("\n")
-}
