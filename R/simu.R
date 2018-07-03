@@ -153,7 +153,7 @@ sim1.1 <- function(n, cen = 0) {
     Y <- pmin(Time, cens)
     d <- 1 * (Time <= cens)
     do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), d[x]),  z1 = z1[x], z2 = z2[x])))
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), d[x]),  z1 = z1[x], z2 = z2[x])))
 }
 
 sim1.2 <- function(n, cen = 0) {
@@ -165,7 +165,7 @@ sim1.2 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 0.59)
     Y <- pmin(Time, cens)
     do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
 sim1.5 <- function(n, cen = 0) {
@@ -177,7 +177,7 @@ sim1.5 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 0.66)
     Y <- pmin(Time, cens)
     do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
 sim1.3 <- function(n, cen = 0) {
@@ -190,7 +190,7 @@ sim1.3 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 2.40)
     Y <- pmin(Time, cens)
     do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
 sim1.4 <- function(n, cen = 0) {
@@ -207,7 +207,7 @@ sim1.4 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 1.63)
     Y <- pmin(Time, cens)
     do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
 sim2.1 <- function(n, cen = 0) {
@@ -233,7 +233,7 @@ sim2.1 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 0.83)
     Y <- pmin(Time, cens)
     dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
                    z2 = z2[x], e = e[x], u = u[x])))
     dat$z1 <- with(dat, e * (Y < u) + (1 - e) * (Y >= u))
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u")])
@@ -269,7 +269,7 @@ sim2.2 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 1.02)
     Y <- pmin(Time, cens)
     dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
                    z2 = z2[x], e = e[x], u1 = u1[x], u2 = u2[x], u3 = u3[x])))
     dat$z1 <- with(dat, e * (u1 <= Y) * (Y < u2) + e * (u3 <= Y) + (1 - e) * (Y < u1) + (1 - e) * (u2 <= Y) * (Y < u3))
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u1", "u2", "u3")])
@@ -282,15 +282,17 @@ sim2.3 <- function(n, cen = 0) {
     Time <- rep(NA, n)
     for (i in 1:n) {
         sol <- rexp(1)
-        Time[i] <- uniroot(f = function(x) sol - 2 * exp(z2[i] + b[i]) * (x * exp(k[i] * x) / k[i] - (exp(k[i] * x) - 1) / k[i]^2),
-                           interval = c(0, 50))$root
+        Time[i] <- uniroot(f = function(x)
+            sol - 2 * exp(z2[i] + b[i]) * (x * exp(k[i] * x) / k[i] - (exp(k[i] * x) - 1) / k[i]^2),
+            interval = c(0, 50))$root
     }
     if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 1.11)
     if (cen == .50) cens <- runif(n, 0, 0.56)
     Y <- pmin(Time, cens)
     dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]),
+                   death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
                    z2 = z2[x], k = k[x], b = b[x])))
     dat$z1 <- with(dat, k * Y + b)
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
@@ -319,7 +321,8 @@ sim3.1 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 0.83)
     Y <- pmin(Time, cens)
     dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]),
+                   death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
                    z2 = z2[x], e = e[x], u = u[x])))
     dat$z1 <- with(dat, e * (Y < u) + (1 - e) * (Y >= u))
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u")])
@@ -355,7 +358,8 @@ sim3.2 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 1.02)
     Y <- pmin(Time, cens)
     dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]),
+                   death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
                    z2 = z2[x], e = e[x], u1 = u1[x], u2 = u2[x], u3 = u3[x])))
     dat$z1 <- with(dat, e * (u1 <= Y) * (Y < u2) + e * (u3 <= Y) + (1 - e) * (Y < u1) + (1 - e) * (u2 <= Y) * (Y < u3))
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u1", "u2", "u3")])
@@ -371,7 +375,9 @@ sim3.3 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 0.56)
     Y <- pmin(Time, cens)
     dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = Y[Y <= Y[x]], death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z2 = z2[x], k = k[x], b = b[x])))
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]),
+                   death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+                   z2 = z2[x], k = k[x], b = b[x])))
     dat$z1 <- with(dat, k * Time + b)
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
 }
