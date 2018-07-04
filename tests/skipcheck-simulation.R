@@ -94,10 +94,13 @@ do.tree <- function(n, cen, sce = 1.1) {
     c(mean(err), mean(err.dcon), mean(err.rpart), mean(err.ctree))
 }
 
-system.time(print(do.tree(100, 0)))
-system.time(print(do.tree(200, 0)))
+e
 
 ## running simulation
+
+## ----------------------------------------------------------------------------------
+## Scenario 1, with time-independent covariates
+## ----------------------------------------------------------------------------------
 cl <- makePSOCKcluster(16)
 setDefaultCluster(cl)
 invisible(clusterExport(NULL, "do.tree"))
@@ -106,18 +109,209 @@ invisible(clusterEvalQ(NULL, library(survival)))
 invisible(clusterEvalQ(NULL, library(rpart)))
 invisible(clusterEvalQ(NULL, library(party)))
 invisible(clusterEvalQ(NULL, library(partykit)))
-sim1.1.100.00 <- parSapply(NULL, 1:100, function(z) do.tree(100, 0, 1.1))
-sim1.1.100.25 <- parSapply(NULL, 1:100, function(z)
+## n = 100
+sim1.1.100.00 <- parSapply(NULL, 1:500, function(z) do.tree(100, 0, 1.1))
+sim1.1.100.25 <- parSapply(NULL, 1:500, function(z)
     tryCatch(do.tree(100, .25, 1.1), error = function(e) rep(NA, 4)))
-sim1.1.100.50 <- parSapply(NULL, 1:100, function(z)
+sim1.1.100.50 <- parSapply(NULL, 1:500, function(z)
     tryCatch(do.tree(100, .50, 1.1), error = function(e) rep(NA, 4)))
-sim1.2.100.00 <- parSapply(NULL, 1:100, function(z) do.tree(100, 0, 1.2))
-sim1.2.100.25 <- parSapply(NULL, 1:100, function(z)
+##
+sim1.2.100.00 <- parSapply(NULL, 1:500, function(z) do.tree(100, 0, 1.2))
+sim1.2.100.25 <- parSapply(NULL, 1:500, function(z)
     tryCatch(do.tree(100, .25, 1.2), error = function(e) rep(NA, 4)))
-sim1.2.100.50 <- parSapply(NULL, 1:100, function(z)
-    tryCatch(do.tree(100, .50, 1.1), error = function(e) rep(NA, 4)))
+sim1.2.100.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .50, 1.2), error = function(e) rep(NA, 4)))
+##
+sim1.3.100.00 <- parSapply(NULL, 1:500, function(z) do.tree(100, 0, 1.3))
+sim1.3.100.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .25, 1.3), error = function(e) rep(NA, 4)))
+sim1.3.100.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .50, 1.3), error = function(e) rep(NA, 4)))
+##
+sim1.4.100.00 <- parSapply(NULL, 1:500, function(z) do.tree(100, 0, 1.4))
+sim1.4.100.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .25, 1.4), error = function(e) rep(NA, 4)))
+sim1.4.100.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .50, 1.4), error = function(e) rep(NA, 4)))
+##
+sim1.5.100.00 <- parSapply(NULL, 1:500, function(z) do.tree(100, 0, 1.5))
+sim1.5.100.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .25, 1.5), error = function(e) rep(NA, 4)))
+sim1.5.100.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .50, 1.5), error = function(e) rep(NA, 4)))
+## n = 200
+sim1.1.200.00 <- parSapply(NULL, 1:500, function(z) do.tree(200, 0, 1.1))
+sim1.1.200.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .25, 1.1), error = function(e) rep(NA, 4)))
+sim1.1.200.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .50, 1.1), error = function(e) rep(NA, 4)))
+##
+sim1.2.200.00 <- parSapply(NULL, 1:500, function(z) do.tree(200, 0, 1.2))
+sim1.2.200.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .25, 1.2), error = function(e) rep(NA, 4)))
+sim1.2.200.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .50, 1.2), error = function(e) rep(NA, 4)))
+##
+sim1.3.200.00 <- parSapply(NULL, 1:500, function(z) do.tree(200, 0, 1.3))
+sim1.3.200.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .25, 1.3), error = function(e) rep(NA, 4)))
+sim1.3.200.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .50, 1.3), error = function(e) rep(NA, 4)))
+##
+sim1.4.200.00 <- parSapply(NULL, 1:500, function(z) do.tree(200, 0, 1.4))
+sim1.4.200.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .25, 1.4), error = function(e) rep(NA, 4)))
+sim1.4.200.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .50, 1.4), error = function(e) rep(NA, 4)))
+##
+sim1.5.200.00 <- parSapply(NULL, 1:500, function(z) do.tree(200, 0, 1.5))
+sim1.5.200.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .25, 1.5), error = function(e) rep(NA, 4)))
+sim1.5.200.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .50, 1.5), error = function(e) rep(NA, 4)))
 stopCluster(cl)
 
+sim1.100 <- list(sim1.1.100.00 = sim1.1.100.00, sim1.1.100.25 = sim1.1.100.25, sim1.1.100.50 = sim1.1.100.50,
+                 sim1.2.100.00 = sim1.2.100.00, sim1.2.100.25 = sim1.2.100.25, sim1.2.100.50 = sim1.2.100.50,
+                 sim1.3.100.00 = sim1.3.100.00, sim1.3.100.25 = sim1.3.100.25, sim1.3.100.50 = sim1.3.100.50,
+                 sim1.4.100.00 = sim1.4.100.00, sim1.4.100.25 = sim1.4.100.25, sim1.4.100.50 = sim1.4.100.50,
+                 sim1.5.100.00 = sim1.5.100.00, sim1.5.100.25 = sim1.5.100.25, sim1.5.100.50 = sim1.5.100.50)
+
+sim1.200 <- list(sim1.1.200.00 = sim1.1.200.00, sim1.1.200.25 = sim1.1.200.25, sim1.1.200.50 = sim1.1.200.50,
+                 sim1.2.200.00 = sim1.2.200.00, sim1.2.200.25 = sim1.2.200.25, sim1.2.200.50 = sim1.2.200.50,
+                 sim1.3.200.00 = sim1.3.200.00, sim1.3.200.25 = sim1.3.200.25, sim1.3.200.50 = sim1.3.200.50,
+                 sim1.4.200.00 = sim1.4.200.00, sim1.4.200.25 = sim1.4.200.25, sim1.4.200.50 = sim1.4.200.50,
+                 sim1.5.200.00 = sim1.5.200.00, sim1.5.200.25 = sim1.5.200.25, sim1.5.200.50 = sim1.5.200.50)
+
+save(sim1.100, file = "sim1.100.RData")
+save(sim1.200, file = "sim1.200.RData")
+
+
+## ----------------------------------------------------------------------------------
+## Scenario 2, with time-varying covariates
+## ----------------------------------------------------------------------------------
+cl <- makePSOCKcluster(16)
+setDefaultCluster(cl)
+invisible(clusterExport(NULL, "do.tree"))
+invisible(clusterEvalQ(NULL, library(rocTree)))
+invisible(clusterEvalQ(NULL, library(survival)))
+invisible(clusterEvalQ(NULL, library(rpart)))
+invisible(clusterEvalQ(NULL, library(party)))
+invisible(clusterEvalQ(NULL, library(partykit)))
+## n = 100
+sim2.1.100.00 <- parSapply(NULL, 1:500, function(z) do.tree(100, 0, 2.1))
+sim2.1.100.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .25, 2.1), error = function(e) rep(NA, 4)))
+sim2.1.100.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .50, 2.1), error = function(e) rep(NA, 4)))
+##
+sim2.2.100.00 <- parSapply(NULL, 1:500, function(z) do.tree(100, 0, 2.2))
+sim2.2.100.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .25, 2.2), error = function(e) rep(NA, 4)))
+sim2.2.100.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .50, 2.2), error = function(e) rep(NA, 4)))
+##
+sim2.3.100.00 <- parSapply(NULL, 1:500, function(z) do.tree(100, 0, 2.3))
+sim2.3.100.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .25, 2.3), error = function(e) rep(NA, 4)))
+sim2.3.100.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .50, 2.3), error = function(e) rep(NA, 4)))
+## n = 200
+sim2.1.200.00 <- parSapply(NULL, 1:500, function(z) do.tree(200, 0, 2.1))
+sim2.1.200.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .25, 2.1), error = function(e) rep(NA, 4)))
+sim2.1.200.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .50, 2.1), error = function(e) rep(NA, 4)))
+##
+sim2.2.200.00 <- parSapply(NULL, 1:500, function(z) do.tree(200, 0, 2.2))
+sim2.2.200.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .25, 2.2), error = function(e) rep(NA, 4)))
+sim2.2.200.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .50, 2.2), error = function(e) rep(NA, 4)))
+##
+sim2.3.200.00 <- parSapply(NULL, 1:500, function(z) do.tree(200, 0, 2.3))
+sim2.3.200.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .25, 2.3), error = function(e) rep(NA, 4)))
+sim2.3.200.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .50, 2.3), error = function(e) rep(NA, 4)))
+stopCluster(cl)
+
+sim2.100 <- list(sim2.1.100.00 = sim2.1.100.00, sim2.1.100.25 = sim2.1.100.25, sim2.1.100.50 = sim2.1.100.50,
+                 sim2.2.100.00 = sim2.2.100.00, sim2.2.100.25 = sim2.2.100.25, sim2.2.100.50 = sim2.2.100.50,
+                 sim2.3.100.00 = sim2.3.100.00, sim2.3.100.25 = sim2.3.100.25, sim2.3.100.50 = sim2.3.100.50)
+
+sim2.200 <- list(sim2.1.200.00 = sim2.1.200.00, sim2.1.200.25 = sim2.1.200.25, sim2.1.200.50 = sim2.1.200.50,
+                 sim2.2.200.00 = sim2.2.200.00, sim2.2.200.25 = sim2.2.200.25, sim2.2.200.50 = sim2.2.200.50,
+                 sim2.3.200.00 = sim2.3.200.00, sim2.3.200.25 = sim2.3.200.25, sim2.3.200.50 = sim2.3.200.50)
+
+save(sim2.100, file = "sim2.100.RData")
+save(sim2.200, file = "sim2.200.RData")
+
+
+## ----------------------------------------------------------------------------------
+## Scenario 2, with time-varying covariates
+## ----------------------------------------------------------------------------------
+cl <- makePSOCKcluster(16)
+setDefaultCluster(cl)
+invisible(clusterExport(NULL, "do.tree"))
+invisible(clusterEvalQ(NULL, library(rocTree)))
+invisible(clusterEvalQ(NULL, library(survival)))
+invisible(clusterEvalQ(NULL, library(rpart)))
+invisible(clusterEvalQ(NULL, library(party)))
+invisible(clusterEvalQ(NULL, library(partykit)))
+## n = 100
+sim3.1.100.00 <- parSapply(NULL, 1:500, function(z) do.tree(100, 0, 2.1))
+sim3.1.100.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .25, 2.1), error = function(e) rep(NA, 4)))
+sim3.1.100.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .50, 2.1), error = function(e) rep(NA, 4)))
+##
+sim3.2.100.00 <- parSapply(NULL, 1:500, function(z) do.tree(100, 0, 2.2))
+sim3.2.100.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .25, 2.2), error = function(e) rep(NA, 4)))
+sim3.2.100.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .50, 2.2), error = function(e) rep(NA, 4)))
+##
+sim3.3.100.00 <- parSapply(NULL, 1:500, function(z) do.tree(100, 0, 2.3))
+sim3.3.100.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .25, 2.3), error = function(e) rep(NA, 4)))
+sim3.3.100.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(100, .50, 2.3), error = function(e) rep(NA, 4)))
+## n = 200
+sim3.1.200.00 <- parSapply(NULL, 1:500, function(z) do.tree(200, 0, 2.1))
+sim3.1.200.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .25, 2.1), error = function(e) rep(NA, 4)))
+sim3.1.200.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .50, 2.1), error = function(e) rep(NA, 4)))
+##
+sim3.2.200.00 <- parSapply(NULL, 1:500, function(z) do.tree(200, 0, 2.2))
+sim3.2.200.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .25, 2.2), error = function(e) rep(NA, 4)))
+sim3.2.200.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .50, 2.2), error = function(e) rep(NA, 4)))
+##
+sim3.3.200.00 <- parSapply(NULL, 1:500, function(z) do.tree(200, 0, 2.3))
+sim3.3.200.25 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .25, 2.3), error = function(e) rep(NA, 4)))
+sim3.3.200.50 <- parSapply(NULL, 1:500, function(z)
+    tryCatch(do.tree(200, .50, 2.3), error = function(e) rep(NA, 4)))
+stopCluster(cl)
+
+sim3.100 <- list(sim3.1.100.00 = sim3.1.100.00, sim3.1.100.25 = sim3.1.100.25, sim3.1.100.50 = sim3.1.100.50,
+                 sim3.2.100.00 = sim3.2.100.00, sim3.2.100.25 = sim3.2.100.25, sim3.2.100.50 = sim3.2.100.50,
+                 sim3.3.100.00 = sim3.3.100.00, sim3.3.100.25 = sim3.3.100.25, sim3.3.100.50 = sim3.3.100.50)
+
+sim3.200 <- list(sim3.1.200.00 = sim3.1.200.00, sim3.1.200.25 = sim3.1.200.25, sim3.1.200.50 = sim3.1.200.50,
+                 sim3.2.200.00 = sim3.2.200.00, sim3.2.200.25 = sim3.2.200.25, sim3.2.200.50 = sim3.2.200.50,
+                 sim3.3.200.00 = sim3.3.200.00, sim3.3.200.25 = sim3.3.200.25, sim3.3.200.50 = sim3.3.200.50)
+
+save(sim3.100, file = "sim3.100.RData")
+save(sim3.200, file = "sim3.200.RData")
+
+
+#######################################################################
+## Forest
+#######################################################################
 
 do.Forest <- function(n, cen, sce = 1.1) {
     ## Pre-determined control list

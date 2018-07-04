@@ -43,7 +43,6 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard"), .
             tmp <- sptdat[[z]]
             ind <- tmp[1,1]
             sapply(1:p, function(y)
-                ## object$xlist[[y]][ind, findInt.X(tmp[,y+1], object$xlist0[[y]][ind,])])
                 cbind(0, object$xlist[[y]])[ind, findInt.X(tmp[,y+1], object$xlist0[[y]][ind,])]) ## mimicking ecdf
         })
         X.path <- data.frame(do.call(rbind, X.path))
@@ -63,15 +62,15 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard"), .
     matk2 <- outer(Y0, Y0, "<=")
     matk3 <- outer(Y0, Y0, "==") * object$E0
     pred <- list()
+    W0 <- upper.tri(matrix(0, n, n), TRUE) * 1:n / n ## for NA's in Wi
     for (i in 1:nID) {
         Wi <- W[[i]] / rowSums(W[[i]])
+        Wi[rowSums(W[[i]]) == 0,] <- W0[rowSums(W[[i]]) == 0,]
         if (type == "survival") {
             pred[[i]] <- data.frame(Time = Y0, Surv = exp(-cumsum(rowSums(matk3 * Wi) / rowSums(matk2 * Wi))))
-            ## pred[[i]] <- approxfun(Y, surv, yleft = 1, yright = min(surv), method = "constant")
         }
         if (type == "hazard") {
             pred[[i]] <- data.frame(Time = Y0, cumHaz = cumsum(rowSums(matk3 * Wi) / rowSums(matk2 * Wi)))
-            ## pred[[i]] <- approxfun(Y, harz, yleft = 1, yright = min(surv), method = "constant")
         }
         pred[[i]] <- pred[[i]][complete.cases(pred[[i]]),]
     }

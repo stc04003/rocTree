@@ -234,18 +234,18 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
             ndInd2[ndInd2 == sp[1] & X2.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1
             ndInd12[ndInd12 == sp[1] & X12.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
             ndInd12[ndInd12 == sp[1] & X12.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1
-            fTree[sp[1] * 2, ] <- rowSums(as.matrix(fmat[EE1, diag(ndInd1) == 2 * sp[1]])) / N1
-            fTree[sp[1] * 2 + 1, ] <- rowSums(as.matrix(fmat[EE1, diag(ndInd1) == 2 * sp[1] + 1])) / N1
+            fTree[sp[1] * 2, ] <- rowSums(fmat[EE1, diag(ndInd1) == 2 * sp[1], drop = FALSE]) / N1
+            fTree[sp[1] * 2 + 1, ] <- rowSums(fmat[EE1, diag(ndInd1) == 2 * sp[1] + 1, drop = FALSE]) / N1
             STree[sp[1] * 2, ] <- rowSums(as.matrix(Smat * (ndInd1 == 2 * sp[1])))[EE1] / N1
             STree[sp[1] * 2 + 1, ] <- rowSums(as.matrix(Smat * (ndInd1 == 2 * sp[1] + 1)))[EE1] / N1
-            fTree2[sp[1] * 2, ] <- rowSums(as.matrix(fmat2[EE2, diag(ndInd2) == 2 * sp[1]])) / N2
-            fTree2[sp[1] * 2 + 1, ] <- rowSums(as.matrix(fmat2[EE2, diag(ndInd2) == 2 * sp[1] + 1])) / N2
+            fTree2[sp[1] * 2, ] <- rowSums(fmat2[EE2, diag(ndInd2) == 2 * sp[1], drop = FALSE]) / N2
+            fTree2[sp[1] * 2 + 1, ] <- rowSums(fmat2[EE2, diag(ndInd2) == 2 * sp[1] + 1, drop = FALSE]) / N2
             STree2[sp[1] * 2, ] <- rowSums(as.matrix(Smat2 * (ndInd2 == 2 * sp[1])))[EE2] / N2
             STree2[sp[1] * 2 + 1, ] <- rowSums(as.matrix(Smat2 * (ndInd2 == 2 * sp[1] + 1)))[EE2] / N2
             ## rTree2[sp[1]*2,] <- fTree2[sp[1]*2,]/STree2[sp[1]*2,]
             ## rTree2[sp[1]*2+1,] <- fTree2[sp[1]*2+1,]/STree2[sp[1]*2+1,]
-            fTree3[sp[1] * 2, ] <- rowSums(as.matrix(fmat3[EE2, diag(ndInd1) == 2 * sp[1]])) / N1
-            fTree3[sp[1] * 2 + 1, ] <- rowSums(as.matrix(fmat3[EE2, diag(ndInd1) == 2 * sp[1] + 1])) / N1
+            fTree3[sp[1] * 2, ] <- rowSums(fmat3[EE2, diag(ndInd1) == 2 * sp[1], drop = FALSE]) / N1
+            fTree3[sp[1] * 2 + 1, ] <- rowSums(fmat3[EE2, diag(ndInd1) == 2 * sp[1] + 1, drop = FALSE]) / N1
             STree3[sp[1] * 2, ] <- rowSums(as.matrix(Smat3 * (ndInd12 == 2 * sp[1])))[EE2] / N1
             STree3[sp[1] * 2 + 1, ] <- rowSums(as.matrix(Smat3 * (ndInd12 == 2 * sp[1] + 1)))[EE2] / N1
             ## rTree3[sp[1]*2,] <- fTree3[sp[1]*2,]/STree3[sp[1]*2,]
@@ -423,11 +423,14 @@ con.cv <- function(y, id, ind, d, x0, beta.seq, control) {
 rocTree.cv <- function(beta.seq, Y, Status, id, X, control = list()) {
     n <- length(unique(id))
     nflds <- control$nflds
+    di <- unlist(lapply(split(Status, id), max), use.names = FALSE)
     flds <- folds(n, nflds)
-    ## if (!(n %% nflds)) flds <- split(sample(1:n, n), rep(1:nflds, each = floor(n / nflds)))
-    ## else flds <- split(sample(1:n, n), c(rep(1:nflds, each = floor(n / nflds)), 1:(n %% nflds)))
-    ## flds <- lapply(flds, function(x) (1:n)[-x]) ## if returnTrain = TRUE
-    ## flds <- createFolds(1:n, k = nflds, list = TRUE, returnTrain = FALSE)
+    fldstep <- 0
+    while(min(unlist(lapply(flds, function(x) sum(di[x])))) == 0) {
+        flds <- folds(n, nflds)
+        fldstep <- fldstep + 1
+        if (fldstep > 50) stop("Not enough events")
+    }
     p <- ncol(X)
     x0list <- sapply(1:p, function(z) rocTree.Xlist(X[,z], 1, Y, id), simplify = FALSE)
     if (!control$parallel) con2.seq <- sapply(1:nflds, function(x) con.cv(Y, id, flds[[x]], Status, x0list, beta.seq, control))
