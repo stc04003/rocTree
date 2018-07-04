@@ -99,12 +99,19 @@ oneWeight <- function(ndInd, xlist, tree) {
         }
     }
     n <- dim(xlist[[1]])[1]
-    W <- rep(list(matrix(0, n, n)), dim(xlist[[1]])[2])
-    for (i in 1:length(W)){
-        ndi <- ndInd[,i]
-        for (j in 1:n) {
-            W[[i]][j, idB2[ndInd2[j,] == ndi[j]]] <- 1 / szL2[j, ndTerm == ndi[j]]
-        }
-    }
+    W <- lapply(1:dim(xlist[[1]])[2], function(z) giveW(ndInd[,z], idB2, ndInd2, ndTerm, szL2))
     W
+}
+
+#' This function provides W in \code{oneWeight} to avoid \code{for} loops.
+#'
+#' @keywords internal
+#' @noRd
+giveW <- function(ndi, idB2, ndInd2, ndTerm, szL2) {
+    n <- length(ndi)
+    w <- matrix(0, n, n)
+    ind <- ndInd2 == ndi
+    w[matrix(idB2, length(idB2), n)[t(ind)] + n * (rep(1:n, rowSums(ind)) - 1)] <-
+        rep(1 / t(szL2)[which(outer(ndTerm, ndi, "=="))], rowSums(ind))
+    t(w)
 }
