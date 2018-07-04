@@ -42,7 +42,23 @@ do.tree <- function(n, cen, sce = 1.1) {
         if (cen == 0) ctrl <- c(ctrl, tau = 2.5)
         if (cen == .25) ctrl <- c(ctrl, tau = 2)
         if (cen == .50) ctrl <- c(ctrl, tau = 1.2)
-    }  
+    }
+    if (sce == 2.1) {
+        if (cen == 0) ctrl <- c(ctrl, tau = .88)
+        if (cen == .25) ctrl <- c(ctrl, tau = .76)
+        if (cen == .50) ctrl <- c(ctrl, tau = .64)
+    }
+    if (sce == 2.2) {
+        if (cen == 0) ctrl <- c(ctrl, tau = 1.30)
+        if (cen == .25) ctrl <- c(ctrl, tau = 1.10)
+        if (cen == .50) ctrl <- c(ctrl, tau = .82)
+    }
+    if (sce == 2.3) {
+        if (cen == 0) ctrl <- c(ctrl, tau = .55)
+        if (cen == .25) ctrl <- c(ctrl, tau = .49)
+        if (cen == .50) ctrl <- c(ctrl, tau = .42)
+    }
+    
     ## data preparation
     dat <- simu(n, cen, sce)
     dat0 <- dat[cumsum(with(dat, unlist(lapply(split(id, id), length), use.names = FALSE))),]
