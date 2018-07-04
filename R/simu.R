@@ -463,7 +463,12 @@ simuTest1.1 <- function(dat) {
 simuTest1.2 <- function(dat) simuTest1.1(dat)
 simuTest1.3 <- function(dat) simuTest1.1(dat)
 simuTest1.4 <- function(dat) simuTest1.1(dat)
-simuTest1.5 <- function(dat) simuTest1.1(dat)
+
+simuTest1.5 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    data.frame(Y = Y, z1 = runif(1), z2 = runif(1), z3 = runif(1), z4 = runif(1), z5 = runif(1))
+}
+
 
 simuTest2.1 <- function(dat) {
     Y <- sort(unique(dat$Y))

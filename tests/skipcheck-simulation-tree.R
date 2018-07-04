@@ -20,7 +20,7 @@ library(grf)
 ## Trees
 #######################################################################
 
-sceCtrl <- function(sce) {
+sceCtrl <- function(cen, sce) {
     ## Pre-determined control list
     ## tau is set at the 95th percentiles of Y
     ctrl <- list(CV = TRUE)
@@ -78,7 +78,7 @@ sceCtrl <- function(sce) {
 }
     
 do.tree <- function(n, cen, sce = 1.1) {
-    ctrl <- sceCtrl(sce)
+    ctrl <- sceCtrl(cen, sce)
     ## data preparation
     dat <- simu(n, cen, sce)
     dat0 <- dat[cumsum(with(dat, unlist(lapply(split(id, id), length), use.names = FALSE))),]
@@ -90,10 +90,12 @@ do.tree <- function(n, cen, sce = 1.1) {
     dat0.test$Y <- dat0.test$id <- dat0.test$death <- NA
     tt <- seq(0, ctrl$tau, length = 100)
     ## Fitting
-    fit <- rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id, control = ctrl)
-    fit.dcon <- rocTree(Surv(Y, death) ~ z1 + z2, data = dat, id = id, control = c(splitBy = "dCON", ctrl))
-    fit.ctree <- ctree(Surv(Y, death) ~ z1 + z2, data = dat0)
-    fit.rpart <- rpart(Surv(Y, death) ~ z1 + z2, data = dat0)
+    if (sce == 1.5) fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5
+    else fm <- Surv(Y, death) ~ z1 + z2
+    fit <- rocTree(fm, data = dat, id = id, control = ctrl)
+    fit.dcon <- rocTree(fm, data = dat, id = id, control = c(splitBy = "dCON", ctrl))
+    fit.ctree <- ctree(fm, data = dat0)
+    fit.rpart <- rpart(fm, data = dat0)
     ft <- fit.rpart$cptable
     cp <- ft[which.min(ft[,4]), 1]
     fit.rpart <- prune(fit.rpart, cp)
@@ -140,6 +142,7 @@ e
 cl <- makePSOCKcluster(16)
 setDefaultCluster(cl)
 invisible(clusterExport(NULL, "do.tree"))
+invisible(clusterExport(NULL, "sceCtrl"))
 invisible(clusterEvalQ(NULL, library(rocTree)))
 invisible(clusterEvalQ(NULL, library(survival)))
 invisible(clusterEvalQ(NULL, library(rpart)))
@@ -343,50 +346,3 @@ sim3.200 <- list(sim3.1.200.00 = sim3.1.200.00, sim3.1.200.25 = sim3.1.200.25, s
 
 save(sim3.100, file = "sim3.100.RData")
 save(sim3.200, file = "sim3.200.RData")
-
-
-#######################################################################
-## Forest
-#######################################################################
-
-do.Forest <- function(n, cen, sce = 1.1) {
-    ctrl <- sceCtrl(sce)
-    ## data preparation
-    dat <- simu(n, cen, sce)
-    dat0 <- dat[cumsum(with(dat, unlist(lapply(split(id, id), length), use.names = FALSE))),]
-    n3 <- 1000
-    dat3 <- lapply(1:n3, function(x) cbind(id = x, simuTest(dat)))
-    dat.test <- do.call(rbind, dat3)
-    dat0.test <- dat.test[cumsum(with(dat.test, unlist(lapply(split(id, id), length), use.names =FALSE))),]
-    rownames(dat0.test) <- NULL
-    dat0.test$Y <- dat0.test$id <- dat0.test$death <- NA
-    tt <- seq(0, ctrl$tau, length = 100)
-    ## Fitting & predicting/testing
-    fit <- rocForest(Surv(Y, death) ~ z1 + z2, data = dat, id = id, control = ctrl)
-    fit.dcon <- rocForest(Surv(Y, death) ~ z1 + z2, data = dat, id = id, control = c(ctrl, splitBy = "dCON"))
-    pred <- predict(fit, dat.test)
-    pred.dcon <- predict(fit.dcon, dat.test)
-    fit.grf <- regression_forest(subset(dat0, select = c(z1, z2)), dat0$Y, mtry = 2, honesty = TRUE)
-    w <- get_sample_weights(fit.grf, newdata = dat0.test)
-    fit.rf <- rfsrc(Surv(Y, death) ~ z1 + z2, data = dat0)
-    pred.rf <- exp(-predict(fit.rf, newdata = subset(dat0.test, select = c("z1", "z2")))$chf)
-    ## Get erros
-    err.grf <- err.rfsrc <- err <- err.dcon <- matrix(NA, length(tt), n3)
-    for (i in 1:n3) {
-        dat.tmp <- dat3[[i]]
-        attr(dat.tmp, "prepBy") <- attr(dat, "prepBy")
-        attr(dat.tmp, "scenario") <- attr(dat, "scenario")
-        truth <- trueSurv(dat.tmp)(tt)
-        err[,i] <- with(pred$pred[[i]], stepfun(Time , c(1, Surv)))(tt)
-        err.dcon[,i] <- with(pred.dcon$pred[[i]], stepfun(Time , c(1, Surv)))(tt)
-        sw <- survfit(Surv(dat0$Y, dat0$death) ~ 1, weights = w[i,])
-        err.grf[,i] <- stepfun(sw$time, c(1, sw$surv))(tt)
-        err.rfsrc[,i] <- stepfun(unique(dat.test$Y), c(1, pred.rf[i,]))(tt)
-        ## absolute error
-        err.grf[,i] <- abs(err.grf[,i]- truth)
-        err.rfsrc[,i] <- abs(err.rfsrc[,i]- truth)
-        err[,i] <- abs(err[,i] - truth)
-        err.dcon[,i] <- abs(err.dcon[,i] - truth)
-    }
-    c(mean(err), mean(err.dcon), mean(err.grf), mean(err.rfsrc))
-}
