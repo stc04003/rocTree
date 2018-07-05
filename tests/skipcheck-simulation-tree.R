@@ -232,6 +232,7 @@ save(sim1.200, file = "sim1.200.RData")
 cl <- makePSOCKcluster(16)
 setDefaultCluster(cl)
 invisible(clusterExport(NULL, "do.tree"))
+invisible(clusterExport(NULL, "sceCtrl"))
 invisible(clusterEvalQ(NULL, library(rocTree)))
 invisible(clusterEvalQ(NULL, library(survival)))
 invisible(clusterEvalQ(NULL, library(rpart)))
@@ -288,11 +289,12 @@ save(sim2.200, file = "sim2.200.RData")
 
 
 ## ----------------------------------------------------------------------------------
-## Scenario 2, with time-varying covariates
+## Scenario 3, with time-varying covariates
 ## ----------------------------------------------------------------------------------
 cl <- makePSOCKcluster(16)
 setDefaultCluster(cl)
 invisible(clusterExport(NULL, "do.tree"))
+invisible(clusterExport(NULL, "sceCtrl"))
 invisible(clusterEvalQ(NULL, library(rocTree)))
 invisible(clusterEvalQ(NULL, library(survival)))
 invisible(clusterEvalQ(NULL, library(rpart)))
