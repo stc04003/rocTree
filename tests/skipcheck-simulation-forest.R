@@ -128,3 +128,23 @@ do.Forest <- function(n, cen, sce = 1.1) {
     }
     c(mean(err), mean(err.dcon), mean(err.grf), mean(err.rfsrc))
 }
+
+
+cl <- makePSOCKcluster(8)
+setDefaultCluster(cl)
+invisible(clusterExport(NULL, "do.Forest"))
+invisible(clusterExport(NULL, "sceCtrl"))
+invisible(clusterEvalQ(NULL, library(rocTree)))
+invisible(clusterEvalQ(NULL, library(survival)))
+invisible(clusterEvalQ(NULL, library(randomForestSRC)))
+invisible(clusterEvalQ(NULL, library(grf)))
+
+sim1.1.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 1.1))
+sim1.1.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 1.1))
+sim1.1.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 1.1))
+
+stopCluster(cl)
+
+rowMeans(sim1.1.200.00) ## 0.06823050 0.06850718 0.21070689 0.12894672
+rowMeans(sim1.1.200.25) ## 0.08239985 0.08239461 0.24581324 0.12815634
+rowMeans(sim1.1.200.50) ## 0.09634210 0.09635808 0.25589998 0.13260609
