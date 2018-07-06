@@ -143,8 +143,36 @@ sim1.1.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 1.1))
 sim1.1.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 1.1))
 sim1.1.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 1.1))
 
+sim1.2.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 1.2))
+sim1.2.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 1.2))
+sim1.2.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 1.2))
+
+sim1.3.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 1.3))
+sim1.3.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 1.3))
+sim1.3.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 1.3))
+
+sim1.4.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 1.4))
+sim1.4.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 1.4))
+sim1.4.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 1.4))
+
+sim1.5.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 1.5))
+sim1.5.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 1.5))
+sim1.5.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 1.5))
+
 stopCluster(cl)
+
+rowMeans(sim1.1.100.00) ## 0.09511860 0.09513851 0.19322780 0.12996838
+rowMeans(sim1.1.100.25) ## 0.1041594 0.1041606 0.2258248 0.1296001
+rowMeans(sim1.1.100.50) ## 0.1204257 0.1203956 0.2315092 0.1345418
 
 rowMeans(sim1.1.200.00) ## 0.06823050 0.06850718 0.21070689 0.12894672
 rowMeans(sim1.1.200.25) ## 0.08239985 0.08239461 0.24581324 0.12815634
 rowMeans(sim1.1.200.50) ## 0.09634210 0.09635808 0.25589998 0.13260609
+
+sim1.100 <- list(sim1.1.100.00 = sim1.1.100.00, sim1.1.100.25 = sim1.1.100.25, sim1.1.100.50 = sim1.1.100.50,
+                 sim1.2.100.00 = sim1.2.100.00, sim1.2.100.25 = sim1.2.100.25, sim1.2.100.50 = sim1.2.100.50,
+                 sim1.3.100.00 = sim1.3.100.00, sim1.3.100.25 = sim1.3.100.25, sim1.3.100.50 = sim1.3.100.50,
+                 sim1.4.100.00 = sim1.4.100.00, sim1.4.100.25 = sim1.4.100.25, sim1.4.100.50 = sim1.4.100.50,
+                 sim1.5.100.00 = sim1.5.100.00, sim1.5.100.25 = sim1.5.100.25, sim1.5.100.50 = sim1.5.100.50)
+
+save(sim1.100, file = "sim1.100.forest.RData")
