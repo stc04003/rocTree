@@ -139,9 +139,9 @@ invisible(clusterEvalQ(NULL, library(survival)))
 invisible(clusterEvalQ(NULL, library(randomForestSRC)))
 invisible(clusterEvalQ(NULL, library(grf)))
 
-sim1.1.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 1.1))
-sim1.1.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 1.1))
-sim1.1.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 1.1))
+sim1.1.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 1.1))
+sim1.1.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 1.1))
+sim1.1.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 1.1))
 
 stopCluster(cl)
 
