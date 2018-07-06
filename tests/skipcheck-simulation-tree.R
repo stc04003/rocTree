@@ -24,7 +24,7 @@ sceCtrl <- function(cen, sce) {
     ## Pre-determined control list
     ## tau is set at the 95th percentiles of Y
     ctrl <- list(CV = TRUE)
-    if (sce %in% c(1.5, 1.1)) {
+    if (sce %in% c(1.5, 1.1, 1.7)) {
         if (cen == 0) ctrl <- c(ctrl, tau = .8)
         if (cen == .25) ctrl <- c(ctrl, tau = .6)
         if (cen == .50) ctrl <- c(ctrl, tau = .5)
@@ -43,6 +43,11 @@ sceCtrl <- function(cen, sce) {
         if (cen == 0) ctrl <- c(ctrl, tau = 2.5)
         if (cen == .25) ctrl <- c(ctrl, tau = 2)
         if (cen == .50) ctrl <- c(ctrl, tau = 1.2)
+    }
+    if (sce == 1.6) {
+        if (cen == 0) ctrl <- c(ctrl, tau = 1.41)
+        if (cen == .25) ctrl <- c(ctrl, tau = 1.28)
+        if (cen == .50) ctrl <- c(ctrl, tau = 1.03)
     }
     if (sce == 2.1) {
         if (cen == 0) ctrl <- c(ctrl, tau = .88)
@@ -91,8 +96,9 @@ do.tree <- function(n, cen, sce = 1.1) {
     tt <- seq(0, ctrl$tau, length = 100)
     ## Fitting
     if (sce == 1.5) fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5
-    else fm <- Surv(Y, death) ~ z1 + z2
-    fit <- rocTree(fm, data = dat, id = id, control = ctrl)
+    if (sce %in% c(1.6, 1.7)) fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5 + z6 + z7 + z8 + z9 + z10
+    if (sce %in% c(1.1, 1.2, 1.3, 1.4)) fm <- Surv(Y, death) ~ z1 + z2
+        fit <- rocTree(fm, data = dat, id = id, control = ctrl)
     fit.dcon <- rocTree(fm, data = dat, id = id, control = c(splitBy = "dCON", ctrl))
     fit.ctree <- ctree(fm, data = dat0)
     fit.rpart <- rpart(fm, data = dat0)
@@ -131,8 +137,6 @@ do.tree <- function(n, cen, sce = 1.1) {
     ## sometimes I get errors from ctree
     c(mean(err), mean(err.dcon), mean(err.rpart), mean(err.ctree))
 }
-
-e
 
 ## running simulation
 
@@ -348,3 +352,40 @@ sim3.200 <- list(sim3.1.200.00 = sim3.1.200.00, sim3.1.200.25 = sim3.1.200.25, s
 
 save(sim3.100, file = "sim3.100.RData")
 save(sim3.200, file = "sim3.200.RData")
+
+
+## ----------------------------------------------------------------------------------
+## Additional simulation from scenario I with p = 10
+## ----------------------------------------------------------------------------------
+
+
+cl <- makePSOCKcluster(16)
+setDefaultCluster(cl)
+invisible(clusterExport(NULL, "do.tree"))
+invisible(clusterExport(NULL, "sceCtrl"))
+invisible(clusterEvalQ(NULL, library(rocTree)))
+invisible(clusterEvalQ(NULL, library(survival)))
+invisible(clusterEvalQ(NULL, library(rpart)))
+invisible(clusterEvalQ(NULL, library(party)))
+invisible(clusterEvalQ(NULL, library(partykit)))
+
+sim1.6.100.00 <- parSapply(NULL, 1:200, function(z) do.tree(100, 0, 1.6))
+sim1.6.100.25 <- parSapply(NULL, 1:200, function(z) 
+    tryCatch(do.tree(100, .25, 1.6), error = function(e) rep(NA, 4)))
+sim1.6.100.50 <- parSapply(NULL, 1:200, function(z)
+    tryCatch(do.tree(100, .50, 1.6), error = function(e) rep(NA, 4)))
+
+sim1.7.100.00 <- parSapply(NULL, 1:200, function(z) do.tree(100, 0, 1.7))
+sim1.7.100.25 <- parSapply(NULL, 1:200, function(z) 
+    tryCatch(do.tree(100, .25, 1.7), error = function(e) rep(NA, 4)))
+sim1.7.100.50 <- parSapply(NULL, 1:200, function(z)
+    tryCatch(do.tree(100, .50, 1.7), error = function(e) rep(NA, 4)))
+stopCluster(cl)
+
+rbind(rowMeans(sim1.6.100.00),
+      rowMeans(sim1.6.100.25),
+      rowMeans(sim1.6.100.50))
+
+rbind(rowMeans(sim1.7.100.00),
+      rowMeans(sim1.7.100.25),
+      rowMeans(sim1.7.100.50))

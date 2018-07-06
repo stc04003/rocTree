@@ -25,6 +25,10 @@ globalVariables(c("n", "cen", "Y", "id")) ## global variables for simu
 #' \eqn{\sigma = 2Z_1, Q = 2Z_2}.}
 #' \item{1.5}{Proportional hazards model with noise variable:
 #' \eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2 + 0Z_3 + 0Z_4 + 0Z_5)}}.}
+#' \item{1.6}{Proportional hazards model with 10 covaraites:
+#' \eqn{\lambda(t, Z) = \lambda_0(t) e^{\sum_{j = 1}^pZ_j}}, for \eqn{\eta_j = 0.1, j = 1, ..., 10.}}
+#' \item{1.7}{Proportional hazards model with noise variable:
+#' \eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2 + 0Z_3 + 0Z_4 + ... + 0Z_{10})}}.}
 #' }
 #' \item{Scenario 2}{assumes time dependent covariate (\eqn{Z_1}) with \eqn{\Lambda(0) = 2t}.
 #' The survival times are generated from the hazard \eqn{\lambda(t, Z(t)) = \lambda_0(t)e^{Z_1(t) + Z_2}},
@@ -44,7 +48,7 @@ globalVariables(c("n", "cen", "Y", "id")) ## global variables for simu
 #' 
 #' @importFrom stats delete.response rexp rgamma rnorm runif rbinom uniroot
 #' @importFrom tibble as.tibble
-#' @importFrom dplyr "%>%" arrange
+#' @importFrom dplyr "%>%" arrange select
 #' 
 #' @return \code{simu} returns a \code{data.frame} in the class of "roc.simu".
 #' This is needed for \code{trueHaz} and \code{trueSurv}.
@@ -63,7 +67,7 @@ globalVariables(c("n", "cen", "Y", "id")) ## global variables for simu
 simu <- function(n, cen, scenario, summary = FALSE) {
     if (!(cen %in% c(0, .25, .50)))
         stop("Only 3 levels of censoring rates (0%, 25%, 50%) are allowed.")
-    if (!(scenario %in% paste(rep(1:3, each = 6), rep(1:6, 3), sep = ".")))
+    if (!(scenario %in% paste(rep(1:3, each = 6), rep(1:7, 3), sep = ".")))
         stop("See ?simu for scenario definition.")
     if (n > 1e4) stop("Sample size too large.")
     dat <- as.tibble(eval(parse(text = paste("sim", scenario, "(n = ", n, ", cen = ", cen, ")", sep = ""))))
@@ -133,6 +137,7 @@ simuTest <- function(dat) {
     return(dat)
 }
 
+#' ##########################################################################################
 #' ##########################################################################################
 #' Background functions for simulation
 #' @keywords internal
@@ -206,6 +211,36 @@ sim1.4 <- function(n, cen = 0) {
     Y <- pmin(Time, cens)
     do.call(rbind, lapply(1:n, function(x)
         data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
+}
+
+sim1.6 <- function(n, cen = 0) {
+    z <- matrix(runif(n * 10), n, 10)
+    Time <- sqrt(rexp(n) * exp(-rowSums(z) * .1))
+    if (cen == 0) cens <- rep(Inf, n)
+    if (cen == .25) cens <- runif(n, 0, 2.76)
+    if (cen == .50) cens <- runif(n, 0, 1.36)
+    Y <- pmin(Time, cens)
+    d <- 1 * (Time <= cens)
+    dat <- do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), d[x]))))
+    dat <- cbind(dat, z[dat$id,])
+    names(dat)[4:13] <- paste("z", 1:10, sep = "")
+    dat
+}
+
+sim1.7 <- function(n, cen = 0) {
+    z <- matrix(runif(n * 10), n, 10)
+    Time <- sqrt(rexp(n) * exp(-rowSums(z[,1:2]) * 2))
+    if (cen == 0) cens <- rep(Inf, n)
+    if (cen == .25) cens <- runif(n, 0, 1.41)
+    if (cen == .50) cens <- runif(n, 0, 0.66)
+    Y <- pmin(Time, cens)
+    d <- 1 * (Time <= cens)
+    dat <- do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), d[x]))))
+    dat <- cbind(dat, z[dat$id,])
+    names(dat)[4:13] <- paste("z", 1:10, sep = "")
+    dat    
 }
 
 sim2.1 <- function(n, cen = 0) {
@@ -297,26 +332,6 @@ sim2.3 <- function(n, cen = 0) {
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
 }
 
-## sim3.1 <- function(n, cen = 0) {
-##     e <- rbinom(n, 1, .5)
-##     u0 <- rexp(n, 5)
-##     z2 <- runif(n)
-##     Time <- rep(NA, n)
-##     u <- rexp(n)
-##     T1 <- (u / .1 / exp(z2) < u0) * (u / .1 / exp(z2)) + (u / .1 / exp(z2) >= u0) * ((u / .1 / exp(z2) - u0) / exp(1) + u)
-##     T2 <- (u / .1 / exp(z2) / exp(1) < u0) * (u / .1 / exp(z2) / exp(1)) + (u / .1 / exp(z2) / exp(1) >= u0) * ((u / .1 / exp(z2) - exp(1) * u) + u)
-##     Time <- T1 * e + T2 * (1 - e)
-##     if (cen == 0) cens <- rep(Inf, n)
-##     if (cen == .25) cens <- runif(n, 0, 14.99)
-##     if (cen == .50) cens <- runif(n, 0, 5.76)
-##     Y <- pmin(Time, cens)
-##     dat <- do.call(rbind, lapply(1:n, function(x)
-##         data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
-##                    z1 = e[x] * (sort(Y[Y <= Y[x]]) < u[x]) + (1 - e[x]) * (sort(Y[Y <= Y[x]]) >= u[x]),
-##                    z2 = z2[x], e = e[x], u = u[x])))
-##     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u")])
-## }
-
 sim3.1 <- function(n, cen = 0) {
     e <- rbinom(n, 1, .5)
     u <- rexp(n, 5)
@@ -402,6 +417,8 @@ sim3.3 <- function(n, cen = 0) {
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
 }
 
+#' #############################################################################################################
+#' #############################################################################################################
 #' Background functions for true survival and cumulative hazard curves given case and datasets
 #' @keywords internal
 #' @noRd
@@ -419,6 +436,18 @@ trueSurv1.4 <- function(dat) with(dat, pgamma(exp(z2 * Y / z1) / 4 / z2^2, 1 / 4
 
 trueHaz1.5 <- function(dat) trueHaz1.1(dat)
 trueSurv1.5 <- function(dat) trueSurv1.1(dat)
+
+trueHaz1.7 <- function(dat) trueHaz1.1(dat)
+trueSurv1.7 <- function(dat) trueSurv1.1(dat)
+
+trueHaz1.6 <- function(dat) {
+    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    dat$Y^2 * exp(.1 * rowSums(z))
+}
+trueSurv1.6 <- function(dat) {
+    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    exp(-dat$Y^2 * exp(.1 * rowSums(z)))
+}
 
 trueSurv2.1 <- function(dat) {
     e <- dat$e[1]
@@ -637,6 +666,13 @@ simuTest1.1 <- function(dat) {
 simuTest1.2 <- function(dat) simuTest1.1(dat)
 simuTest1.3 <- function(dat) simuTest1.1(dat)
 simuTest1.4 <- function(dat) simuTest1.1(dat)
+
+simuTest1.6 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    data.frame(Y = Y, z1 = runif(1), z2 = runif(1), z3 = runif(1), z4 = runif(1), z5 = runif(1),
+               z6 = runif(1), z7 = runif(1), z8 = runif(1), z9 = runif(1), z10 = runif(1))
+}
+simuTest1.7 <- function(dat) simuTest1.6(dat)
 
 simuTest1.5 <- function(dat) {
     Y <- sort(unique(dat$Y))

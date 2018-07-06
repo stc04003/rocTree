@@ -48,9 +48,9 @@ where \eqn{\lambda_0(t)} is the baseline hazard function,
 \eqn{Z_1} and \eqn{Z_2} are the covariates.
 When time varying covariate is involved (scenario 2), only \eqn{Z_1} is assumed to dependent on time.
 
-This function is used to generate the true cumulative hazard function used in the simulation.
+This function is used to generate the true cumulative hazard function for ONE ID used in the simulation.
 
-This function is used to generate the true survival function used in the simulation.
+This function is used to generate the true survival function for ONE ID used in the simulation.
 
 This function is used to generate testing sets for each scenario.
 }
@@ -70,6 +70,10 @@ The following scenarios are included.
 \eqn{\sigma = 2Z_1, Q = 2Z_2}.}
 \item{1.5}{Proportional hazards model with noise variable:
 \eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2 + 0Z_3 + 0Z_4 + 0Z_5)}}.}
+\item{1.6}{Proportional hazards model with 10 covaraites:
+\eqn{\lambda(t, Z) = \lambda_0(t) e^{\sum_{j = 1}^pZ_j}}, for \eqn{\eta_j = 0.1, j = 1, ..., 10.}}
+\item{1.7}{Proportional hazards model with noise variable:
+\eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2 + 0Z_3 + 0Z_4 + ... + 0Z_{10})}}.}
 }
 \item{Scenario 2}{assumes time dependent covariate (\eqn{Z_1}) with \eqn{\Lambda(0) = 2t}.
 The survival times are generated from the hazard \eqn{\lambda(t, Z(t)) = \lambda_0(t)e^{Z_1(t) + Z_2}},

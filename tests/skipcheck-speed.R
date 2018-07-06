@@ -40,4 +40,3 @@ tt <- seq(0, ctrl$tau, length = 100)
 fit <- rocForest(Surv(Y, death) ~ z1 + z2, data = dat, id = id, control = ctrl)
 system.time(pred2 <- predict(fit, dat.test))
 ## 137.272 
-
