@@ -380,11 +380,13 @@ sim1.7.100.25 <- parSapply(NULL, 1:200, function(z)
     tryCatch(do.tree(100, .25, 1.7), error = function(e) rep(NA, 4)))
 sim1.7.100.50 <- parSapply(NULL, 1:200, function(z)
     tryCatch(do.tree(100, .50, 1.7), error = function(e) rep(NA, 4)))
+
+
 stopCluster(cl)
 
 rbind(rowMeans(sim1.6.100.00),
       rowMeans(sim1.6.100.25),
-      rowMeans(sim1.6.100.50))
+      rowMeans(sim1.6.100.50, na.rm = T))
 
 rbind(rowMeans(sim1.7.100.00),
       rowMeans(sim1.7.100.25),
