@@ -358,7 +358,6 @@ save(sim3.200, file = "sim3.200.RData")
 ## Additional simulation from scenario I with p = 10
 ## ----------------------------------------------------------------------------------
 
-
 cl <- makePSOCKcluster(16)
 setDefaultCluster(cl)
 invisible(clusterExport(NULL, "do.tree"))
@@ -369,25 +368,52 @@ invisible(clusterEvalQ(NULL, library(rpart)))
 invisible(clusterEvalQ(NULL, library(party)))
 invisible(clusterEvalQ(NULL, library(partykit)))
 
-sim1.6.100.00 <- parSapply(NULL, 1:200, function(z) do.tree(100, 0, 1.6))
-sim1.6.100.25 <- parSapply(NULL, 1:200, function(z) 
+sim1.6.100.00 <- parSapply(NULL, 1:100, function(z) do.tree(100, 0, 1.6))
+sim1.6.100.25 <- parSapply(NULL, 1:100, function(z) 
     tryCatch(do.tree(100, .25, 1.6), error = function(e) rep(NA, 4)))
-sim1.6.100.50 <- parSapply(NULL, 1:200, function(z)
+sim1.6.100.50 <- parSapply(NULL, 1:100, function(z)
     tryCatch(do.tree(100, .50, 1.6), error = function(e) rep(NA, 4)))
 
-sim1.7.100.00 <- parSapply(NULL, 1:200, function(z) do.tree(100, 0, 1.7))
-sim1.7.100.25 <- parSapply(NULL, 1:200, function(z) 
+sim1.7.100.00 <- parSapply(NULL, 1:100, function(z) do.tree(100, 0, 1.7))
+sim1.7.100.25 <- parSapply(NULL, 1:100, function(z) 
     tryCatch(do.tree(100, .25, 1.7), error = function(e) rep(NA, 4)))
-sim1.7.100.50 <- parSapply(NULL, 1:200, function(z)
+sim1.7.100.50 <- parSapply(NULL, 1:100, function(z)
     tryCatch(do.tree(100, .50, 1.7), error = function(e) rep(NA, 4)))
 
+sim1.6.200.00 <- parSapply(NULL, 1:100, function(z) do.tree(200, 0, 1.6))
+sim1.6.200.25 <- parSapply(NULL, 1:100, function(z) 
+    tryCatch(do.tree(200, .25, 1.6), error = function(e) rep(NA, 4)))
+sim1.6.200.50 <- parSapply(NULL, 1:100, function(z)
+    tryCatch(do.tree(200, .50, 1.6), error = function(e) rep(NA, 4)))
+
+sim1.7.200.00 <- parSapply(NULL, 1:100, function(z) do.tree(200, 0, 1.7))
+sim1.7.200.25 <- parSapply(NULL, 1:100, function(z) 
+    tryCatch(do.tree(200, .25, 1.7), error = function(e) rep(NA, 4)))
+sim1.7.200.50 <- parSapply(NULL, 1:100, function(z)
+    tryCatch(do.tree(200, .50, 1.7), error = function(e) rep(NA, 4)))
 
 stopCluster(cl)
 
 rbind(rowMeans(sim1.6.100.00),
       rowMeans(sim1.6.100.25),
       rowMeans(sim1.6.100.50, na.rm = T))
+##            [,1]       [,2]       [,3]       [,4]
+## [1,] 0.07928718 0.07807786 0.04076484 0.03781790
+## [2,] 0.07422311 0.07569786 0.04248704 0.03976126
+## [3,] 0.07132143 0.07114367 0.05297073 0.04654988
 
 rbind(rowMeans(sim1.7.100.00),
       rowMeans(sim1.7.100.25),
       rowMeans(sim1.7.100.50))
+
+rbind(rowMeans(sim1.6.200.00),
+      rowMeans(sim1.6.200.25),
+      rowMeans(sim1.6.200.50, na.rm = T))
+##            [,1]       [,2]       [,3]       [,4]
+## [1,] 0.07664994 0.07950215 0.02879364 0.02731711
+## [2,] 0.07377814 0.07322514 0.03077444 0.03225442
+## [3,] 0.06234509 0.06249201 0.03674016 0.03719258
+
+rbind(rowMeans(sim1.7.200.00),
+      rowMeans(sim1.7.200.25),
+      rowMeans(sim1.7.200.50))

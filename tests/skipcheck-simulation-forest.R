@@ -130,7 +130,7 @@ do.Forest <- function(n, cen, sce = 1.1) {
 }
 
 
-cl <- makePSOCKcluster(8)
+cl <- makePSOCKcluster(16)
 setDefaultCluster(cl)
 invisible(clusterExport(NULL, "do.Forest"))
 invisible(clusterExport(NULL, "sceCtrl"))
@@ -176,3 +176,145 @@ sim1.100 <- list(sim1.1.100.00 = sim1.1.100.00, sim1.1.100.25 = sim1.1.100.25, s
                  sim1.5.100.00 = sim1.5.100.00, sim1.5.100.25 = sim1.5.100.25, sim1.5.100.50 = sim1.5.100.50)
 
 save(sim1.100, file = "sim1.100.forest.RData")
+
+
+cl <- makePSOCKcluster(16)
+setDefaultCluster(cl)
+invisible(clusterExport(NULL, "do.Forest"))
+invisible(clusterExport(NULL, "sceCtrl"))
+invisible(clusterEvalQ(NULL, library(rocTree)))
+invisible(clusterEvalQ(NULL, library(survival)))
+invisible(clusterEvalQ(NULL, library(randomForestSRC)))
+invisible(clusterEvalQ(NULL, library(grf)))
+
+sim1.1.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 1.1))
+sim1.1.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 1.1))
+sim1.1.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 1.1))
+
+sim1.2.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 1.2))
+sim1.2.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 1.2))
+sim1.2.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 1.2))
+
+sim1.3.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 1.3))
+sim1.3.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 1.3))
+sim1.3.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 1.3))
+
+sim1.4.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 1.4))
+sim1.4.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 1.4))
+sim1.4.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 1.4))
+
+sim1.5.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 1.5))
+sim1.5.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 1.5))
+sim1.5.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 1.5))
+
+stopCluster(cl)
+
+rowMeans(sim1.1.200.00) ## 0.09511860 0.09513851 0.19322780 0.12996838
+rowMeans(sim1.1.200.25) ## 0.1041594 0.1041606 0.2258248 0.1296001
+rowMeans(sim1.1.200.50) ## 0.1204257 0.1203956 0.2315092 0.1345418
+
+rowMeans(sim1.1.200.00) ## 0.06823050 0.06850718 0.21070689 0.12894672
+rowMeans(sim1.1.200.25) ## 0.08239985 0.08239461 0.24581324 0.12815634
+rowMeans(sim1.1.200.50) ## 0.09634210 0.09635808 0.25589998 0.13260609
+
+sim1.200 <- list(sim1.1.200.00 = sim1.1.200.00, sim1.1.200.25 = sim1.1.200.25, sim1.1.200.50 = sim1.1.200.50,
+                 sim1.2.200.00 = sim1.2.200.00, sim1.2.200.25 = sim1.2.200.25, sim1.2.200.50 = sim1.2.200.50,
+                 sim1.3.200.00 = sim1.3.200.00, sim1.3.200.25 = sim1.3.200.25, sim1.3.200.50 = sim1.3.200.50,
+                 sim1.4.200.00 = sim1.4.200.00, sim1.4.200.25 = sim1.4.200.25, sim1.4.200.50 = sim1.4.200.50,
+                 sim1.5.200.00 = sim1.5.200.00, sim1.5.200.25 = sim1.5.200.25, sim1.5.200.50 = sim1.5.200.50)
+
+save(sim1.200, file = "sim1.200.forest.RData")
+
+
+cl <- makePSOCKcluster(16)
+setDefaultCluster(cl)
+invisible(clusterExport(NULL, "do.Forest"))
+invisible(clusterExport(NULL, "sceCtrl"))
+invisible(clusterEvalQ(NULL, library(rocTree)))
+invisible(clusterEvalQ(NULL, library(survival)))
+invisible(clusterEvalQ(NULL, library(randomForestSRC)))
+invisible(clusterEvalQ(NULL, library(grf)))
+
+sim2.1.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 2.1))
+sim2.1.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 2.1))
+sim2.1.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 2.1))
+
+sim2.2.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 2.2))
+sim2.2.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 2.2))
+sim2.2.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 2.2))
+
+sim2.3.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 2.3))
+sim2.3.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 2.3))
+sim2.3.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 2.3))
+
+sim2.1.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 2.1))
+sim2.1.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 2.1))
+sim2.1.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 2.1))
+
+sim2.2.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 2.2))
+sim2.2.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 2.2))
+sim2.2.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 2.2))
+
+sim2.3.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 2.3))
+sim2.3.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 2.3))
+sim2.3.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 2.3))
+
+stopCluster(cl)
+
+sim2.100 <- list(sim2.1.100.00 = sim2.1.100.00, sim2.1.100.25 = sim2.1.100.25, sim2.1.100.50 = sim2.1.100.50,
+                 sim2.2.100.00 = sim2.2.100.00, sim2.2.100.25 = sim2.2.100.25, sim2.2.100.50 = sim2.2.100.50,
+                 sim2.3.100.00 = sim2.3.100.00, sim2.3.100.25 = sim2.3.100.25, sim2.3.100.50 = sim2.3.100.50)
+
+sim2.200 <- list(sim2.1.200.00 = sim2.1.200.00, sim2.1.200.25 = sim2.1.200.25, sim2.1.200.50 = sim2.1.200.50,
+                 sim2.2.200.00 = sim2.2.200.00, sim2.2.200.25 = sim2.2.200.25, sim2.2.200.50 = sim2.2.200.50,
+                 sim2.3.200.00 = sim2.3.200.00, sim2.3.200.25 = sim2.3.200.25, sim2.3.200.50 = sim2.3.200.50)
+
+save(sim2.100, file = "sim2.100.forest.RData")
+save(sim2.200, file = "sim2.200.forest.RData")
+
+
+cl <- makePSOCKcluster(16)
+setDefaultCluster(cl)
+invisible(clusterExport(NULL, "do.Forest"))
+invisible(clusterExport(NULL, "sceCtrl"))
+invisible(clusterEvalQ(NULL, library(rocTree)))
+invisible(clusterEvalQ(NULL, library(survival)))
+invisible(clusterEvalQ(NULL, library(randomForestSRC)))
+invisible(clusterEvalQ(NULL, library(grf)))
+
+sim3.1.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 3.1))
+sim3.1.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 3.1))
+sim3.1.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 3.1))
+
+sim3.2.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 3.2))
+sim3.2.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 3.2))
+sim3.2.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 3.2))
+
+sim3.3.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 3.3))
+sim3.3.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 3.3))
+sim3.3.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 3.3))
+
+sim3.1.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 3.1))
+sim3.1.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 3.1))
+sim3.1.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 3.1))
+
+sim3.2.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 3.2))
+sim3.2.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 3.2))
+sim3.2.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 3.2))
+
+sim3.3.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 3.3))
+sim3.3.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 3.3))
+sim3.3.200.50 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .5, 3.3))
+
+stopCluster(cl)
+
+sim3.100 <- list(sim3.1.100.00 = sim3.1.100.00, sim3.1.100.25 = sim3.1.100.25, sim3.1.100.50 = sim3.1.100.50,
+                 sim3.2.100.00 = sim3.2.100.00, sim3.2.100.25 = sim3.2.100.25, sim3.2.100.50 = sim3.2.100.50,
+                 sim3.3.100.00 = sim3.3.100.00, sim3.3.100.25 = sim3.3.100.25, sim3.3.100.50 = sim3.3.100.50)
+
+sim3.200 <- list(sim3.1.200.00 = sim3.1.200.00, sim3.1.200.25 = sim3.1.200.25, sim3.1.200.50 = sim3.1.200.50,
+                 sim3.2.200.00 = sim3.2.200.00, sim3.2.200.25 = sim3.2.200.25, sim3.2.200.50 = sim3.2.200.50,
+                 sim3.3.200.00 = sim3.3.200.00, sim3.3.200.25 = sim3.3.200.25, sim3.3.200.50 = sim3.3.200.50)
+
+save(sim3.100, file = "sim3.100.forest.RData")
+save(sim3.200, file = "sim3.200.forest.RData")
