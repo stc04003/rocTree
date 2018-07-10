@@ -45,9 +45,9 @@ sceCtrl <- function(cen, sce) {
         if (cen == .50) ctrl <- c(ctrl, tau = 1.2)
     }
     if (sce == 1.6) {
-        if (cen == 0) ctrl <- c(ctrl, tau = 1.41)
-        if (cen == .25) ctrl <- c(ctrl, tau = 1.28)
-        if (cen == .50) ctrl <- c(ctrl, tau = 1.03)
+        if (cen == 0) ctrl <- c(ctrl, tau = .8) # 1.41)
+        if (cen == .25) ctrl <- c(ctrl, tau = .8) # 1.28)
+        if (cen == .50) ctrl <- c(ctrl, tau = .8) # 1.03)
     }
     if (sce == 2.1) {
         if (cen == 0) ctrl <- c(ctrl, tau = .88)
@@ -395,7 +395,7 @@ sim1.7.200.50 <- parSapply(NULL, 1:100, function(z)
 stopCluster(cl)
 
 rbind(rowMeans(sim1.6.100.00),
-      rowMeans(sim1.6.100.25),
+      rowMeans(sim1.6.100.25, na.rm = T),
       rowMeans(sim1.6.100.50, na.rm = T))
 ##            [,1]       [,2]       [,3]       [,4]
 ## [1,] 0.07928718 0.07807786 0.04076484 0.03781790

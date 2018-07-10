@@ -2,10 +2,6 @@
 ## This file consists of utility functions used in the rocTree package
 ############################################################################################
 
-## ------------------------------------------------------------------------------------------
-## Creates covaraite path for time varying purpose (x.list).
-## ------------------------------------------------------------------------------------------
-
 #' Creates summaries for the final nodes.
 #'
 #' This function is called after split, prune, and CV (if applicable).
@@ -109,6 +105,7 @@ K1 <- function(u) {
   0.75 * (1 - u ^ 2) * (abs(u) < 1)
 }
 
+## This doesn't adjust for boundary condition and can cause errors
 ## K2 <- function(s, vec, h) {
 ##     if (is.na(s)) return(rep(NA, length(vec)))
 ##     if (s < h) return(Kq((s - vec) / h, s / h))
@@ -126,4 +123,14 @@ Kq <- function(x, q) {
     sigk1 <- sqrt(0.2)
     2 / (q + 1) * K1(2 / (q + 1) * (x - (q - 1) / 2)) *
         (1 + ((q - 1) / (q + 1) / sigk1) ^ 2 + 2 / sigk1 ^ 2 * (1 - q) / (1 + q) ^ 2 * x)
+}
+
+#' Smoothing kernels for hazard estimation
+#'
+#' @keywords internal
+#' @noRd
+K3 <- function(s, vec, h) {
+    if (is.na(s)) return(rep(NA, length(vec)))
+    if (s < h) return(Kq((s - vec) / h, s / h))
+    else return(K1((s - vec) / h))
 }

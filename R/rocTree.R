@@ -386,8 +386,7 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
     con1opt <- con1[res[, 1]]
     res <- cbind(res, con1opt, con2opt)
     res <- rbind(res, c(100, Inf, 0, 0))
-    ## beta.seq <- c(0.0001,0.001,0.01,0.1)
-    cvconbb <- function(bb) res[which(res[, 2] >= bb)[1] - 1, 4]
+    cvconbb <- function(bb) res[max(1, which(res[, 2] >= bb)[1] - 1), 4]
     cvcon2 <- sapply(beta.seq[-length(beta.seq)], cvconbb)
     c(unlist(cvcon2), tail(res[, 4], 2)[1])
 }
@@ -655,6 +654,7 @@ grow <- function(Y, E, X.list, control) {
     }
     ## beta.seq <- sqrt(c(res[, 2] * c(res[-1, 2], Inf)))
     beta.seq <- sqrt(abs(res[,2] * c(res[-1, 2], Inf)))
+    beta.seq[length(beta.seq)] <- rev(res[,2])[1]
     list(beta.seq = beta.seq,
          optTree.seq = optTreeList[res[, 1]],
          treeMat = treeMat)

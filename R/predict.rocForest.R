@@ -11,7 +11,7 @@
 #'
 #' @seealso \code{\link{predict.rocTree}}
 #' @export
-predict.rocForest <- function(object, newdata, type = c("survival", "hazard"), ...) {
+predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "cumHaz"), ...) {
     if (!is.rocForest(object)) stop("Response must be a \"rocForest\" object")
     type <- match.arg(type)
     ctrl <- object$ctrl
@@ -35,7 +35,7 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard"), .
         Y <- newdata$Y
         n <- length(unique(Y))
         newdata$yind <- findInt(Y, object$Y0)
-        newdata <- newdata[order(newdata$yind, Y),]
+        newdata <- newdata[order(newdata$yind, Y),] ## edit here
         X <- cbind(yind = newdata$yind, model.frame(delete.response(object$terms), newdata))
         xlist <- rep(list(matrix(NA, n, length(unique(newdata$id)))), p)
         sptdat <- split(X, newdata$yind)
@@ -59,6 +59,8 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard"), .
         W <- lapply(1:nID, function(x) tmp[[x]] + W[[x]])
     }
     Y0 <- unique(Y)
+    t0 <- seq(0, quantile(Y0, 0.8), length = 50)
+    matk <- t(sapply(t0, function(z) object$E0 * K3(z, Y0, object$ctrl$hN) / object$ctrl$hN))
     matk2 <- outer(Y0, Y0, "<=")
     matk3 <- outer(Y0, Y0, "==") * object$E0
     pred <- list()
@@ -67,12 +69,15 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard"), .
         Wi <- W[[i]] / rowSums(W[[i]])
         Wi[rowSums(W[[i]]) == 0,] <- W0[rowSums(W[[i]]) == 0,]
         if (type == "survival") {
-            pred[[i]] <- data.frame(Time = Y0, Surv = exp(-cumsum(rowSums(matk3 * Wi) / rowSums(matk2 * Wi))))
+            pred[[i]] <- data.frame(Time = Y0, Surv = exp(-cumsum(rowSums(matk3 * Wi))))
+        }
+        if (type == "cumHaz") {
+            pred[[i]] <- data.frame(Time = Y0, cumHaz = cumsum(rowSums(matk3 * Wi)))
         }
         if (type == "hazard") {
-            pred[[i]] <- data.frame(Time = Y0, cumHaz = cumsum(rowSums(matk3 * Wi) / rowSums(matk2 * Wi)))
+            pred[[i]] <- data.frame(Time = t0, haz = colSums(t(matk) * diag(Wi)))
         }
-        pred[[i]] <- pred[[i]][complete.cases(pred[[i]]),]
+        ## pred[[i]] <- pred[[i]][complete.cases(pred[[i]]),] ## no longer needed since NA in W0 are removed before for loop
     }
     for (i in 1:length(xlist)) attr(xlist[[i]], "dimnames") <- NULL
     out <- list(xlist = xlist, W = W, pred = pred)
