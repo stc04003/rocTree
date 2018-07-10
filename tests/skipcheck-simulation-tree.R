@@ -108,8 +108,8 @@ do.tree <- function(n, cen, sce = 1.1) {
     if (sce == 1.5) fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5
     if (sce %in% c(1.6, 1.7, 1.8, 1.9))
         fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5 + z6 + z7 + z8 + z9 + z10
-    if (sce %in% c(1.1, 1.2, 1.3, 1.4)) fm <- Surv(Y, death) ~ z1 + z2
-        fit <- rocTree(fm, data = dat, id = id, control = ctrl)
+    if (!(sce %in% 15:19/10)) fm <- Surv(Y, death) ~ z1 + z2
+    fit <- rocTree(fm, data = dat, id = id, control = ctrl)
     fit.dcon <- rocTree(fm, data = dat, id = id, control = c(splitBy = "dCON", ctrl))
     fit.ctree <- ctree(fm, data = dat0)
     fit.rpart <- rpart(fm, data = dat0)

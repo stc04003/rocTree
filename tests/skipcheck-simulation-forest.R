@@ -15,16 +15,18 @@ library(partykit)
 ## forest
 library(randomForestSRC)
 library(grf)
+library(ranger)
 
 #######################################################################
 ## Load function
 #######################################################################
 
+
 sceCtrl <- function(cen, sce) {
     ## Pre-determined control list
     ## tau is set at the 95th percentiles of Y
     ctrl <- list(CV = TRUE)
-    if (sce %in% c(1.5, 1.1)) {
+    if (sce %in% c(1.5, 1.1, 1.7)) {
         if (cen == 0) ctrl <- c(ctrl, tau = .8)
         if (cen == .25) ctrl <- c(ctrl, tau = .6)
         if (cen == .50) ctrl <- c(ctrl, tau = .5)
@@ -43,6 +45,21 @@ sceCtrl <- function(cen, sce) {
         if (cen == 0) ctrl <- c(ctrl, tau = 2.5)
         if (cen == .25) ctrl <- c(ctrl, tau = 2)
         if (cen == .50) ctrl <- c(ctrl, tau = 1.2)
+    }
+    if (sce == 1.6) {
+        if (cen == 0) ctrl <- c(ctrl, tau = 1.41)
+        if (cen == .25) ctrl <- c(ctrl, tau = 1.28)
+        if (cen == .50) ctrl <- c(ctrl, tau = 1.03)
+    }    
+    if (sce == 1.8) {
+        if (cen == 0) ctrl <- c(ctrl, tau = 30)
+        if (cen == .25) ctrl <- c(ctrl, tau = 5.4)
+        if (cen == .50) ctrl <- c(ctrl, tau = 1.68)
+    }
+    if (sce == 1.9) {
+        if (cen == 0) ctrl <- c(ctrl, tau = 2.26)
+        if (cen == .25) ctrl <- c(ctrl, tau = 1.86)
+        if (cen == .50) ctrl <- c(ctrl, tau = 1.41)
     }
     if (sce == 2.1) {
         if (cen == 0) ctrl <- c(ctrl, tau = .88)
@@ -77,39 +94,46 @@ sceCtrl <- function(cen, sce) {
     return(ctrl)
 }
 
-
 do.Forest <- function(n, cen, sce = 1.1) {
     ctrl <- sceCtrl(cen, sce)
     ## data preparation
     dat <- simu(n, cen, sce)
     dat0 <- dat[cumsum(with(dat, unlist(lapply(split(id, id), length), use.names = FALSE))),]
-    n3 <- 100
+    n3 <- 1000
     dat3 <- lapply(1:n3, function(x) cbind(id = x, simuTest(dat)))
     dat.test <- do.call(rbind, dat3)
     dat0.test <- dat.test[cumsum(with(dat.test, unlist(lapply(split(id, id), length), use.names =FALSE))),]
     rownames(dat0.test) <- NULL
     dat0.test$Y <- dat0.test$id <- dat0.test$death <- NA
     tt <- seq(0, ctrl$tau, length = 100)
-    ## Fitting & predicting/testing
+    ## Define formula
     if (sce == 1.5) fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5
-    else fm <- Surv(Y, death) ~ z1 + z2
+    if (sce %in% c(1.6, 1.7, 1.8, 1.9))
+        fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5 + z6 + z7 + z8 + z9 + z10
+    if (!(sce %in% 15:19/10)) fm <- Surv(Y, death) ~ z1 + z2
+    ## Fitting & predicting/testing    
     fit <- rocForest(fm, data = dat, id = id, control = ctrl)
     fit.dcon <- rocForest(fm, data = dat, id = id, control = c(ctrl, splitBy = "dCON"))
+    fit.ranger <- ranger(fm, data = dat0)
     pred <- predict(fit, dat.test)
     pred.dcon <- predict(fit.dcon, dat.test)
-    if (sce == 1.5)
-        fit.grf <- regression_forest(subset(dat0, select = c(z1, z2, z3, z4, z5)),
-                                     dat0$Y, mtry = 2, honesty = TRUE)
-    if (sce != 1.5)
-        fit.grf <- regression_forest(subset(dat0, select = c(z1, z2)), dat0$Y, mtry = 2, honesty = TRUE)
-    w <- get_sample_weights(fit.grf, newdata = dat0.test)
+    pred.ranger <- predict(fit.ranger, dat0.test)
+    ## removing grf
+    ## if (sce == 1.5)
+    ##     fit.grf <- regression_forest(subset(dat0, select = c(z1, z2, z3, z4, z5)),
+    ##                                  dat0$Y, mtry = 2, honesty = TRUE)
+    ## if (sce != 1.5)
+    ##     fit.grf <- regression_forest(subset(dat0, select = c(z1, z2)), dat0$Y, mtry = 2, honesty = TRUE)
+    ## w <- get_sample_weights(fit.grf, newdata = dat0.test)
     fit.rf <- rfsrc(fm, data = dat0)
     if (sce == 1.5)
         pred.rf <- exp(-predict(fit.rf, newdata = subset(dat0.test, select = c(z1, z2, z3, z4, z5)))$chf)
-    if (sce != 1.5)
+    if (sce %in% c(1.6, 1.7, 1.8, 1.9))
+        pred.rf <- exp(-predict(fit.rf, newdata = subset(dat0.test, select = c(z1, z2, z3, z4, z5, z6, z7, z8, z9, 10)))$chf)
+    if (!(sce %in% 15:19/10)) 
         pred.rf <- exp(-predict(fit.rf, newdata = subset(dat0.test, select = c(z1, z2)))$chf)
-    ## Get erros
-    err.grf <- err.rfsrc <- err <- err.dcon <- matrix(NA, length(tt), n3)
+    ## Get errors
+    err.ranger <- err.rfsrc <- err <- err.dcon <- matrix(NA, length(tt), n3)
     for (i in 1:n3) {
         dat.tmp <- dat3[[i]]
         attr(dat.tmp, "prepBy") <- attr(dat, "prepBy")
@@ -117,16 +141,17 @@ do.Forest <- function(n, cen, sce = 1.1) {
         truth <- trueSurv(dat.tmp)(tt)
         err[,i] <- with(pred$pred[[i]], stepfun(Time , c(1, Surv)))(tt)
         err.dcon[,i] <- with(pred.dcon$pred[[i]], stepfun(Time , c(1, Surv)))(tt)
-        sw <- survfit(Surv(dat0$Y, dat0$death) ~ 1, weights = w[i,])
-        err.grf[,i] <- stepfun(sw$time, c(1, sw$surv))(tt)
+        ## sw <- survfit(Surv(dat0$Y, dat0$death) ~ 1, weights = w[i,])
+        ## err.grf[,i] <- stepfun(sw$time, c(1, sw$surv))(tt)
         err.rfsrc[,i] <- stepfun(sort(unique(subset(dat0, dat0$death > 0)$Y)), c(1, pred.rf[i,]))(tt)
+        err.ranger[,i] <- with(pred.ranger, stepfun(unique.death.times, c(1, survival[i,])))(tt)
         ## absolute error
-        err.grf[,i] <- abs(err.grf[,i]- truth)
         err.rfsrc[,i] <- abs(err.rfsrc[,i]- truth)
         err[,i] <- abs(err[,i] - truth)
         err.dcon[,i] <- abs(err.dcon[,i] - truth)
+        err.ranger[,i] <- abs(err.ranger[,i] - truth)
     }
-    c(mean(err), mean(err.dcon), mean(err.grf), mean(err.rfsrc))
+    c(mean(err), mean(err.dcon), mean(err.ranger), mean(err.rfsrc))
 }
 
 
@@ -318,3 +343,4 @@ sim3.200 <- list(sim3.1.200.00 = sim3.1.200.00, sim3.1.200.25 = sim3.1.200.25, s
 
 save(sim3.100, file = "sim3.100.forest.RData")
 save(sim3.200, file = "sim3.200.forest.RData")
+
