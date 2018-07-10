@@ -4,8 +4,8 @@
 \alias{predict.rocForest}
 \title{Predicting based on a \code{rocForest} model.}
 \usage{
-\method{predict}{rocForest}(object, newdata, type = c("survival", "hazard"),
-  ...)
+\method{predict}{rocForest}(object, newdata, type = c("survival", "hazard",
+  "cumHaz"), ...)
 }
 \arguments{
 \item{object}{is an \code{rocForest} object.}

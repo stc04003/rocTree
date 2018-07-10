@@ -67,8 +67,8 @@ globalVariables(c("n", "cen", "Y", "id")) ## global variables for simu
 simu <- function(n, cen, scenario, summary = FALSE) {
     if (!(cen %in% c(0, .25, .50)))
         stop("Only 3 levels of censoring rates (0%, 25%, 50%) are allowed.")
-    if (!(scenario %in% paste(rep(1:3, each = 6), rep(1:7, 3), sep = ".")))
-        stop("See ?simu for scenario definition.")
+    ## if (!(scenario %in% paste(rep(1:3, each = 6), rep(1:7, 3), sep = ".")))
+    ##     stop("See ?simu for scenario definition.")
     if (n > 1e4) stop("Sample size too large.")
     dat <- as.tibble(eval(parse(text = paste("sim", scenario, "(n = ", n, ", cen = ", cen, ")", sep = ""))))
     if (summary) {
@@ -241,6 +241,39 @@ sim1.7 <- function(n, cen = 0) {
     dat <- cbind(dat, z[dat$id,])
     names(dat)[4:13] <- paste("z", 1:10, sep = "")
     dat    
+}
+
+#' @importFrom MASS mvrnorm
+sim1.8 <- function(n, cen = 0) {
+    V <- .75^as.matrix(dist(1:10, upper = TRUE))
+    z <- mvrnorm(n = n, mu = rep(0, 10), Sigma = V)
+    Time <- sqrt(rexp(n) * exp(-rowSums(z) * .5))
+    if (cen == 0) cens <- rep(Inf, n)
+    if (cen == .25) cens <- runif(n, 0, 7.83)
+    if (cen == .50) cens <- runif(n, 0, 1.95)
+    Y <- pmin(Time, cens)
+    d <- 1 * (Time <= cens) 
+    dat <- do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), d[x]))))
+    dat <- cbind(dat, z[dat$id,])
+    names(dat)[4:13] <- paste("z", 1:10, sep = "")
+    dat   
+}
+
+sim1.9 <- function(n, cen = 0) {
+    V <- .75^as.matrix(dist(1:10, upper = TRUE))
+    z <- mvrnorm(n = n, mu = rep(0, 10), Sigma = V)
+    Time <- sqrt(rexp(n) * exp(- z %*% rep(c(-.5, .5), 5)))
+    if (cen == 0) cens <- rep(Inf, n)
+    if (cen == .25) cens <- runif(n, 0, 3.77)
+    if (cen == .50) cens <- runif(n, 0, 1.78)
+    Y <- pmin(Time, cens)
+    d <- 1 * (Time <= cens) 
+    dat <- do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), d[x]))))
+    dat <- cbind(dat, z[dat$id,])
+    names(dat)[4:13] <- paste("z", 1:10, sep = "")
+    dat   
 }
 
 sim2.1 <- function(n, cen = 0) {
@@ -449,6 +482,24 @@ trueSurv1.6 <- function(dat) {
     exp(-dat$Y^2 * exp(.1 * rowSums(z)))
 }
 
+trueHaz1.8 <- function(dat) {
+    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    dat$Y^2 * exp(.5 * rowSums(z))
+}
+trueSurv1.8 <- function(dat) {
+    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    exp(-dat$Y^2 * exp(.5 * rowSums(z)))
+}
+
+trueHaz1.9 <- function(dat) {
+    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    dat$Y^2 * exp(as.matrix(z) %*% rep(c(-.5, .5), 5))
+}
+trueSurv1.9 <- function(dat) {
+    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    exp(-dat$Y^2 * exp(as.matrix(z) %*% rep(c(-.5, .5), 5)))
+}
+
 trueSurv2.1 <- function(dat) {
     e <- dat$e[1]
     u <- dat$u[1]
@@ -509,7 +560,6 @@ trueHaz2.2 <- function(dat) {
     return(sapply(Y, oneHaz))
 }
 
-
 trueSurv2.2 <- function(dat) {
     e <- dat$e[1]
     u1 <- dat$u1[1]
@@ -533,7 +583,6 @@ trueSurv2.2 <- function(dat) {
     }
     return(sapply(Y, oneSurv))
 }
-
     
 trueHaz3.1 <- function(dat) {
     e <- dat$e[1]
@@ -552,7 +601,6 @@ trueHaz3.1 <- function(dat) {
     }
     return(sapply(Y, oneHaz))
 }
-
     
 trueSurv3.1 <- function(dat) {
     e <- dat$e[1]
@@ -672,13 +720,22 @@ simuTest1.6 <- function(dat) {
     data.frame(Y = Y, z1 = runif(1), z2 = runif(1), z3 = runif(1), z4 = runif(1), z5 = runif(1),
                z6 = runif(1), z7 = runif(1), z8 = runif(1), z9 = runif(1), z10 = runif(1))
 }
+
+
 simuTest1.7 <- function(dat) simuTest1.6(dat)
+simuTest1.8 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    V <- .75^as.matrix(dist(1:10, upper = TRUE))
+    z <- mvrnorm(n = 1, mu = rep(0, 10), Sigma = V)
+    as.data.frame(cbind(Y = Y, z1 = z[1], z2 = z[2], z3 = z[3], z4 = z[4], z5 = z[5],
+                        z6 = z[6], z7 = z[7], z8 = z[8], z9 = z[9], z10 = z[10]))
+}
+simuTest1.9 <- function(dat) simuTest1.8(dat)
 
 simuTest1.5 <- function(dat) {
     Y <- sort(unique(dat$Y))
     data.frame(Y = Y, z1 = runif(1), z2 = runif(1), z3 = runif(1), z4 = runif(1), z5 = runif(1))
 }
-
 
 simuTest2.1 <- function(dat) {
     Y <- sort(unique(dat$Y))

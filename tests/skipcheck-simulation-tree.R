@@ -45,9 +45,19 @@ sceCtrl <- function(cen, sce) {
         if (cen == .50) ctrl <- c(ctrl, tau = 1.2)
     }
     if (sce == 1.6) {
-        if (cen == 0) ctrl <- c(ctrl, tau = .8) # 1.41)
-        if (cen == .25) ctrl <- c(ctrl, tau = .8) # 1.28)
-        if (cen == .50) ctrl <- c(ctrl, tau = .8) # 1.03)
+        if (cen == 0) ctrl <- c(ctrl, tau = 1.41)
+        if (cen == .25) ctrl <- c(ctrl, tau = 1.28)
+        if (cen == .50) ctrl <- c(ctrl, tau = 1.03)
+    }    
+    if (sce == 1.8) {
+        if (cen == 0) ctrl <- c(ctrl, tau = 30)
+        if (cen == .25) ctrl <- c(ctrl, tau = 5.4)
+        if (cen == .50) ctrl <- c(ctrl, tau = 1.68)
+    }
+    if (sce == 1.9) {
+        if (cen == 0) ctrl <- c(ctrl, tau = 2.26)
+        if (cen == .25) ctrl <- c(ctrl, tau = 1.86)
+        if (cen == .50) ctrl <- c(ctrl, tau = 1.41)
     }
     if (sce == 2.1) {
         if (cen == 0) ctrl <- c(ctrl, tau = .88)
@@ -81,7 +91,7 @@ sceCtrl <- function(cen, sce) {
     }
     return(ctrl)
 }
-    
+
 do.tree <- function(n, cen, sce = 1.1) {
     ctrl <- sceCtrl(cen, sce)
     ## data preparation
@@ -96,7 +106,8 @@ do.tree <- function(n, cen, sce = 1.1) {
     tt <- seq(0, ctrl$tau, length = 100)
     ## Fitting
     if (sce == 1.5) fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5
-    if (sce %in% c(1.6, 1.7)) fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5 + z6 + z7 + z8 + z9 + z10
+    if (sce %in% c(1.6, 1.7, 1.8, 1.9))
+        fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5 + z6 + z7 + z8 + z9 + z10
     if (sce %in% c(1.1, 1.2, 1.3, 1.4)) fm <- Surv(Y, death) ~ z1 + z2
         fit <- rocTree(fm, data = dat, id = id, control = ctrl)
     fit.dcon <- rocTree(fm, data = dat, id = id, control = c(splitBy = "dCON", ctrl))
@@ -358,7 +369,7 @@ save(sim3.200, file = "sim3.200.RData")
 ## Additional simulation from scenario I with p = 10
 ## ----------------------------------------------------------------------------------
 
-cl <- makePSOCKcluster(16)
+cl <- makePSOCKcluster(8)
 setDefaultCluster(cl)
 invisible(clusterExport(NULL, "do.tree"))
 invisible(clusterExport(NULL, "sceCtrl"))
@@ -368,29 +379,17 @@ invisible(clusterEvalQ(NULL, library(rpart)))
 invisible(clusterEvalQ(NULL, library(party)))
 invisible(clusterEvalQ(NULL, library(partykit)))
 
-sim1.6.100.00 <- parSapply(NULL, 1:100, function(z) do.tree(100, 0, 1.6))
-sim1.6.100.25 <- parSapply(NULL, 1:100, function(z) 
-    tryCatch(do.tree(100, .25, 1.6), error = function(e) rep(NA, 4)))
-sim1.6.100.50 <- parSapply(NULL, 1:100, function(z)
-    tryCatch(do.tree(100, .50, 1.6), error = function(e) rep(NA, 4)))
+sim1.9.100.00 <- parSapply(NULL, 1:100, function(z) do.tree(100, 0, 1.9))
+sim1.9.100.25 <- parSapply(NULL, 1:100, function(z) 
+    tryCatch(do.tree(100, .25, 1.9), error = function(e) rep(NA, 4)))
+sim1.9.100.50 <- parSapply(NULL, 1:100, function(z)
+    tryCatch(do.tree(100, .50, 1.9), error = function(e) rep(NA, 4)))
 
-sim1.7.100.00 <- parSapply(NULL, 1:100, function(z) do.tree(100, 0, 1.7))
-sim1.7.100.25 <- parSapply(NULL, 1:100, function(z) 
-    tryCatch(do.tree(100, .25, 1.7), error = function(e) rep(NA, 4)))
-sim1.7.100.50 <- parSapply(NULL, 1:100, function(z)
-    tryCatch(do.tree(100, .50, 1.7), error = function(e) rep(NA, 4)))
-
-sim1.6.200.00 <- parSapply(NULL, 1:100, function(z) do.tree(200, 0, 1.6))
-sim1.6.200.25 <- parSapply(NULL, 1:100, function(z) 
-    tryCatch(do.tree(200, .25, 1.6), error = function(e) rep(NA, 4)))
-sim1.6.200.50 <- parSapply(NULL, 1:100, function(z)
-    tryCatch(do.tree(200, .50, 1.6), error = function(e) rep(NA, 4)))
-
-sim1.7.200.00 <- parSapply(NULL, 1:100, function(z) do.tree(200, 0, 1.7))
-sim1.7.200.25 <- parSapply(NULL, 1:100, function(z) 
-    tryCatch(do.tree(200, .25, 1.7), error = function(e) rep(NA, 4)))
-sim1.7.200.50 <- parSapply(NULL, 1:100, function(z)
-    tryCatch(do.tree(200, .50, 1.7), error = function(e) rep(NA, 4)))
+sim1.9.200.00 <- parSapply(NULL, 1:100, function(z) do.tree(200, 0, 1.9))
+sim1.9.200.25 <- parSapply(NULL, 1:100, function(z) 
+    tryCatch(do.tree(200, .25, 1.9), error = function(e) rep(NA, 4)))
+sim1.9.200.50 <- parSapply(NULL, 1:100, function(z)
+    tryCatch(do.tree(200, .50, 1.9), error = function(e) rep(NA, 4)))
 
 stopCluster(cl)
 
@@ -417,3 +416,12 @@ rbind(rowMeans(sim1.6.200.00),
 rbind(rowMeans(sim1.7.200.00),
       rowMeans(sim1.7.200.25),
       rowMeans(sim1.7.200.50))
+
+
+rbind(rowMeans(sim1.8.100.00),
+      rowMeans(sim1.8.100.25),
+      rowMeans(sim1.8.100.50))
+##           [,1]      [,2]       [,3]       [,4]
+## [1,] 0.1072156 0.1080589 0.07513157 0.07672885
+## [2,] 0.2114849 0.2086031 0.16059524 0.16366960
+## [3,] 0.2341358 0.2354637 0.18256731 0.18866838
