@@ -115,6 +115,7 @@ giveW <- function(ndi, idB2, ndInd2, ndTerm, szL2) {
     n <- length(ndi)
     w <- matrix(0, n, n)
     ind <- ndInd2 == ndi
-    w[matrix(idB2, length(idB2), n)[t(ind)] + n * (rep(1:n, rowSums(ind)) - 1)] <- rep(1 / t(szL2)[which(outer(ndTerm, ndi, "=="))], rowSums(ind))
+    w[matrix(idB2, length(idB2), n)[t(ind)] + n * (rep(1:n, rowSums(ind)) - 1)] <-
+        rep(1 / t(szL2)[which(outer(ndTerm, ndi, "=="))], rowSums(ind))
     t(w)
 }

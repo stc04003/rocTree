@@ -17,7 +17,8 @@ void con(int *Nf, int *Ny, double *fuTerm, double *SuTerm, double *con, double *
   }
 }
 
-void con3(int *Nf, int *Ny, double *fuTerm, double *SuTerm, double *fuTerm2, double *SuTerm2, double *con, double *result){
+void con3(int *Nf, int *Ny, double *fuTerm, double *SuTerm,
+	  double *fuTerm2, double *SuTerm2, double *con, double *result){
   int i, j, k;
   double matfs1, matfs3, matfs4;
   for (i = 0; i < Ny[0]; i++) {
@@ -276,4 +277,22 @@ void cutSearch2(int *n, int *cL, int *m, int *y, int *Ny,
   Free(SR);
   Free(fL);
   Free(fR);
+}
+
+// C function to replace the "giveW" function in R.
+void giveWC(int *n, int *lidB2, int *lndTerm,
+	    int *ndi, int *idB2, int *ndInd2, int *ndTerm, double *szL2, double *result) {
+  int i, j, k;
+  for (i = 0; i < lidB2[0]; i++) {
+    for (j = 0; j < n[0]; j++) {
+      if (ndInd2[i * n[0] + j] == ndi[j]) {
+    	for (k = 0; k < lndTerm[0]; k++) {
+    	  if (ndTerm[k] == ndi[j]) {
+    	    if (szL2[k * lndTerm[0] + j] != 0)
+    	      result[idB2[i] * n[0] + j] = 1 / szL2[k * lndTerm[0] + j];
+    	  }
+    	}
+      }
+    }
+  }
 }

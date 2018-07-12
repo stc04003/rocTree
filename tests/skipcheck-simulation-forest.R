@@ -162,7 +162,7 @@ invisible(clusterExport(NULL, "sceCtrl"))
 invisible(clusterEvalQ(NULL, library(rocTree)))
 invisible(clusterEvalQ(NULL, library(survival)))
 invisible(clusterEvalQ(NULL, library(randomForestSRC)))
-invisible(clusterEvalQ(NULL, library(ranger)))
+invisible(clusterEvalQ(NULL, library(grf)))
 
 sim1.1.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 1.1))
 sim1.1.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 1.1))
@@ -183,22 +183,6 @@ sim1.4.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 1.4))
 sim1.5.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 1.5))
 sim1.5.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 1.5))
 sim1.5.100.50 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .5, 1.5))
-
-sim1.9.100.00 <- parSapply(NULL, 1:500, function(z) tryCatch(do.Forest(100, 0, 1.9), error = function(e) rep(NA, 4)))
-sim1.9.100.25 <- parSapply(NULL, 1:500, function(z) tryCatch(do.Forest(100, .25, 1.9), error = function(e) rep(NA, 4)))
-sim1.9.100.50 <- parSapply(NULL, 1:500, function(z) tryCatch(do.Forest(100, .5, 1.9), error = function(e) rep(NA, 4)))
-
-sim1.8.100.00 <- parSapply(NULL, 1:500, function(z) tryCatch(do.Forest(100, 0, 1.8), error = function(e) rep(NA, 4)))
-sim1.8.100.25 <- parSapply(NULL, 1:500, function(z) tryCatch(do.Forest(100, .25, 1.8), error = function(e) rep(NA, 4)))
-sim1.8.100.50 <- parSapply(NULL, 1:500, function(z) tryCatch(do.Forest(100, .5, 1.8), error = function(e) rep(NA, 4)))
-
-sim1.7.100.00 <- parSapply(NULL, 1:500, function(z) tryCatch(do.Forest(100, 0, 1.7), error = function(e) rep(NA, 4)))
-sim1.7.100.25 <- parSapply(NULL, 1:500, function(z) tryCatch(do.Forest(100, .25, 1.7), error = function(e) rep(NA, 4)))
-sim1.7.100.50 <- parSapply(NULL, 1:500, function(z) tryCatch(do.Forest(100, .5, 1.7), error = function(e) rep(NA, 4)))
-
-sim1.9.200.00 <- parSapply(NULL, 1:500, function(z) tryCatch(do.Forest(200, 0, 1.9), error = function(e) rep(NA, 4)))
-sim1.9.200.25 <- parSapply(NULL, 1:500, function(z) tryCatch(do.Forest(200, 0, 1.9), error = function(e) rep(NA, 4)))
-sim1.9.200.50 <- parSapply(NULL, 1:500, function(z) tryCatch(do.Forest(200, 0, 1.9), error = function(e) rep(NA, 4)))
 
 stopCluster(cl)
 
@@ -226,7 +210,7 @@ invisible(clusterExport(NULL, "sceCtrl"))
 invisible(clusterEvalQ(NULL, library(rocTree)))
 invisible(clusterEvalQ(NULL, library(survival)))
 invisible(clusterEvalQ(NULL, library(randomForestSRC)))
-invisible(clusterEvalQ(NULL, library(ranger)))
+invisible(clusterEvalQ(NULL, library(grf)))
 
 sim1.1.200.00 <- parSapply(NULL, 1:500, function(z) do.Forest(200, 0, 1.1))
 sim1.1.200.25 <- parSapply(NULL, 1:500, function(z) do.Forest(200, .25, 1.1))
@@ -274,7 +258,7 @@ invisible(clusterExport(NULL, "sceCtrl"))
 invisible(clusterEvalQ(NULL, library(rocTree)))
 invisible(clusterEvalQ(NULL, library(survival)))
 invisible(clusterEvalQ(NULL, library(randomForestSRC)))
-invisible(clusterEvalQ(NULL, library(ranger)))
+invisible(clusterEvalQ(NULL, library(grf)))
 
 sim2.1.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 2.1))
 sim2.1.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 2.1))
@@ -321,7 +305,7 @@ invisible(clusterExport(NULL, "sceCtrl"))
 invisible(clusterEvalQ(NULL, library(rocTree)))
 invisible(clusterEvalQ(NULL, library(survival)))
 invisible(clusterEvalQ(NULL, library(randomForestSRC)))
-invisible(clusterEvalQ(NULL, library(ranger)))
+invisible(clusterEvalQ(NULL, library(grf)))
 
 sim3.1.100.00 <- parSapply(NULL, 1:500, function(z) do.Forest(100, 0, 3.1))
 sim3.1.100.25 <- parSapply(NULL, 1:500, function(z) do.Forest(100, .25, 3.1))
@@ -360,33 +344,3 @@ sim3.200 <- list(sim3.1.200.00 = sim3.1.200.00, sim3.1.200.25 = sim3.1.200.25, s
 save(sim3.100, file = "sim3.100.forest.RData")
 save(sim3.200, file = "sim3.200.forest.RData")
 
-
-debug(do.Forest)
-do.Forest(200, 0, 1.9)
-
-debug(predict)
-system.time(predict(fit, dat.test[1:20000,]))
-
-do <- function() {
-     W <- oneWeight(ndInd, xlist, object$forest[[1]])
-     for (i in 2:length(object$forest)) {
-         tmp <- oneWeight(ndInd, xlist, object$forest[[i]])
-         W <- lapply(1:nID, function(x) tmp[[x]] + W[[x]])
-     }
-}
-
-debug(oneWeight)
-oneWeight(ndInd, xlist, object$forest[[3]])
-
-
-giveW2 <- function (ndi, idB2, ndInd2, ndTerm, szL2) {
-    n <- length(ndi)
-    w <- matrix(0, n, n)
-    ind <- ndInd2 == ndi
-    rs <- rowSums(ind)
-    w[matrix(idB2, length(idB2), n)[t(ind)] + n * (rep(1:n, rs) - 1)] <- rep(1/t(szL2)[which(outer(ndTerm, ndi, "=="))], rs)
-    w
-}
-
-library(microbenchmark)
-microbenchmark(giveW(ndInd[,33], idB2, ndInd2, ndTerm, szL2), giveW2(ndInd[,33], idB2, ndInd2, ndTerm, szL2), times = 1e3)
