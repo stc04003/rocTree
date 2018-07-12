@@ -91,6 +91,9 @@ plot.rocTree.control <- function(rankdir = c("TB", "BT", "LR", "RL", "TD"),
 #' @param x an object of class "rocTree", usually returned by the rocTree function.
 #' @param control A list of control parameters. See "details" for important special features of control parameters.
 #' @export
+#'
+#' @importFrom ggplot2 ggplot geom_line xlab ylab aes
+#' 
 #' @examples
 #' data(simudat)
 #' library(survival)
@@ -98,16 +101,18 @@ plot.rocTree.control <- function(rankdir = c("TB", "BT", "LR", "RL", "TD"),
 #' data = simudat, control = list(CV = TRUE, nflds = 10)))
 #' plotTreeHaz(fit)
 plotTreeHaz <- function(x, control = list()) {
-    ctrl <- rocTree.control()
+    ctrl <- plot.rocTree.control()
     namc <- names(control)
     if (!all(namc %in% names(ctrl))) 
         stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
     ctrl[namc] <- control
     if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object")
-    l <- ncol(x$r2Final)
-    plot(x$tt, x$r2Final[,1], ylab = "Hazard", xlab = "Time", "l", lwd = 1.5, ylim = range(c(x$r2Final)))
-    if (l > 1) invisible(sapply(2:l, function(z) lines(x$tt, x$r2Final[,z], lwd = 1.5, lty = z, col = z)))
-    legend("topright", paste("Node", x$ndFinal), lwd = 1.5, lty = 1:l, col = 1:l, bty = "n")
+    tmp <- data.frame(x = fit$tt, y = unlist(fit$r2Final), Node = rep(fit$ndFinal, each = length(fit$tt)), row.names = NULL)
+    tmp$Node <- factor(tmp$Node)
+    gg <- ggplot(tmp, aes(x = x, y = y, group = Node)) +
+        geom_line(aes(linetype = Node, color = Node, lwd = I(1.1))) +
+        xlab("Time") + ylab("Hazard")
+    gg
 }
 
 ## ---------------------------------------------------------------------------------------
