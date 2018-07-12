@@ -21,7 +21,6 @@ library(ranger)
 ## Load function
 #######################################################################
 
-
 sceCtrl <- function(cen, sce) {
     ## Pre-determined control list
     ## tau is set at the 95th percentiles of Y
@@ -153,7 +152,6 @@ do.Forest <- function(n, cen, sce = 1.1) {
     }
     c(mean(err), mean(err.dcon), mean(err.ranger), mean(err.rfsrc))
 }
-
 
 cl <- makePSOCKcluster(16)
 setDefaultCluster(cl)
@@ -343,4 +341,3 @@ sim3.200 <- list(sim3.1.200.00 = sim3.1.200.00, sim3.1.200.25 = sim3.1.200.25, s
 
 save(sim3.100, file = "sim3.100.forest.RData")
 save(sim3.200, file = "sim3.200.forest.RData")
-

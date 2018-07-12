@@ -111,11 +111,18 @@ oneWeight <- function(ndInd, xlist, tree) {
 #'
 #' @keywords internal
 #' @noRd
+## giveW <- function(ndi, idB2, ndInd2, ndTerm, szL2) {
+##     n <- length(ndi)
+##     w <- matrix(0, n, n)
+##     ind <- ndInd2 == ndi
+##     w[matrix(idB2, length(idB2), n)[t(ind)] + n * (rep(1:n, rowSums(ind)) - 1)] <-
+##         rep(1 / t(szL2)[which(outer(ndTerm, ndi, "=="))], rowSums(ind))
+##     t(w)
+## }
+## C version
 giveW <- function(ndi, idB2, ndInd2, ndTerm, szL2) {
     n <- length(ndi)
-    w <- matrix(0, n, n)
-    ind <- ndInd2 == ndi
-    w[matrix(idB2, length(idB2), n)[t(ind)] + n * (rep(1:n, rowSums(ind)) - 1)] <-
-        rep(1 / t(szL2)[which(outer(ndTerm, ndi, "=="))], rowSums(ind))
-    t(w)
+    matrix(.C("giveWC", as.integer(n), as.integer(length(idB2)), as.integer(length(ndTerm)),
+              as.integer(ndi), as.integer(idB2 - 1), as.integer(ndInd2), as.integer(ndTerm),
+              as.double(szL2), out = double(n * n), PACKAGE = "rocTree")$out, n)
 }
