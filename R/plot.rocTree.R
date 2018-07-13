@@ -110,7 +110,7 @@ plotTreeHaz <- function(x, control = list()) {
     tmp <- data.frame(x = x$tt, y = unlist(x$r2Final), Node = rep(x$ndFinal, each = length(x$tt)), row.names = NULL)
     tmp$Node <- factor(tmp$Node)
     gg <- ggplot(tmp, aes(x = x, y = y, group = Node)) +
-        geom_line(aes(linetype = Node, color = Node, lwd = I(1.1))) +
+        geom_line(aes(linetype = Node, color = Node), lwd = I(1.1)) +
         xlab("Time") + ylab("Hazard")
     gg
 }

@@ -89,10 +89,13 @@ DF$Y <- DF$Y + tmp
 head(DF, 20)
 length(unique(DF$Y)) == length(unique(DF$ID))
 
+fm <- Surv(Y, Status) ~ HEMOG + AIDS + TRT + SEX + KSC + CD4 + OP
+
 #' Fitting rocTree
 set.seed(1)
-system.time(fit <- rocTree(Surv(Y, Status) ~ HEMOG + AIDS + TRT + SEX + KSC + CD4 + OP, data = DF, id = ID, 
-                           control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5, minsp = 30, minsp2 = 5)))
+system.time(fit <- rocTree(fm, data = DF, id = ID,
+                           control = list(disc = c(0, 1, 1, 1, 0, 0, 1),
+                                          tau = 1.5, minsp = 30, minsp2 = 5)))
 ## 25 secs
 fit
 
@@ -137,9 +140,9 @@ fit
 ##          °--15) TRT > 1.0000*     
                                
 set.seed(1)
-system.time(fit2 <- rocTree(Surv(Y, Status) ~ HEMOG + AIDS + TRT + SEX + KSC + CD4 + OP, data = DF, id = ID, 
-                           control = list(disc = c(0, 1, 1, 1, 0, 0, 1),
-                                          tau = 1.5, minsp = 30, minsp2 = 5, CV = TRUE, parallel = TRUE)))
+system.time(fit2 <- rocTree(fm, data = DF, id = ID, 
+                            control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
+                                           minsp = 30, minsp2 = 5, CV = TRUE, parallel = TRUE)))
 ## 29.5 secs
 fit2
 
@@ -167,9 +170,11 @@ ggsave(filename = "haz.pdf")
 
 
 set.seed(1)
-system.time(fit3 <- rocForest(Surv(Y, Status) ~ HEMOG + AIDS + TRT + SEX + KSC + CD4 + OP, data = DF, id = ID,
+system.time(fit3 <- rocForest(fm, data = DF, id = ID,
                               control = list(disc = c(0, 1, 1, 1, 0, 0, 1),
-                                             tau = 1.5, minsp = 30, minsp2 = 5, parallel = TRUE)))                              
+                                             tau = 1.5, minsp = 30, minsp2 = 5, parallel = TRUE)))
 ## 31.9 secs
 
+debug(predict)
 system.time(pred.fit3 <- predict(fit3))
+
