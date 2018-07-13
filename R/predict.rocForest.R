@@ -58,6 +58,7 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
     for (i in 2:length(object$forest)) {
         tmp <- oneWeight(ndInd, xlist, object$forest[[i]])
         W <- lapply(1:nID, function(x) tmp[[x]] + W[[x]])
+        rm(tmp)
     }
     W <- lapply(W, matrix, n)
     Y0 <- unique(Y)
