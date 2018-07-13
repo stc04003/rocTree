@@ -59,6 +59,7 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
         tmp <- oneWeight(ndInd, xlist, object$forest[[i]])
         W <- lapply(1:nID, function(x) tmp[[x]] + W[[x]])
     }
+    W <- lapply(W, matrix, n)
     Y0 <- unique(Y)
     t0 <- seq(0, quantile(Y0, 0.8), length = 50)
     matk <- t(sapply(t0, function(z) object$E0 * K3(z, Y0, object$ctrl$hN) / object$ctrl$hN))
@@ -105,8 +106,7 @@ oneWeight <- function(ndInd, xlist, tree) {
         }
     }
     n <- dim(xlist[[1]])[1]
-    W <- lapply(1:dim(xlist[[1]])[2], function(z) giveW(ndInd[,z], idB2, ndInd2, ndTerm, szL2))
-    W
+    lapply(1:dim(xlist[[1]])[2], function(z) giveW(ndInd[,z], idB2, ndInd2, ndTerm, szL2))
 }
 
 #' This function provides W in \code{oneWeight} to avoid \code{for} loops.
@@ -124,7 +124,7 @@ oneWeight <- function(ndInd, xlist, tree) {
 
 giveW <- function(ndi, idB2, ndInd2, ndTerm, szL2) {
     n <- length(ndi)
-    matrix(.C("giveWC", as.integer(n), as.integer(length(idB2)), as.integer(length(ndTerm)),
-              as.integer(ndi), as.integer(idB2 - 1), as.integer(ndInd2), as.integer(ndTerm),
-              as.double(szL2), out = double(n * n), PACKAGE = "rocTree")$out, n)
+    .C("giveWC", as.integer(n), as.integer(length(idB2)), as.integer(length(ndTerm)),
+       as.integer(ndi), as.integer(idB2 - 1), as.integer(ndInd2), as.integer(ndTerm),
+       as.double(szL2), out = double(n * n), PACKAGE = "rocTree")$out
 }

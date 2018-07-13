@@ -287,9 +287,8 @@ void giveWC(int *n, int *lidB2, int *lndTerm,
     for (j = 0; j < n[0]; j++) {
       if (ndInd2[i * n[0] + j] == ndi[j]) {
     	for (k = 0; k < lndTerm[0]; k++) {
-    	  if (ndTerm[k] == ndi[j]) {
-    	    if (szL2[k * lndTerm[0] + j] != 0)
-    	      result[idB2[i] * n[0] + j] = 1 / szL2[k * lndTerm[0] + j];
+    	  if (ndTerm[k] == ndi[j] && szL2[k * lndTerm[0] + j] != 0) {
+	    result[idB2[i] * n[0] + j] = 1 / szL2[k * lndTerm[0] + j];
     	  }
     	}
       }
