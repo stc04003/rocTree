@@ -107,7 +107,7 @@ plotTreeHaz <- function(x, control = list()) {
         stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
     ctrl[namc] <- control
     if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object")
-    tmp <- data.frame(x = fit$tt, y = unlist(fit$r2Final), Node = rep(fit$ndFinal, each = length(fit$tt)), row.names = NULL)
+    tmp <- data.frame(x = x$tt, y = unlist(x$r2Final), Node = rep(x$ndFinal, each = length(x$tt)), row.names = NULL)
     tmp$Node <- factor(tmp$Node)
     gg <- ggplot(tmp, aes(x = x, y = y, group = Node)) +
         geom_line(aes(linetype = Node, color = Node, lwd = I(1.1))) +
