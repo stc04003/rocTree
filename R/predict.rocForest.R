@@ -53,6 +53,7 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
     nID <- dim(xlist[[1]])[2]
     ndInd <- matrix(1, n, nID)
     dfPred <- ndInd - 1
+    ## oneWeight <- memoise(oneWeight0)
     W <- oneWeight(ndInd, xlist, object$forest[[1]])
     for (i in 2:length(object$forest)) {
         tmp <- oneWeight(ndInd, xlist, object$forest[[i]])
@@ -87,6 +88,7 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
 
 #' This function provides one weight matrix using a tree from the forest
 #'
+#' ##@importFrom memoise memoise
 #' @keywords internal
 #' @noRd
 oneWeight <- function(ndInd, xlist, tree) {
