@@ -91,7 +91,9 @@ length(unique(DF$Y)) == length(unique(DF$ID))
 
 fm <- Surv(Y, Status) ~ HEMOG + AIDS + TRT + SEX + KSC + CD4 + OP
 
+#' ------------------------------------------------------------------------------------------
 #' Fitting rocTree
+#' ------------------------------------------------------------------------------------------
 set.seed(1)
 system.time(fit <- rocTree(fm, data = DF, id = ID,
                            control = list(disc = c(0, 1, 1, 1, 0, 0, 1),
@@ -159,22 +161,30 @@ plot(fit, control = list(savePlot = TRUE))
 plot(fit2, control = list(savePlot = TRUE))
 
 plotTreeHaz(fit2)
-
 plotTreeHaz(fit2) + theme_bw() +
     theme(axis.line = element_line(colour = "black"),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           panel.border = element_blank(),
           panel.background = element_blank()) 
-ggsave(filename = "haz.pdf")
+## ggsave(filename = "haz.pdf")
+
+pred.fit2 <- predict(fit2)
 
 
+#' ------------------------------------------------------------------------------------------
+#' Random Forest
+#' ------------------------------------------------------------------------------------------
 set.seed(1)
 system.time(fit3 <- rocForest(fm, data = DF, id = ID,
                               control = list(disc = c(0, 1, 1, 1, 0, 0, 1),
                                              tau = 1.5, minsp = 30, minsp2 = 5, parallel = TRUE)))
 ## 31.9 secs
 
-debug(predict)
+## debug(predict)
 system.time(pred.fit3 <- predict(fit3))
+##    user  system elapsed 
+## 294.082  58.471 352.881 
+## save(pred.fit3, file = "pred.fit3.RData")
+
 

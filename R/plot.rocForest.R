@@ -20,3 +20,4 @@ plot.rocForest <- function(x, tree = 1L, output = c("graph", "visNetwork"),
     class(tmp) <- "rocTree"
     plot.rocTree(tmp, output = output, digits = digits, control = control)
 }
+

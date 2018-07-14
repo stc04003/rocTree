@@ -99,7 +99,7 @@ do.Forest <- function(n, cen, sce = 1.1) {
     ## data preparation
     dat <- simu(n, cen, sce)
     dat0 <- dat[cumsum(with(dat, unlist(lapply(split(id, id), length), use.names = FALSE))),]
-    n3 <- 1000
+    n3 <- 500
     dat3 <- lapply(1:n3, function(x) cbind(id = x, simuTest(dat)))
     dat.test <- do.call(rbind, dat3)
     dat0.test <- dat.test[cumsum(with(dat.test, unlist(lapply(split(id, id), length), use.names =FALSE))),]

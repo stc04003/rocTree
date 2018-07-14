@@ -133,7 +133,6 @@ grow2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, control) {
     ndInd[lower.tri(ndInd)] <- 0
     ndInd2 <- matrix(1, N, N2)
     ndInd2[outer(Y, Y2, FUN = ">")] <- 0
-    conTree <- sum(0.5 * const * ss * rowMeans(fmat)[EE1])
     while (sum(treeMat[, 2] == 1) > 0) {
         sp <- splitTree(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd, const, fTree, STree, control, round(length(X1.list) / 2))
         if (sp[1] * 2 < M & !is.na(sp[2])) {
@@ -152,25 +151,24 @@ grow2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, control) {
                                           min(rowMeans(ndInd[Y1 <= tau, ] == sp[1] * 2 + 1)), NA, NA)
             treeMat$terminal[which(treeMat$u < minsp / N1 & treeMat$u2 < minsp2 / N1)] <- 2
             if(sum(diag(ndInd) == 2 * sp[1]) > 1) {
-                fTree[sp[1] * 2, ] <- rowSums(fmat[EE1, diag(ndInd) == 2 * sp[1]]) / N1
+                fTree[sp[1] * 2, ] <- rowSums(fmat[EE1, diag(ndInd) == 2 * sp[1]], drop = FALSE) / N1
             } else {
                 fTree[sp[1] * 2, ] <- sum(fmat[EE1, diag(ndInd) == 2 * sp[1]]) / N1
             }
             if(sum(diag(ndInd) == 2 * sp[1] + 1)>1) {
-                fTree[sp[1] * 2 + 1, ] <- rowSums(fmat[EE1, diag(ndInd) == 2 * sp[1] + 1]) / N1
+                fTree[sp[1] * 2 + 1, ] <- rowSums(fmat[EE1, diag(ndInd) == 2 * sp[1] + 1], drop = FALSE) / N1
             } else {
                 fTree[sp[1] * 2 + 1, ] <- sum(fmat[EE1, diag(ndInd) == 2 * sp[1] + 1]) / N1
             }
-            STree[sp[1] * 2, ] <- rowSums(Smat * (ndInd == 2 * sp[1]))[EE1] / N1
-            STree[sp[1] * 2 + 1, ] <- rowSums(Smat * (ndInd == 2 * sp[1] + 1))[EE1] / N1
-            conTree <- conTree + sp[4]
+            STree[sp[1] * 2, ] <- rowSums(Smat * (ndInd == 2 * sp[1]), drop = FALSE)[EE1] / N1
+            STree[sp[1] * 2 + 1, ] <- rowSums(Smat * (ndInd == 2 * sp[1] + 1), drop = FALSE)[EE1] / N1
         } else {
             treeMat$terminal[treeMat[, 1] == sp[1]] <- 2
             break
         }
     }
     treeMat <- treeMat[!is.na(treeMat$u),]
-    ndTerm <- treeMat$nd[treeMat$terminal >= 1] ## Yifei's update July 1
+    ndTerm <- treeMat$nd[treeMat$terminal >= 1]
     if (nrow(treeMat) == 1) ndTerm <- 1
     szL2 <- sapply(ndTerm, function(x) rowSums(ndInd2 == x))
     list(treeMat = treeMat, szL2 = szL2, ndInd2 = ndInd2)
