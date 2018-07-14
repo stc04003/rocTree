@@ -344,3 +344,20 @@ sim3.200 <- list(sim3.1.200.00 = sim3.1.200.00, sim3.1.200.25 = sim3.1.200.25, s
 save(sim3.100, file = "sim3.100.forest.RData")
 save(sim3.200, file = "sim3.200.forest.RData")
 
+
+
+
+########################################################
+## minsp = 0?
+
+set.seed(1)
+dat <- simu(200, 0, 1.3)
+ctrl <- sceCtrl(0, 1.3)
+ctrl$minsp2 <- 0
+fm <- Surv(Y, death) ~ z1 + z2
+system.time(fit <- rocForest(fm, data = dat, id = id, control = ctrl))
+
+dat.test <- simuTest(dat)
+system.time(pred <- predict(fit, dat.test))
+
+

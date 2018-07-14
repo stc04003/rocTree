@@ -186,7 +186,8 @@ sim1.5 <- function(n, cen = 0) {
 sim1.3 <- function(n, cen = 0) {
     z1 <- runif(n)
     z2 <- runif(n)
-    Time <- exp(-2 + 2 * z1 + 2 * z2 + rnorm(n, sd = .5))
+    Time <- rlnorm(n, meanlog = -2 + 2 * z1 + 2 * z2, sdlog = .5)
+    ## exp(-2 + 2 * z1 + 2 * z2 + rnorm(n, sd = .5))
     cens <- runif(n, 0, cen)
     if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 6.00)
@@ -196,14 +197,28 @@ sim1.3 <- function(n, cen = 0) {
         data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
+## sim1.4 <- function(n, cen = 0) {
+##     z1 <- runif(n)
+##     z2 <- runif(n)    
+##     sig <- 2 * z1
+##     Q <- 2 * z2
+##     g <- rgamma(n, Q^-2, 1)
+##     w <- log(Q^2 * g) / Q
+##     Time <- exp(sig * w)
+##     cens <- runif(n, 0, cen)
+##     if (cen == 0) cens <- rep(Inf, n)
+##     if (cen == .25) cens <- runif(n, 0, 4.12)
+##     if (cen == .50) cens <- runif(n, 0, 1.63)
+##     Y <- pmin(Time, cens)
+##     do.call(rbind, lapply(1:n, function(x)
+##         data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
+## }
+
+#' @importFrom flexsurv pgengamma rgengamma 
 sim1.4 <- function(n, cen = 0) {
     z1 <- runif(n)
-    z2 <- runif(n)    
-    sig <- 2 * z1
-    Q <- 2 * z2
-    g <- rgamma(n, Q^-2, 1)
-    w <- log(Q^2 * g) / Q
-    Time <- exp(sig * w)
+    z2 <- runif(n)
+    Time <- rgengamma(n, mu = 0, sigma = 2 * z1, Q = 2 * z2)
     cens <- runif(n, 0, cen)
     if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 4.12)
@@ -462,12 +477,12 @@ trueSurv1.1 <- function(dat) exp(-with(dat, Y^2 * exp(2 * z1 + 2 * z2)))
 trueHaz1.2 <- function(dat) with(dat, Y^2 * exp(2 * sin(2 * pi * dat$z1) + 2 * abs(dat$z2 - .5)))
 trueSurv1.2 <- function(dat) with(dat, exp(-Y^2 * exp(2 * sin(2 * pi * dat$z1) + 2 * abs(dat$z2 - .5))))
 
-trueHaz1.3 <- function(dat) with(dat, -log(pnorm(Y / exp(-2 + 2 * dat$z1 + 2 * dat$z2), sd = .5)))
-trueSurv1.3 <- function(dat) with(dat, pnorm(Y / exp(-2 + 2 * dat$z1 + 2 * dat$z2), sd = .5))
+trueHaz1.3 <- function(dat) with(dat, -log(1 - plnorm(Y, meanlog = -2 + 2 * z1 + 2 * z2, sdlog = .5)))
+trueSurv1.3 <- function(dat) with(dat, 1 - plnorm(Y, meanlog = -2 + 2 * z1 + 2 * z2, sdlog = .5))
 
-trueHaz1.4 <- function(dat) with(dat, -log(pgamma(exp(z2 * Y / z1) / 4 / z2^2, 1 / 4 / z2^2, 1)))
-trueSurv1.4 <- function(dat) with(dat, pgamma(exp(z2 * Y / z1) / 4 / z2^2, 1 / 4 / z2^2, 1))
-
+trueHaz1.4 <- function(dat) with(dat, -log(1 - pgengamma(Y, mu = 0, sigma = 2 * z1, Q = 2 * z2)))
+trueSurv1.4 <- function(dat) with(dat, 1 - pgengamma(Y, mu = 0, sigma = 2 * z1, Q = 2 * z2))
+    
 trueHaz1.5 <- function(dat) trueHaz1.1(dat)
 trueSurv1.5 <- function(dat) trueSurv1.1(dat)
 

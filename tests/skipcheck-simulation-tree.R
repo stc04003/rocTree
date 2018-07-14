@@ -94,6 +94,8 @@ sceCtrl <- function(cen, sce) {
 
 do.tree <- function(n, cen, sce = 1.1) {
     ctrl <- sceCtrl(cen, sce)
+    ## ctrl$minsp <- 20
+    ## ctrl$minsp2 <- 0
     ## data preparation
     dat <- simu(n, cen, sce)
     dat0 <- dat[cumsum(with(dat, unlist(lapply(split(id, id), length), use.names = FALSE))),]
@@ -408,51 +410,85 @@ stopCluster(cl)
 rbind(rowMeans(sim1.6.100.00),
       rowMeans(sim1.6.100.25, na.rm = T),
       rowMeans(sim1.6.100.50, na.rm = T))
-##            [,1]       [,2]       [,3]       [,4]
-## [1,] 0.07928718 0.07807786 0.04076484 0.03781790
-## [2,] 0.07422311 0.07569786 0.04248704 0.03976126
-## [3,] 0.07132143 0.07114367 0.05297073 0.04654988
-
-rbind(rowMeans(sim1.7.100.00),
-      rowMeans(sim1.7.100.25),
-      rowMeans(sim1.7.100.50))
 
 rbind(rowMeans(sim1.6.200.00),
       rowMeans(sim1.6.200.25),
       rowMeans(sim1.6.200.50, na.rm = T))
-##            [,1]       [,2]       [,3]       [,4]
-## [1,] 0.07664994 0.07950215 0.02879364 0.02731711
-## [2,] 0.07377814 0.07322514 0.03077444 0.03225442
-## [3,] 0.06234509 0.06249201 0.03674016 0.03719258
-
-rbind(rowMeans(sim1.7.200.00),
-      rowMeans(sim1.7.200.25),
-      rowMeans(sim1.7.200.50))
-
-
-rbind(rowMeans(sim1.8.100.00),
-      rowMeans(sim1.8.100.25),
-      rowMeans(sim1.8.100.50))
-##           [,1]      [,2]       [,3]       [,4]
-## [1,] 0.1072156 0.1080589 0.07513157 0.07672885
-## [2,] 0.2114849 0.2086031 0.16059524 0.16366960
-## [3,] 0.2341358 0.2354637 0.18256731 0.18866838
-
 
 rbind(rowMeans(sim1.9.100.00),
       rowMeans(sim1.9.100.25),
       rowMeans(sim1.9.100.50))
 
-##           [,1]      [,2]      [,3]      [,4]
-## [1,] 0.1222060 0.1220328 0.1144312 0.1128715
-## [2,] 0.1269211 0.1275461 0.1271939 0.1241900
-## [3,] 0.1277333 0.1281871 0.1305194 0.1271655
-
 rbind(rowMeans(sim1.9.200.00),
       rowMeans(sim1.9.200.25),
       rowMeans(sim1.9.200.50))
 
-##           [,1]      [,2]      [,3]      [,4]
-## [1,] 0.1180645 0.1188342 0.1093005 0.1081697
-## [2,] 0.1240393 0.1238585 0.1203347 0.1192824
-## [3,] 0.1225618 0.1227709 0.1246412 0.1231376
+
+
+
+set.seed(1234)
+n <- 200
+cen <- .25
+sce <- 1.2
+dat <- simu(n, cen, sce)
+n3 <- 1000
+dat3 <- lapply(1:n3, function(x) cbind(id = x, simuTest(dat)))
+dat.test <- do.call(rbind, dat3)
+
+## Fitting
+if (sce == 1.5) fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5
+if (sce %in% c(1.6, 1.7, 1.8, 1.9))
+    fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5 + z6 + z7 + z8 + z9 + z10
+if (!(sce %in% 15:19/10)) fm <- Surv(Y, death) ~ z1 + z2
+
+fit <- rocTree(fm, data = dat, id = id,
+               control = list(minsp = 20, minsp2 = 0, CV = TRUE, parallel = TRUE, Trace = TRUE))
+fit2 <- rocTree(fm, data = dat, id = id,
+                control = list(minsp = 20, minsp2 = 5, CV = TRUE, parallel = TRUE, Trace = TRUE))
+fit3 <- rocTree(fm, data = dat, id = id,
+                control = list(minsp = 20, minsp2 = 10, CV = TRUE, parallel = TRUE, Trace = TRUE))
+fit4 <- rocTree(fm, data = dat, id = id,
+                control = list(minsp = 20, minsp2 = 20, CV = TRUE, parallel = TRUE, Trace = TRUE))
+
+head(fit$treeMat, 10)
+head(fit2$treeMat, 10)
+
+fit$Frame
+fit2$Frame
+fit3$Frame
+fit4$Frame
+
+fit3 <- rocForest(fm, data = dat, id = id)
+fit4 <- rocForest(fm, data = dat, id = id, control = list(minsp2 = 20))
+
+fit3
+print(fit3, 2)
+print(fit3, 3)
+print(fit3, 4)
+
+fit3$forest[[1]]$treeMat
+fit3$forest[[2]]$treeMat
+fit3$forest[[3]]$treeMat
+fit3$forest[[4]]$treeMat
+fit3$forest[[5]]$treeMat
+fit3$forest[[6]]$treeMat
+fit3$forest[[7]]$treeMat
+fit3$forest[[8]]$treeMat
+fit3$forest[[9]]$treeMat
+fit3$forest[[10]]$treeMat
+fit3$forest[[11]]$treeMat
+
+fit4$forest[[1]]$treeMat
+fit4$forest[[2]]$treeMat
+fit4$forest[[3]]$treeMat
+fit4$forest[[4]]$treeMat
+fit4$forest[[5]]$treeMat
+fit4$forest[[6]]$treeMat
+fit4$forest[[7]]$treeMat
+fit4$forest[[8]]$treeMat
+fit4$forest[[9]]$treeMat
+fit4$forest[[10]]$treeMat
+fit4$forest[[11]]$treeMat
+
+pred <- predict(fit3)
+predict(fit3, dat.test)
