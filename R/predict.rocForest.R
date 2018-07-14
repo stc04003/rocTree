@@ -29,7 +29,7 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
         id <- attr(object$terms, "id")
         if (!any(res == names(newdata))) newdata$Y <- min(object$Y0)
         else names(newdata)[which(names(newdata) == res)] <- "Y"
-        if (!any(id == names(newdata))) newdata$id <- 1:nrow(newdata)
+        if (!any(id == names(newdata))) newdata$id <- 1##:nrow(newdata)
         else names(newdata)[which(names(newdata) == id)] <- "id"
         p <- length(object$vNames)
         Y <- newdata$Y

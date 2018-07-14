@@ -95,59 +95,15 @@ fm <- Surv(Y, Status) ~ HEMOG + AIDS + TRT + SEX + KSC + CD4 + OP
 #' Fitting rocTree
 #' ------------------------------------------------------------------------------------------
 set.seed(1)
-system.time(fit <- rocTree(fm, data = DF, id = ID,
-                           control = list(disc = c(0, 1, 1, 1, 0, 0, 1),
-                                          tau = 1.5, minsp = 30, minsp2 = 5)))
-## 25 secs
-fit
-
-## Root                                        
-##  ¦--2) KSC <= 0.39615                       
-##  ¦   ¦--4) KSC <= 0.18844                   
-##  ¦   ¦   ¦--8) HEMOG <= 0.14775             
-##  ¦   ¦   ¦   ¦--16) HEMOG <= 0.053533*      
-##  ¦   ¦   ¦   °--17) HEMOG > 0.053533*       
-##  ¦   ¦   °--9) HEMOG > 0.14775              
-##  ¦   ¦       ¦--18) HEMOG <= 0.45610        
-##  ¦   ¦       ¦   ¦--36) AIDS <= 0.0000*     
-##  ¦   ¦       ¦   °--37) AIDS > 0.0000*      
-##  ¦   ¦       °--19) HEMOG > 0.45610         
-##  ¦   ¦           ¦--38) AIDS <= 0.0000*     
-##  ¦   ¦           °--39) AIDS > 0.0000*      
-##  ¦   °--5) KSC > 0.18844                    
-##  ¦       ¦--10) HEMOG <= 0.24411*           
-##  ¦       °--11) HEMOG > 0.24411*            
-##  °--3) KSC > 0.39615                        
-##      ¦--6) OP <= 0.0000                     
-##      ¦   ¦--12) CD4 <= 0.46467              
-##      ¦   ¦   ¦--24) KSC <= 0.72163          
-##      ¦   ¦   ¦   ¦--48) TRT <= 1.0000*      
-##      ¦   ¦   ¦   °--49) TRT > 1.0000*       
-##      ¦   ¦   °--25) KSC > 0.72163           
-##      ¦   ¦       ¦--50) HEMOG <= 0.47966*   
-##      ¦   ¦       °--51) HEMOG > 0.47966*    
-##      ¦   °--13) CD4 > 0.46467               
-##      ¦       ¦--26) HEMOG <= 0.55246        
-##      ¦       ¦   ¦--52) KSC <= 0.72163*     
-##      ¦       ¦   °--53) KSC > 0.72163       
-##      ¦       ¦       ¦--106) CD4 <= 0.78587*
-##      ¦       ¦       °--107) CD4 > 0.78587* 
-##      ¦       °--27) HEMOG > 0.55246         
-##      ¦           ¦--54) HEMOG <= 0.68737*   
-##      ¦           °--55) HEMOG > 0.68737     
-##      ¦               ¦--110) KSC <= 0.72163*
-##      ¦               °--111) KSC > 0.72163* 
-##      °--7) OP > 0.0000                      
-##          ¦--14) TRT <= 1.0000*              
-##          °--15) TRT > 1.0000*     
-                               
+system.time(fit <- rocTree(fm, data = DF, id = ID, 
+                           control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
+                                          minsp = 30, minsp2 = 5, CV = TRUE, parallel = TRUE)))
 set.seed(1)
 system.time(fit2 <- rocTree(fm, data = DF, id = ID, 
                             control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
-                                           minsp = 30, minsp2 = 5, CV = TRUE, parallel = TRUE)))
-## 29.5 secs
-fit2
+                                           minsp = 30, minsp2 = 0, CV = TRUE, parallel = TRUE)))
 
+fit
 ## ROC-guided survival tree
 ## node), split
 ##    * denotes terminal node

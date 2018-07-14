@@ -261,7 +261,7 @@ CV3 <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, control) {
             treeMat$terminal[which(treeMat$u <= minsp / N1 & treeMat$u2 <= minsp2 / N1)] <- 2
             ## conTree <- conTree + sp[4]
         } else {
-            if (sum(!is.na(treeMat$p)) > 1) break ## this happens when all smaller trees have too few samples
+            if (sum(!is.na(treeMat$u2)) > 1) break
             else treeMat$terminal[treeMat$nd == sp[1]] <- 2
             break
         }
@@ -560,7 +560,7 @@ grow <- function(Y, E, X.list, control) {
             treeMat$terminal[which(treeMat$u < minsp / N & treeMat$u2 < minsp2 / N)] <- 2
             conTree <- conTree + sp[4]
         } else {
-            if (sum(!is.na(treeMat$p)) > 1) break
+            if (sum(!is.na(treeMat$u2)) > 1) break
             else treeMat$terminal[treeMat$nd == sp[1]] <- 2
             break
         }

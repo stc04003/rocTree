@@ -163,8 +163,9 @@ grow2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, control) {
             STree[sp[1] * 2, ] <- rowSums(Smat * (ndInd == 2 * sp[1]))[EE1] / N1
             STree[sp[1] * 2 + 1, ] <- rowSums(Smat * (ndInd == 2 * sp[1] + 1))[EE1] / N1
         } else {
-            if (sum(!is.na(treeMat$p)) > 1) break
-            else treeMat$terminal[treeMat$nd == sp[1]] <- 2
+            ## if (sum(!is.na(treeMat$u2)) > 1) break
+            treeMat$terminal[treeMat$nd == sp[1]] <- 2
+            treeMat$terminal[treeMat$nd == 1] <- 0
             break
         }
     }

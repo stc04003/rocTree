@@ -243,7 +243,8 @@ void cutSearch2(int *n, int *cL, int *m, int *y, int *Ny,
       ssL += indccL[y[j] * (1 + n[0])];
       ssR += indccR[y[j] * (1 + n[0])];
     }
-    if (minRS == 0 && (ssL < minsp[0] / 3 || ssR < minsp[0] / 3)) {
+    // if (minRS == 0 && (ssL < minsp[0] / 3 || ssR < minsp[0] / 3)) {
+    if ((ssL < minsp[0] / 3 || ssR < minsp[0] / 3)) {
       result[i] = -1;
     } else {
       for (j = 0; j < n[0]; j++) {
