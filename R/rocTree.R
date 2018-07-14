@@ -560,7 +560,7 @@ grow <- function(Y, E, X.list, control) {
             treeMat$terminal[which(treeMat$u < minsp / N & treeMat$u2 < minsp2 / N)] <- 2
             conTree <- conTree + sp[4]
         } else {
-            if (sum(!is.na(treeMat$p)) > 1) break ## this happens when all smaller trees have too few samples
+            if (sum(!is.na(treeMat$p)) > 1) break
             else treeMat$terminal[treeMat$nd == sp[1]] <- 2
             break
         }

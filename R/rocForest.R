@@ -151,19 +151,20 @@ grow2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, control) {
                                           min(rowMeans(ndInd[Y1 <= tau, ] == sp[1] * 2 + 1)), NA, NA)
             treeMat$terminal[which(treeMat$u < minsp / N1 & treeMat$u2 < minsp2 / N1)] <- 2
             if(sum(diag(ndInd) == 2 * sp[1]) > 1) {
-                fTree[sp[1] * 2, ] <- rowSums(fmat[EE1, diag(ndInd) == 2 * sp[1]], drop = FALSE) / N1
+                fTree[sp[1] * 2, ] <- rowSums(fmat[EE1, diag(ndInd) == 2 * sp[1], drop = FALSE]) / N1
             } else {
                 fTree[sp[1] * 2, ] <- sum(fmat[EE1, diag(ndInd) == 2 * sp[1]]) / N1
             }
             if(sum(diag(ndInd) == 2 * sp[1] + 1)>1) {
-                fTree[sp[1] * 2 + 1, ] <- rowSums(fmat[EE1, diag(ndInd) == 2 * sp[1] + 1], drop = FALSE) / N1
+                fTree[sp[1] * 2 + 1, ] <- rowSums(fmat[EE1, diag(ndInd) == 2 * sp[1] + 1, drop = FALSE]) / N1
             } else {
                 fTree[sp[1] * 2 + 1, ] <- sum(fmat[EE1, diag(ndInd) == 2 * sp[1] + 1]) / N1
             }
-            STree[sp[1] * 2, ] <- rowSums(Smat * (ndInd == 2 * sp[1]), drop = FALSE)[EE1] / N1
-            STree[sp[1] * 2 + 1, ] <- rowSums(Smat * (ndInd == 2 * sp[1] + 1), drop = FALSE)[EE1] / N1
+            STree[sp[1] * 2, ] <- rowSums(Smat * (ndInd == 2 * sp[1]))[EE1] / N1
+            STree[sp[1] * 2 + 1, ] <- rowSums(Smat * (ndInd == 2 * sp[1] + 1))[EE1] / N1
         } else {
-            treeMat$terminal[treeMat[, 1] == sp[1]] <- 2
+            if (sum(!is.na(treeMat$p)) > 1) break
+            else treeMat$terminal[treeMat$nd == sp[1]] <- 2
             break
         }
     }
