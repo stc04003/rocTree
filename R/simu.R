@@ -215,7 +215,8 @@ sim1.4 <- function(n, cen = 0) {
 
 sim1.6 <- function(n, cen = 0) {
     z <- matrix(runif(n * 10), n, 10)
-    Time <- sqrt(rexp(n) * exp(-rowSums(z) * .1))
+    ## z <- matrix(rnorm(n * 10), n, 10)
+    Time <- sqrt(rexp(n) * exp(-rowSums(z[,1:2]) * 2))
     if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 2.76)
     if (cen == .50) cens <- runif(n, 0, 1.36)
@@ -475,11 +476,11 @@ trueSurv1.7 <- function(dat) trueSurv1.1(dat)
 
 trueHaz1.6 <- function(dat) {
     z <- dat %>% select(paste("z", 1:10, sep = ""))
-    dat$Y^2 * exp(.1 * rowSums(z))
+    dat$Y^2 * exp(2 * rowSums(z[,1:2]))
 }
 trueSurv1.6 <- function(dat) {
     z <- dat %>% select(paste("z", 1:10, sep = ""))
-    exp(-dat$Y^2 * exp(.1 * rowSums(z)))
+    exp(-dat$Y^2 * exp(2 * rowSums(z[,1:2])))
 }
 
 trueHaz1.8 <- function(dat) {

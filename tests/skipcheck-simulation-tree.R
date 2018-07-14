@@ -369,7 +369,7 @@ save(sim3.200, file = "sim3.200.RData")
 ## Additional simulation from scenario I with p = 10
 ## ----------------------------------------------------------------------------------
 
-cl <- makePSOCKcluster(8)
+cl <- makePSOCKcluster(16)
 setDefaultCluster(cl)
 invisible(clusterExport(NULL, "do.tree"))
 invisible(clusterExport(NULL, "sceCtrl"))
@@ -378,6 +378,18 @@ invisible(clusterEvalQ(NULL, library(survival)))
 invisible(clusterEvalQ(NULL, library(rpart)))
 invisible(clusterEvalQ(NULL, library(party)))
 invisible(clusterEvalQ(NULL, library(partykit)))
+
+sim1.6.100.00 <- parSapply(NULL, 1:100, function(z) do.tree(100, 0, 1.6))
+sim1.6.100.25 <- parSapply(NULL, 1:100, function(z) 
+    tryCatch(do.tree(100, .25, 1.6), error = function(e) rep(NA, 4)))
+sim1.6.100.50 <- parSapply(NULL, 1:100, function(z)
+    tryCatch(do.tree(100, .50, 1.6), error = function(e) rep(NA, 4)))
+
+sim1.6.200.00 <- parSapply(NULL, 1:100, function(z) do.tree(200, 0, 1.6))
+sim1.6.200.25 <- parSapply(NULL, 1:100, function(z) 
+    tryCatch(do.tree(200, .25, 1.6), error = function(e) rep(NA, 4)))
+sim1.6.200.50 <- parSapply(NULL, 1:100, function(z)
+    tryCatch(do.tree(200, .50, 1.6), error = function(e) rep(NA, 4)))
 
 sim1.9.100.00 <- parSapply(NULL, 1:100, function(z) do.tree(100, 0, 1.9))
 sim1.9.100.25 <- parSapply(NULL, 1:100, function(z) 
