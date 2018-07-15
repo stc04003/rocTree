@@ -91,6 +91,7 @@ length(unique(DF$Y)) == length(unique(DF$ID))
 
 fm <- Surv(Y, Status) ~ HEMOG + AIDS + TRT + SEX + KSC + CD4 + OP
 
+
 #' ------------------------------------------------------------------------------------------
 #' Fitting rocTree
 #' ------------------------------------------------------------------------------------------
@@ -102,7 +103,6 @@ set.seed(1)
 system.time(fit2 <- rocTree(fm, data = DF, id = ID, 
                             control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
                                            minsp = 30, minsp2 = 0, CV = TRUE, parallel = TRUE)))
-
 fit
 ## ROC-guided survival tree
 ## node), split
@@ -112,6 +112,7 @@ fit
 ##  °--3) KSC > 0.39615    
 ##      ¦--6) OP <= 0.0000*
 ##      °--7) OP > 0.0000* 
+fit2
 
 plot(fit, control = list(savePlot = TRUE))
 plot(fit2, control = list(savePlot = TRUE))
