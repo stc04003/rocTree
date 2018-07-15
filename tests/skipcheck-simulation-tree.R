@@ -492,3 +492,20 @@ fit4$forest[[11]]$treeMat
 
 pred <- predict(fit3)
 predict(fit3, dat.test)
+
+
+f1 <- function(A, B, C) {
+    if ((A || B) & C) 1
+    else 2
+}
+
+f2 <- function(B, C) {
+    if (B & C) 1
+    else 2
+}
+
+x1 <- expand.grid(c(TRUE, FALSE), c(TRUE, FALSE), c(TRUE, FALSE))
+x2 <- expand.grid(c(TRUE, FALSE), c(TRUE, FALSE))
+
+cbind(x1, apply(x1, 1, function(y) f1(y[1], y[2], y[3])))
+cbind(x2, apply(x2, 1, function(y) f2(y[1], y[2])))

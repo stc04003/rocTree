@@ -121,7 +121,8 @@ void cutSearch(int *n, int *cL, int *m, int *y, int *Ny,
       ssL += indccL[y[j] * (1 + n[0])];
       ssR += indccR[y[j] * (1 + n[0])];
     }
-    if (ssL < minsp[0] / 3 || ssR < minsp[0] / 3) {
+    if ((minRS == 0 || minsp2 == 0) && (ssL < minsp[0] / 3 || ssR < minsp[0] / 3)) {
+      //if (ssL < minsp[0] / 3 || ssR < minsp[0] / 3) {
       result[i] = -1;
     } else {
       for (j = 0; j < n[0]; j++) {
@@ -236,6 +237,7 @@ void cutSearch2(int *n, int *cL, int *m, int *y, int *Ny,
     } 
     ssL = 0.0;
     ssR = 0.0;
+
     minRS = minsp2[0] / 3;
     for (j = 0; j < Ny[0]; j++) {
       if (rsSmatL[y[j]] < minRS) minRS = 0; 
@@ -243,8 +245,8 @@ void cutSearch2(int *n, int *cL, int *m, int *y, int *Ny,
       ssL += indccL[y[j] * (1 + n[0])];
       ssR += indccR[y[j] * (1 + n[0])];
     }
-    // if (minRS == 0 && (ssL < minsp[0] / 3 || ssR < minsp[0] / 3)) {
-    if ((ssL < minsp[0] / 3 || ssR < minsp[0] / 3)) {
+    // edit cut search
+    if ((minRS == 0 || minsp2 == 0) && (ssL < minsp[0] / 3 || ssR < minsp[0] / 3)) {
       result[i] = -1;
     } else {
       for (j = 0; j < n[0]; j++) {
@@ -267,6 +269,7 @@ void cutSearch2(int *n, int *cL, int *m, int *y, int *Ny,
 	result[i] += fabs(fR[j] * SL[j] - fL[j] * SR[j]) * con[j];
       }
     } // end else
+    
   } // end i
   Free(indccL);
   Free(indccR);

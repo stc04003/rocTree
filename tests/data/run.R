@@ -96,22 +96,37 @@ fm <- Surv(Y, Status) ~ HEMOG + AIDS + TRT + SEX + KSC + CD4 + OP
 #' Fitting rocTree
 #' ------------------------------------------------------------------------------------------
 set.seed(1)
-system.time(fit <- rocTree(fm, data = DF, id = ID, 
+system.time(fit1 <- rocTree(fm, data = DF, id = ID, 
                            control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
                                           minsp = 20, minsp2 = 5, CV = TRUE, parallel = TRUE)))
 set.seed(1)
 system.time(fit2 <- rocTree(fm, data = DF, id = ID, 
                             control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
                                            minsp = 20, minsp2 = 0, CV = TRUE, parallel = TRUE)))
-fit
+
+fit1
+## Root                    
+##  ¦--2) KSC <= 0.39615*  
+##  °--3) KSC > 0.39615    
+##      ¦--6) OP <= 0.0000*
+##      °--7) OP > 0.0000* 
 fit2
-## Gives the same tree:
 ## Root                  
 ##  ¦--2) KSC <= 0.39615*
 ##  °--3) KSC > 0.39615*
 
-plot(fit, control = list(savePlot = TRUE))
+plot(fit1, control = list(savePlot = TRUE))
 plot(fit2, control = list(savePlot = TRUE))
+
+
+plotTreeHaz(fit)
+plotTreeHaz(fit) + theme_bw() +
+    theme(axis.line = element_line(colour = "black"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank()) 
+ggsave(filename = "haz-fit1.pdf")
 
 plotTreeHaz(fit2)
 plotTreeHaz(fit2) + theme_bw() +
@@ -120,8 +135,10 @@ plotTreeHaz(fit2) + theme_bw() +
           panel.grid.minor = element_blank(),
           panel.border = element_blank(),
           panel.background = element_blank()) 
-## ggsave(filename = "haz.pdf")
+ggsave(filename = "haz-fit2.pdf")
 
+
+pred.fit1 <- predict(fit1)
 pred.fit2 <- predict(fit2)
 
 
