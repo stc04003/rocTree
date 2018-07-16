@@ -384,7 +384,7 @@ sim2.3 <- function(n, cen = 0) {
 sim3.1 <- function(n, cen = 0) {
     e <- rbinom(n, 1, .5)
     u <- rexp(n, 5)
-    z2 <- runif(n) * -1
+    z2 <- -runif(n)
     Time <- rep(NA, n)    
     for (i in 1:n) {
         sol <- rexp(1)
@@ -418,7 +418,7 @@ sim3.2 <- function(n, cen = 0) {
     u1 <- u[,1]
     u2 <- u[,2]
     u3 <- u[,3]
-    z2 <- runif(n)
+    z2 <- -runif(n)
     Time <- rep(NA, n)
     for (i in 1:n) {
         sol <- rexp(1)
@@ -452,7 +452,7 @@ sim3.2 <- function(n, cen = 0) {
 sim3.3 <- function(n, cen = 0) {
     k <- runif(n, 1, 2)
     b <- runif(n, 1, 2)
-    z2 <- runif(n)
+    z2 <- -runif(n)
     Time <- log(10 * rexp(n) * exp(-z2 - b) * k + 1) / k
     if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 2.48)
@@ -604,7 +604,7 @@ trueHaz3.1 <- function(dat) {
     e <- dat$e[1]
     u <- dat$u[1]
     Y <- dat$Y
-    z2 <- dat$z2[1]
+    z2 <- -dat$z2[1]
     oneHaz <- function(Y) {
         if (e == 1) {
             if (Y < u) return(.1 * exp(z2) * Y)
@@ -622,7 +622,7 @@ trueSurv3.1 <- function(dat) {
     e <- dat$e[1]
     u <- dat$u[1]
     Y <- dat$Y
-    z2 <- dat$z2[1]
+    z2 <- -dat$z2[1]
     oneSurv <- function(Y) {
         if (e == 1) {
             if (Y < u) return(exp(-.1 * exp(z2) * Y))
@@ -642,7 +642,7 @@ trueHaz3.2 <- function(dat) {
     u2 <- dat$u2[1]
     u3 <- dat$u3[1]
     Y <- dat$Y
-    z2 <- dat$z2[1]
+    z2 <- -dat$z2[1]
     oneHaz <- function(Y) {
         if (e == 1) {
             if (Y < u1) return(.1 * exp(z2 + 1) * Y)
@@ -666,7 +666,7 @@ trueSurv3.2 <- function(dat) {
     u2 <- dat$u2[1]
     u3 <- dat$u3[1]
     Y <- dat$Y
-    z2 <- dat$z2[1]
+    z2 <- -dat$z2[1]
     oneSurv <- function(Y) {
         if (e == 1) {
             if (Y < u1) return(exp(-.1 * exp(z2 + 1) * Y))
@@ -704,7 +704,7 @@ trueHaz3.3 <- function(dat) {
     Y <- dat$Y
     k <- dat$k[1]
     b <- dat$b[1]
-    z2 <- dat$z2[1]
+    z2 <- -dat$z2[1]
     return(.1 * exp(z2 + b) * (exp(k * Y) - 1) / k)
 }
 
@@ -712,7 +712,7 @@ trueSurv3.3 <- function(dat) {
     Y <- dat$Y
     k <- dat$k[1]
     b <- dat$b[1]
-    z2 <- dat$z2[1]
+    z2 <- -dat$z2[1]
     return(exp(-.1 * exp(z2 + b) * (exp(k * Y) - 1) / k))
 }
 
