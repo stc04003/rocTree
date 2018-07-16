@@ -91,18 +91,17 @@ length(unique(DF$Y)) == length(unique(DF$ID))
 
 fm <- Surv(Y, Status) ~ HEMOG + AIDS + TRT + SEX + KSC + CD4 + OP
 
-
 #' ------------------------------------------------------------------------------------------
 #' Fitting rocTree
 #' ------------------------------------------------------------------------------------------
 set.seed(1)
 system.time(fit1 <- rocTree(fm, data = DF, id = ID, 
                            control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
-                                          minsp = 20, minsp2 = 5, CV = TRUE, parallel = TRUE)))
+                                          minsp = 20, minsp2 = 5, CV = TRUE, parallel = F, Trace = T)))
 set.seed(1)
 system.time(fit2 <- rocTree(fm, data = DF, id = ID, 
                             control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
-                                           minsp = 20, minsp2 = 0, CV = TRUE, parallel = TRUE)))
+                                           minsp = 20, minsp2 = 0, CV = TRUE, parallel = F)))
 
 fit1
 ## Root                    
