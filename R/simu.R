@@ -295,7 +295,7 @@ sim1.9 <- function(n, cen = 0) {
 sim2.1 <- function(n, cen = 0) {
     e <- rbinom(n, 1, .5)
     u <- rexp(n, 5)
-    z2 <- -runif(n)
+    z2 <- runif(n)
     Time <- rep(NA, n)
     for (i in 1:n) {
         sol <- rexp(1)
@@ -323,12 +323,10 @@ sim2.1 <- function(n, cen = 0) {
 
 sim2.2 <- function(n, cen = 0) {
     e <- rbinom(n, 1, .5)
-    u <- matrix(rexp(3 * n, 5), n)
-    u <- t(apply(u, 1, sort))
-    u1 <- u[,1]
-    u2 <- u[,2]
-    u3 <- u[,3] 
-    z2 <- -runif(n)
+    u1 <- rexp(n, 10)
+    u2 <- u1 + rexp(n, 10)
+    u3 <- u2 + rexp(n, 10)
+    z2 <- runif(n)
     Time <- rep(NA, n)
     for (i in 1:n) {
         sol <- rexp(1)
@@ -361,7 +359,7 @@ sim2.2 <- function(n, cen = 0) {
 sim2.3 <- function(n, cen = 0) {
     k <- runif(n, 1, 2)
     b <- runif(n, 1, 2)
-    z2 <- -runif(n)
+    z2 <- runif(n)
     Time <- rep(NA, n)
     for (i in 1:n) {
         sol <- rexp(1)
@@ -384,7 +382,7 @@ sim2.3 <- function(n, cen = 0) {
 sim3.1 <- function(n, cen = 0) {
     e <- rbinom(n, 1, .5)
     u <- rexp(n, 5)
-    z2 <- -runif(n)
+    z2 <- runif(n)
     Time <- rep(NA, n)    
     for (i in 1:n) {
         sol <- rexp(1)
@@ -415,10 +413,10 @@ sim3.2 <- function(n, cen = 0) {
     e <- rbinom(n, 1, .5)
     u <- matrix(rexp(3 * n, 5), n)
     u <- t(apply(u, 1, sort))
-    u1 <- u[,1]
-    u2 <- u[,2]
-    u3 <- u[,3]
-    z2 <- -runif(n)
+    u1 <- rexp(n, 10)
+    u2 <- u1 + rexp(n, 10)
+    u3 <- u2 + rexp(n, 10)
+    z2 <- runif(n)
     Time <- rep(NA, n)
     for (i in 1:n) {
         sol <- rexp(1)
@@ -452,7 +450,7 @@ sim3.2 <- function(n, cen = 0) {
 sim3.3 <- function(n, cen = 0) {
     k <- runif(n, 1, 2)
     b <- runif(n, 1, 2)
-    z2 <- -runif(n)
+    z2 <- runif(n)
     Time <- log(10 * rexp(n) * exp(-z2 - b) * k + 1) / k
     if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 2.48)
@@ -519,7 +517,7 @@ trueSurv1.9 <- function(dat) {
 trueSurv2.1 <- function(dat) {
     e <- dat$e[1]
     u <- dat$u[1]
-    z2 <- -dat$z2[1]
+    z2 <- dat$z2[1]
     Y <- dat$Y
     oneSurv <- function(Y) {
         if (e == 1) {
@@ -538,7 +536,7 @@ trueHaz2.1 <- function(dat) {
     e <- dat$e[1]
     u <- dat$u[1]
     Y <- dat$Y
-    z2 <- -dat$z2[1]
+    z2 <- dat$z2[1]
     oneHaz <- function(Y) {
         if (e == 1) {
             if (Y < u) return(exp(z2) * Y^2)
@@ -558,7 +556,7 @@ trueHaz2.2 <- function(dat) {
     u2 <- dat$u2[1]
     u3 <- dat$u3[1]
     Y <- dat$Y
-    z2 <- -dat$z2[1]
+    z2 <- dat$z2[1]
     oneHaz <- function(Y) {
         if (e == 1) {
             if (Y < u1) return(exp(z2 + 1) * Y^2)
@@ -582,7 +580,7 @@ trueSurv2.2 <- function(dat) {
     u2 <- dat$u2[1]
     u3 <- dat$u3[1]
     Y <- dat$Y
-    z2 <- -dat$z2[1]
+    z2 <- dat$z2[1]
     oneSurv <- function(Y) {
         if (e == 1) {
             if (Y < u1) return(exp(-exp(z2 + 1) * Y^2))
@@ -604,7 +602,7 @@ trueHaz3.1 <- function(dat) {
     e <- dat$e[1]
     u <- dat$u[1]
     Y <- dat$Y
-    z2 <- -dat$z2[1]
+    z2 <- dat$z2[1]
     oneHaz <- function(Y) {
         if (e == 1) {
             if (Y < u) return(.1 * exp(z2) * Y)
@@ -622,7 +620,7 @@ trueSurv3.1 <- function(dat) {
     e <- dat$e[1]
     u <- dat$u[1]
     Y <- dat$Y
-    z2 <- -dat$z2[1]
+    z2 <- dat$z2[1]
     oneSurv <- function(Y) {
         if (e == 1) {
             if (Y < u) return(exp(-.1 * exp(z2) * Y))
@@ -642,7 +640,7 @@ trueHaz3.2 <- function(dat) {
     u2 <- dat$u2[1]
     u3 <- dat$u3[1]
     Y <- dat$Y
-    z2 <- -dat$z2[1]
+    z2 <- dat$z2[1]
     oneHaz <- function(Y) {
         if (e == 1) {
             if (Y < u1) return(.1 * exp(z2 + 1) * Y)
@@ -666,7 +664,7 @@ trueSurv3.2 <- function(dat) {
     u2 <- dat$u2[1]
     u3 <- dat$u3[1]
     Y <- dat$Y
-    z2 <- -dat$z2[1]
+    z2 <- dat$z2[1]
     oneSurv <- function(Y) {
         if (e == 1) {
             if (Y < u1) return(exp(-.1 * exp(z2 + 1) * Y))
@@ -688,7 +686,7 @@ trueHaz2.3 <- function(dat) {
     Y <- dat$Y
     k <- dat$k[1]
     b <- dat$b[1]
-    z2 <- -dat$z2[1]
+    z2 <- dat$z2[1]
     return(2 * exp(b + z2) * (Y * exp(k * Y) / k - (exp(k * Y) - 1) / k^2))
 }
 
@@ -696,7 +694,7 @@ trueSurv2.3 <- function(dat) {
     Y <- dat$Y
     k <- dat$k[1]
     b <- dat$b[1]
-    z2 <- -dat$z2[1]
+    z2 <- dat$z2[1]
     return(exp(-(2 * exp(b + z2) * (Y * exp(k * Y) / k - (exp(k * Y) - 1) / k^2))))
 }
 
@@ -704,7 +702,7 @@ trueHaz3.3 <- function(dat) {
     Y <- dat$Y
     k <- dat$k[1]
     b <- dat$b[1]
-    z2 <- -dat$z2[1]
+    z2 <- dat$z2[1]
     return(.1 * exp(z2 + b) * (exp(k * Y) - 1) / k)
 }
 
@@ -712,7 +710,7 @@ trueSurv3.3 <- function(dat) {
     Y <- dat$Y
     k <- dat$k[1]
     b <- dat$b[1]
-    z2 <- -dat$z2[1]
+    z2 <- dat$z2[1]
     return(exp(-.1 * exp(z2 + b) * (exp(k * Y) - 1) / k))
 }
 
@@ -763,10 +761,9 @@ simuTest2.1 <- function(dat) {
 simuTest2.2 <- function(dat) {
     Y <- sort(unique(dat$Y))
     e <- rbinom(1, 1, .5)
-    u <- sort(rexp(3 * 1, 5))
-    u1 <- u[1]
-    u2 <- u[2]
-    u3 <- u[3]
+    u1 <- rexp(1, 10)
+    u2 <- u1 + rexp(1, 10)
+    u3 <- u2 + rexp(1, 10)
     z1 <- e * ((u1 <= Y) * (Y < u2) + (u3 <= Y)) + (1 - e) * ((Y < u1) + (u2 <= Y) * (Y < u3))
     data.frame(Y = Y, z1 = z1, z2 = runif(1), e = e, u1 = u1, u2 = u2, u3 = u3)
 }
@@ -781,3 +778,116 @@ simuTest2.3 <- function(dat) {
 simuTest3.1 <- function(dat) simuTest2.1(dat)
 simuTest3.2 <- function(dat) simuTest2.2(dat)
 simuTest3.3 <- function(dat) simuTest2.3(dat)
+
+sim4.1 <- function(n, cen) {
+    z2 <- runif(n)
+    p1 <- rbinom(n, 1, .5)
+    t0 <- rexp(n, 5)
+    nu <- 2
+    U <- runif(n)
+    b1 <- 2
+    b2 <- 2
+    a <- b2 * z2
+    Tp0 <- ifelse(-log(U) < exp(a) * t0^nu, 
+    (-log(U) * exp(-a))^(1/nu),
+    ((-log(U) - exp(a) * t0^nu + exp(a + b1) * t0^nu) / exp(a + b1))^(1/nu))
+    Tp1 <- ifelse(-log(U) < exp(a + b1) * t0^nu,
+    (-log(U) / exp(a + b1))^(1/nu),
+    ((-log(U) - exp(a + b1) * t0^nu + exp(a) * t0^nu) / exp(a))^(1/nu))
+    Time <- Tp0 * p1 + Tp1 * (1 - p1)
+    if (cen == 0) cens <- rep(Inf, n)
+    if (cen == .25) cens <- runif(n, 0, 1.8)
+    if (cen == .50) cens <- runif(n, 0, 0.8)
+    Y <- pmin(Time, cens)
+    d <- 1 * (Time <= cens)
+    dat <- do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), d[x]),
+                   z2 = z2[x], e = p1[x], u = t0[x])))
+    dat$z1 <- with(dat, e * (Y < u) + (1 - e) * (Y >= u))
+    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u")])        
+}
+
+simuTest4.1 <- function(dat) simuTest2.1(dat)
+trueHaz4.1 <- function(dat) {
+    attach(dat)
+    b1 <- 2
+    b2 <- 2
+    a <- b2 * z2
+    nu <- 2
+    Surv <- exp(a) * Y^nu * (e == 1 & Y < u) +
+        (exp(a) * (u^nu + exp(b1) * Y^nu - exp(b1) * u^nu)) * (e == 1 & Y >= u) +
+        (exp(a + b1) * Y^nu) * (e == 0 & Y < u) +
+        (exp(a) * (exp(b1) * u^nu + Y^nu - u^nu)) * (e == 0 & Y >= u)
+    detach(dat)
+    return(Surv)
+}
+trueSurv4.1 <- function(dat) {
+    haz <- trueHaz4.1(dat)
+    return(exp(-haz))
+}
+
+sim4.2 <- function(n, cen) {
+    U <- runif(n)
+    z2 <- runif(n)
+    b1 <- 2
+    b2 <- 2
+    a <- b2 * z2
+    p1 <- rbinom(n, 1, .5)
+    t1 <- rexp(n, 10)
+    t2 <- t1 + rexp(n, 10)
+    t3 <- t2 + rexp(n, 10)
+    Tp0 <- (-log(U) / exp(a)) * (-log(U) < exp(a) * t1) + 
+        ((-log(U) - exp(a) * t1 + exp(a + b1) * t1) / exp(a + b1)) *
+        (-log(U) >= exp(a) * t1 & -log(U) < exp(a) * (t1 + exp(b1) * (t2 - t1))) +
+        ((-log(U) - exp(a) * t1 - exp(a + b1) * (t2 - t1) + exp(a) * t2) / exp(a)) *
+        (-log(U) >= exp(a) * (t1 + exp(b1) * (t2-t1)) & -log(U) < exp(a) *
+         (t1 + exp(b1) * (t2 - t1) + (t3 - t2))) +
+        ((-log(U) - exp(a) * t1 - exp(a + b1) * (t2 - t1) -
+          exp(a) * (t3 - t2) + exp(a + b1) * t3) / exp(a + b1)) *
+        (-log(U) >= exp(a) * (t1 + exp(b1) * (t2 - t1) + (t3 - t2)))
+    Tp1 <- (-log(U) / exp(a + b1)) * (-log(U) < exp(a + b1) * t1) + 
+        ((-log(U) - exp(a + b1) * t1 + exp(a) * t1) / exp(a)) *
+        (-log(U) >= exp(a + b1) * t1 & -log(U) < exp(a) * (exp(b1) * t1 + (t2 - t1)))+
+        ((-log(U) - exp(a + b1) * t1 - exp(a) * (t2 - t1) + exp(a + b1) * t2) / exp(a + b1)) *
+        (-log(U) >= exp(a) * (exp(b1) * t1 + (t2 - t1)) & -log(U) < exp(a) *
+         (exp(b1) * t1 + (t2 - t1) + exp(b1) * (t3 - t2))) +
+        ((-log(U) - exp(a + b1) * t1 - exp(a) * (t2 - t1) -
+          exp(a + b1) * (t3 - t2) + exp(a) * t3) / exp(a)) *
+        (-log(U) >= exp(a) * (exp(b1) * t1 + (t2 - t1) + exp(b1) * (t3 - t2)))
+    Time <- Tp0 * p1 + Tp1 * (1 - p1)
+    if (cen == 0) cens <- rep(Inf, n)
+    if (cen == .25) cens <- runif(n, 0, 0.7)
+    if (cen == .50) cens <- runif(n, 0, 0.275)
+    Y <- pmin(Time, cens)
+    d <- 1 * (Time <= cens)
+    dat <- do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), d[x]),
+                   z2 = z2[x], e = p1[x], u1 = t1[x], u2 = t2[x], u3 = t3[x])))
+    dat$z1 <- with(dat, e * (u1 <= Y) * (Y < u2) + e * (u3 <= Y) + (1 - e) * (Y < u1) + (1 - e) * (u2 <= Y) * (Y < u3))
+    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u1", "u2", "u3")])      
+}
+
+simuTest4.2 <- function(dat) simuTest2.2(dat)
+
+trueHaz4.2 <- function(dat) {
+    attach(dat)
+    b1 <- 2
+    b2 <- 2
+    a <- b2 * z2
+    haz <- (exp(a) * Y) * (e == 1 & Y < u1) +
+        (exp(a) * (u1 + exp(b1) * Y - exp(b1) * u1)) * (e == 1 & Y >= u1 & Y < u2) + 
+        (exp(a) * (u1 + exp(b1) * u2 - exp(b1) * u1 + Y - u2)) * (e == 1 & Y >= u2 & Y < u3) + 
+        (exp(a) * (u1 + exp(b1) * u2 - exp(b1) * u1 + u3 - u2 + exp(b1) * (Y - u3))) *
+        (e == 1 & Y >= u3) + 
+        (exp(a + b1) * Y) * (e == 0 & Y < u1) + (exp(a) * (exp(b1) * u1 + Y - u1)) *
+        (e == 0 & Y >= u1 & Y < u2) +
+        (exp(a) * (exp(b1) * u1 + u2 - u1 + exp(b1) * (Y - u2))) * (e == 0 & Y >= u2 & Y < u3) + 
+        (exp(a) * (exp(b1) * u1 + u2 - u1 + exp(b1) * (u3 - u2) + (Y - u3))) * (e == 0 & Y >= u3)    
+    detach(dat)
+    haz
+}
+
+trueSurv4.2 <- function(dat) {
+    haz <- trueHaz4.2(dat)
+    return(exp(-haz))
+}
