@@ -56,6 +56,7 @@ rocForest <- function(formula, data, id, subset, control = list()) {
     vNames <- colnames(X)
     if (is.null(ctrl$disc)) ctrl$disc <- rep(0, p)
     if (length(ctrl$disc) == 1) ctrl$disc <- rep(ctrl$disc, p)
+    if (is.numeric(ctrl$fsz) && ctrl$fsz > length(Y)) stop("Invalid split size in forest.")
     xlist <- sapply(1:p, function(z) rocTree.Xlist(X[,z], ctrl$disc[z], Y, id), simplify = FALSE)
     xlist0 <- sapply(1:p, function(z) rocTree.Xlist(X[,z], 1, Y, id), simplify = FALSE) ## for prediction
     Y0 <- unlist(lapply(split(Y, id), max), use.names = FALSE)
@@ -184,7 +185,9 @@ is.rocForest <- function(x) inherits(x, "rocForest")
 #' @noRd
 forest1 <- function(Y, E, xlist, control) {
     n <- length(Y)
-    S <- 2 * (1 + (n - 1) %/% 4)
+    ## S <- 2 * (1 + (n - 1) %/% 4)
+    if (is.numeric(control$fsz)) S <- control$fsz
+    else S <- control$fsz(n)
     idB <- sample(1:n, S)
     idB1 <- sort(idB[1:(S/2)])
     idB2 <- sort(idB[-(1:(S/2))])

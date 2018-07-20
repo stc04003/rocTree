@@ -91,3 +91,4 @@ do.Forest(100, 0, 1.9) ## Sce I in the paper
 set.seed(1)
 do.Forest(100, 0, 1.6) ## Sce II in the paper
 ## [1] 0.06225787 0.05847085 0.11120561 0.12835964
+

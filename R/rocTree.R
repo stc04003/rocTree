@@ -135,11 +135,11 @@ rocTree <- function(formula, data, id, subset, control = list()) {
 
 rocTree.control <- function(tau = 0.4, M = 1000, hN = tau / 20, h = hN,
                             minsp = 20, minsp2 = 5, disc = 0, nflds = 10, CV = FALSE, Trace = FALSE,
-                            parallel = FALSE, parCluster = detectCores() / 2, ghN = 0.2, B = 500,
-                            splitBy = c("CON", "dCON")) {
+                            parallel = FALSE, parCluster = detectCores() / 2, ghN = 0.2, B = 500, 
+                            fsz = function(n) round(n/2), splitBy = c("CON", "dCON")) {
     list(tau = tau, M = M, hN = hN, h = h, minsp = minsp, minsp2 = minsp2, disc = disc,
          nflds = nflds, CV = CV, Trace = Trace, parallel = parallel, parCluster = parCluster, ghN = ghN,
-         B = B, splitBy = match.arg(splitBy))
+         B = B, fsz = fsz, splitBy = match.arg(splitBy))
 }
 
 #' Prepare xlist in \code{rocTree} and \code{rocForest}
