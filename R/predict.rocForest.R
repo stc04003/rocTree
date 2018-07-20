@@ -63,7 +63,7 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
     W <- lapply(W, matrix, n)
     Y0 <- unique(Y)
     t0 <- seq(0, quantile(Y0, 0.8), length = 50)
-    matk <- t(sapply(t0, function(z) object$E0 * K3(z, Y0, object$ctrl$hN) / object$ctrl$hN))
+    matk <- t(sapply(t0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN))
     matk2 <- outer(Y0, Y0, "<=")
     matk3 <- outer(Y0, Y0, "==") * object$E0
     pred <- list()

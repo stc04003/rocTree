@@ -147,13 +147,41 @@ pred.fit2 <- predict(fit2)
 set.seed(1)
 system.time(fit3 <- rocForest(fm, data = DF, id = ID,
                               control = list(disc = c(0, 1, 1, 1, 0, 0, 1),
-                                             tau = 1.5, minsp = 30, minsp2 = 5, parallel = TRUE)))
+                                             tau = 1.5, minsp = 3, minsp2 = 1, parallel = FALSE)))
 ## 31.9 secs
 
-## debug(predict)
-system.time(pred.fit3 <- predict(fit3))
-##    user  system elapsed 
-## 294.082  58.471 352.881 
-## save(pred.fit3, file = "pred.fit3.RData")
+
+#' ------------------------------------------------------------------------------------------
+#' Testing set
+#' ------------------------------------------------------------------------------------------
+library(tidyverse)
+
+dat0 <- tibble(Y = sort(unique(DF$Y)), HEMOG = 12.5, AIDS = 1, TRT = 2, SEX = 1, CD4 = 27, OP = 1)
+dim(dat0) # 467
+
+#' KSC ranges from 10 to 100
+datA <- dat0 %>% mutate(ID = 1, KSC = (Y < 0.75) * 20 + (Y > .75) * 80)
+datB <- dat0 %>% mutate(ID = 2, KSC = (Y < 0.75) * 80 + (Y > .75) * 20)
+datC <- dat0 %>% mutate(ID = 3, KSC = 80)
 
 
+predA <- predB <- predC <- predD <- NULL
+system.time(predA <- predict(fit3, datA, type = "hazard"))
+system.time(predB <- predict(fit3, datB, type = "hazard"))
+system.time(predC <- predict(fit3, datC, type = "hazard"))
+## system.time(predD <- predict(fit3, datD, type = "hazard"))
+
+datgg <- rbind(predA$pred[[1]], predB$pred[[1]], predC$pred[[1]], predD$pred[[1]])
+datgg$patient <- rep(LETTERS[1:3], each = dim(predA$pred[[1]])[1])
+
+gg <- ggplot(datgg, aes(x = Time, y = haz, group = patient)) +
+    geom_line(aes(linetype = patient, color = patient), lwd = I(1.1)) +
+    xlab("Time") + ylab("Hazard")
+
+gg + theme_bw() +
+    theme(axis.line = element_line(colour = "black"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank()) 
+ggsave(filename = "pred.fit3.pdf")
