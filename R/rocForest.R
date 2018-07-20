@@ -19,11 +19,7 @@
 #'
 #' @return An object of S3 class "\code{rocForest}" representing the fit, with the following components:
 rocForest <- function(formula, data, id, subset, control = list()) {
-    ctrl <- rocTree.control()
-    namc <- names(control)
-    if (!all(namc %in% names(ctrl))) 
-        stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
-    ctrl[namc] <- control
+    ctrl <- rocTree.control(control)
     Call <- match.call()
     indx <- match(c("formula", "data", "id", "subset"), names(Call), nomatch = 0L)
     if (indx[1] == 0L) stop("A 'formula' argument is required")

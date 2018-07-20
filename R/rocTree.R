@@ -52,12 +52,7 @@
 #' data = simudat, control = list(CV = TRUE, nflds = 10)))
 #' fit
 rocTree <- function(formula, data, id, subset, control = list()) {
-    ctrl <- rocTree.control()
-    namc <- names(control)
-    if (!all(namc %in% names(ctrl))) 
-        stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
-    ctrl[namc] <- control
-    if (!(ctrl$splitBy %in% c("CON", "dCON"))) stop("'splitBy' should be one of \"CON\", \"dCON\".")
+    ctrl <- rocTree.control(control)
     Call <- match.call()
     indx <- match(c("formula", "data", "id", "subset"), names(Call), nomatch = 0L)
     if (indx[1] == 0L) stop("A 'formula' argument is required")
@@ -133,13 +128,22 @@ rocTree <- function(formula, data, id, subset, control = list()) {
     return(out)
 }
 
-rocTree.control <- function(tau = 0.4, M = 1000, hN = tau / 20, h = hN,
-                            minsp = 20, minsp2 = 5, disc = 0, nflds = 10, CV = FALSE, Trace = FALSE,
-                            parallel = FALSE, parCluster = detectCores() / 2, ghN = 0.2, B = 500, 
-                            fsz = function(n) round(n/2), splitBy = c("CON", "dCON")) {
-    list(tau = tau, M = M, hN = hN, h = h, minsp = minsp, minsp2 = minsp2, disc = disc,
-         nflds = nflds, CV = CV, Trace = Trace, parallel = parallel, parCluster = parCluster, ghN = ghN,
-         B = B, fsz = fsz, splitBy = match.arg(splitBy))
+rocTree.control <- function(l) {
+    if (missing(l)) l <- NULL
+    ## default list
+    dl <- list(tau = 0.4, M = 1000, hN = NULL, h = NULL,
+               minsp = 20, minsp2 = 5, disc = 0, nflds = 10, CV = FALSE, Trace = FALSE,
+               parallel = FALSE, parCluster = detectCores() / 2, ghN = 0.2, B = 500, 
+               fsz = function(n) round(n/2), splitBy = "CON")
+    naml <- names(l)
+    if (!all(naml %in% names(dl)))
+        stop("unknown names in control: ", naml[!(naml %in% names(dl))])
+    dl[naml] <- l
+    if (!(dl$splitBy %in% c("CON", "dCON")))
+        stop("invalid splitBy: must be either \"CON\" or \"dCON\".")
+    if (is.null(dl$hN)) dl$hN <- dl$tau / 20
+    if (is.null(dl$h)) dl$h <- dl$tau / 20
+    return(dl)
 }
 
 #' Prepare xlist in \code{rocTree} and \code{rocForest}
