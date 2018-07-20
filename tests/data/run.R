@@ -99,9 +99,6 @@ system.time(fit1 <- rocTree(fm, data = DF, id = ID,
                            control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
                                           minsp = 20, minsp2 = 5, CV = TRUE, parallel = F, Trace = T)))
 set.seed(1)
-system.time(fit2 <- rocTree(fm, data = DF, id = ID, 
-                            control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
-                                           minsp = 20, minsp2 = 0, CV = TRUE, parallel = F)))
 
 fit1
 ## Root                    
@@ -109,36 +106,18 @@ fit1
 ##  °--3) KSC > 0.39615    
 ##      ¦--6) OP <= 0.0000*
 ##      °--7) OP > 0.0000* 
-fit2
-## Root                  
-##  ¦--2) KSC <= 0.39615*
-##  °--3) KSC > 0.39615*
 
-plot(fit1, control = list(savePlot = TRUE))
-plot(fit2, control = list(savePlot = TRUE))
+plot(fit1, control = list(shape = "rect"))
+## plot(fit1, control = list(savePlot = TRUE, shape = "rect"))
 
-
-plotTreeHaz(fit)
-plotTreeHaz(fit) + theme_bw() +
+plotTreeHaz(fit1)
+plotTreeHaz(fit1) + theme_bw() +
     theme(axis.line = element_line(colour = "black"),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           panel.border = element_blank(),
           panel.background = element_blank()) 
-ggsave(filename = "haz-fit1.pdf")
-
-plotTreeHaz(fit2)
-plotTreeHaz(fit2) + theme_bw() +
-    theme(axis.line = element_line(colour = "black"),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.border = element_blank(),
-          panel.background = element_blank()) 
-ggsave(filename = "haz-fit2.pdf")
-
-
-pred.fit1 <- predict(fit1)
-pred.fit2 <- predict(fit2)
+## ggsave(filename = "haz-fit1.pdf")
 
 
 #' ------------------------------------------------------------------------------------------
@@ -148,8 +127,6 @@ set.seed(1)
 system.time(fit3 <- rocForest(fm, data = DF, id = ID,
                               control = list(disc = c(0, 1, 1, 1, 0, 0, 1),
                                              tau = 1.5, minsp = 3, minsp2 = 1, parallel = FALSE)))
-## 31.9 secs
-
 
 #' ------------------------------------------------------------------------------------------
 #' Testing set
