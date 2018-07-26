@@ -97,13 +97,16 @@ fm <- Surv(Y, Status) ~ HEMOG + AIDS + TRT + SEX + KSC + CD4 + OP
 set.seed(1)
 system.time(fit1 <- rocTree(fm, data = DF, id = ID, 
                            control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
-                                          minsp = 20, minsp2 = 5, CV = TRUE, parallel = F, Trace = T)))
-set.seed(1)
+                                          minsp = 20, minsp2 = 5, CV = TRUE,
+                                          parallel = T, parCluster = 8)))
+## adding (t) to emphasize they are time-dependent covariates.
+fit1$vNames[5] <- "KSC(t)"
+fit1$vNames[7] <- "OP(t)"
 
 fit1
 ## Root                    
 ##  ¦--2) KSC <= 0.39615*  
-##  °--3) KSC > 0.39615    
+##  °--3) KSC > 0.39615
 ##      ¦--6) OP <= 0.0000*
 ##      °--7) OP > 0.0000* 
 
@@ -117,16 +120,20 @@ plotTreeHaz(fit1) + theme_bw() +
           panel.grid.minor = element_blank(),
           panel.border = element_blank(),
           panel.background = element_blank()) 
-## ggsave(filename = "haz-fit1.pdf")
+ggsave(filename = "haz-fit1-hn04.pdf")
 
+plotTreeHaz(fit1, control = list(ghN = .2))
+plotTreeHaz(fit1, control = list(ghN = .3))
+plotTreeHaz(fit1, control = list(ghN = .4))
 
 #' ------------------------------------------------------------------------------------------
 #' Random Forest
 #' ------------------------------------------------------------------------------------------
 set.seed(1)
 system.time(fit3 <- rocForest(fm, data = DF, id = ID,
-                              control = list(disc = c(0, 1, 1, 1, 0, 0, 1),
-                                             tau = 1.5, minsp = 3, minsp2 = 1, parallel = FALSE)))
+                              control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = .5,
+                                             tau = 1.5, minsp = 3, minsp2 = 1,
+                                             parallel = T, parCluster = 8)))
 
 #' ------------------------------------------------------------------------------------------
 #' Testing set
@@ -135,12 +142,12 @@ library(tidyverse)
 
 dat0 <- tibble(Y = sort(unique(DF$Y)), HEMOG = 12.5, AIDS = 1, TRT = 2, SEX = 1, CD4 = 27, OP = 1)
 dim(dat0) # 467
+quantile(DF$KSC, .39615)
 
 #' KSC ranges from 10 to 100
-datA <- dat0 %>% mutate(ID = 1, KSC = (Y < 0.75) * 20 + (Y > .75) * 80)
-datB <- dat0 %>% mutate(ID = 2, KSC = (Y < 0.75) * 80 + (Y > .75) * 20)
+datA <- dat0 %>% mutate(ID = 1, KSC = seq(40, 60, length = 467))
+datB <- dat0 %>% mutate(ID = 2, KSC = seq(80, 40, length = 467))
 datC <- dat0 %>% mutate(ID = 3, KSC = 80)
-
 
 predA <- predB <- predC <- predD <- NULL
 system.time(predA <- predict(fit3, datA, type = "hazard"))
@@ -148,7 +155,7 @@ system.time(predB <- predict(fit3, datB, type = "hazard"))
 system.time(predC <- predict(fit3, datC, type = "hazard"))
 ## system.time(predD <- predict(fit3, datD, type = "hazard"))
 
-datgg <- rbind(predA$pred[[1]], predB$pred[[1]], predC$pred[[1]], predD$pred[[1]])
+datgg <- rbind(predA$pred[[1]], predB$pred[[1]], predC$pred[[1]])
 datgg$patient <- rep(LETTERS[1:3], each = dim(predA$pred[[1]])[1])
 
 gg <- ggplot(datgg, aes(x = Time, y = haz, group = patient)) +
@@ -161,4 +168,5 @@ gg + theme_bw() +
           panel.grid.minor = element_blank(),
           panel.border = element_blank(),
           panel.background = element_blank()) 
-ggsave(filename = "pred.fit3.pdf")
+
+## ggsave(filename = "pred.fit3.nh05.pdf")
