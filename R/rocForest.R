@@ -131,7 +131,7 @@ grow2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, control) {
     ndInd2 <- matrix(1, N, N2)
     ndInd2[outer(Y, Y2, FUN = ">")] <- 0
     while (sum(treeMat[, 2] == 1) > 0) {
-        sp <- splitTree(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd, const, fTree, STree, control, round(length(X1.list) / 2))
+        sp <- splitTree(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd, const, fTree, STree, control, ceiling(sqrt(length(X1.list))))
         if (sp[1] * 2 < M & !is.na(sp[2])) {
             ndInd[ndInd == sp[1] & X1.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
             ndInd[ndInd == sp[1] & X1.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1

@@ -98,8 +98,9 @@ rocTree <- function(formula, data, id, subset, control = list()) {
     if (ctrl$CV & length(out$beta.seq) > 2) 
         out$con2.seq <- rocTree.cv(out$beta.seq, Y, Status, id, X, ctrl)
     out <- c(out, rocTree.final(out, Y0, E0, xlist, ctrl))
-    out <- c(out, rocTree.haz(out$dfFinal, Y0, ctrl))
-    names(out$dfFinal) <- names(out$r2Final) <- paste("Node", out$ndFinal, sep = "")
+    ## out <- c(out, rocTree.haz(out$dfFinal, Y0, ctrl))
+    ## names(out$r2Final) <- 
+    names(out$dfFinal) <- paste("Node", out$ndFinal, sep = "")
     out$Y0 <- Y0
     out$E0 <- E0
     out$xlist <- xlist
@@ -133,7 +134,7 @@ rocTree.control <- function(l) {
     ## default list
     dl <- list(tau = 0.4, M = 1000, hN = NULL, h = NULL,
                minsp = 20, minsp2 = 5, disc = 0, nflds = 10, CV = FALSE, Trace = FALSE,
-               parallel = FALSE, parCluster = detectCores() / 2, ghN = 0.2, B = 500, 
+               parallel = FALSE, parCluster = detectCores() / 2, B = 500, ghN = .2,
                fsz = function(n) round(n/2), splitBy = "CON")
     naml <- names(l)
     if (!all(naml %in% names(dl)))

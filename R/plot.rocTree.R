@@ -76,7 +76,7 @@ plot.rocTree.control <- function(rankdir = c("TB", "BT", "LR", "RL", "TD"),
                                  file_name = "pic.pdf",
                                  file_type = "pdf") {
     list(rankdir = match.arg(rankdir), shape = shape, nodeOnly = nodeOnly, savePlot = savePlot,
-         file_name = file_name, file_type = file_type)
+         file_name = file_name, file_type = file_type, hN = 0.2)
 }
 
 #' Plotting the estimated hazard function from an rocTree object
@@ -101,12 +101,10 @@ plot.rocTree.control <- function(rankdir = c("TB", "BT", "LR", "RL", "TD"),
 #' data = simudat, control = list(CV = TRUE, nflds = 10)))
 #' plotTreeHaz(fit)
 plotTreeHaz <- function(x, control = list()) {
-    ctrl <- plot.rocTree.control()
-    namc <- names(control)
-    if (!all(namc %in% names(ctrl))) 
-        stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
-    ctrl[namc] <- control
+    if (is.null(control$tau)) control$tau <- x$ctrl$tau
+    if (is.null(control$ghN)) control$ghN <- x$ctrl$ghN    
     if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object")
+    x <- c(x, rocTree.haz(x$dfFinal, x$Y0, control))
     tmp <- data.frame(x = x$tt, y = unlist(x$r2Final), Node = rep(x$ndFinal, each = length(x$tt)), row.names = NULL)
     tmp$Node <- factor(tmp$Node)
     gg <- ggplot(tmp, aes(x = x, y = y, group = Node)) +

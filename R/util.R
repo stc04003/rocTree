@@ -71,7 +71,7 @@ rocTree.haz <- function(dfFinal, Y0, control) {
     tt <- seq(0, tau, length = 500) ## move 500 to control later
     r2Final <- matrix(NA, 500, NCOL(dfFinal))
     for (i in 1:NCOL(dfFinal)) {
-        r2Final[,i] <- colSums(sapply(tt, function(x) K2(x, Y0, hN)) * dfFinal[,i]) / hN
+        r2Final[,i] <- colSums(sapply(tt, function(x) K3(x, Y0, hN)) * dfFinal[,i]) / hN
     }
     r2Final[r2Final < 0] <- 0
     list(tt = tt, r2Final = data.frame(r2Final))
