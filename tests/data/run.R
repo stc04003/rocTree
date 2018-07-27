@@ -133,7 +133,7 @@ set.seed(1)
 system.time(fit3 <- rocForest(fm, data = DF, id = ID,
                               control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = .5,
                                              tau = 1.5, minsp = 3, minsp2 = 1,
-                                             parallel = T, parCluster = 8)))
+                                             parallel = T, parCluster = 16)))
 
 #' ------------------------------------------------------------------------------------------
 #' Testing set
@@ -143,9 +143,12 @@ library(tidyverse)
 dat0 <- tibble(Y = sort(unique(DF$Y)), HEMOG = 12.5, AIDS = 1, TRT = 2, SEX = 1, CD4 = 27, OP = 1)
 dim(dat0) # 467
 quantile(DF$KSC, .39615)
+ecdf(DF$KSC)(75)
+ecdf(DF$KSC)(80)
 
 #' KSC ranges from 10 to 100
-datA <- dat0 %>% mutate(ID = 1, KSC = seq(40, 60, length = 467))
+## datA <- dat0 %>% mutate(ID = 1, KSC = seq(40, 60, length = 467))
+datA <- dat0 %>% mutate(ID = 1, KSC = seq(60, 90, length = 467))
 datB <- dat0 %>% mutate(ID = 2, KSC = seq(80, 40, length = 467))
 datC <- dat0 %>% mutate(ID = 3, KSC = 80)
 
@@ -169,4 +172,4 @@ gg + theme_bw() +
           panel.border = element_blank(),
           panel.background = element_blank()) 
 
-## ggsave(filename = "pred.fit3.nh05.pdf")
+## ggsave(filename = "pred-fit3-hn05.pdf")
