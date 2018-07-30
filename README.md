@@ -15,7 +15,7 @@ This package is working in progress.
 
 ### Online documentations
 
-[Online document](https://www.sychiou.com/rocTree/index.html) includes...
+[Online document](https://www.sychiou.com/rocTree/) includes...
 
 ### Installation
 
