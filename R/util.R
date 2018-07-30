@@ -106,6 +106,8 @@ K1 <- function(u) {
 }
 
 #' This doesn't adjust for boundary condition and can cause errors
+#' @keywords internal
+#' @noRd
 K2 <- function(s, vec, h) {
     if (is.na(s)) return(rep(NA, length(vec)))
     if (s < h) return(K1((h - vec) / h))

@@ -24,11 +24,14 @@ knitr::opts_chunk$set(
 ### ROC-guided survival trees and forests
 ***
 
-## Development
+### Development
 
 This package is working in progress.
 
-#### Installation
+### Online documentations
+[Online document](https://www.sychiou.com/rocTree/index.html) includes...
+
+### Installation
 
 You can install rocTree from github with:
 
