@@ -46,10 +46,10 @@
 #' @keywords rocTree
 #' @seealso See \code{\link{print.rocTree}} and \code{\link{plot.rocTree}} for printing and plotting an \code{rocTree}, respectively.
 #' @examples
-#' data(simudat)
 #' library(survival)
-#' system.time(fit <- rocTree(Surv(Time, Status) ~ X1 + X2 + X3, id = ID,
-#' data = simudat, control = list(CV = TRUE, nflds = 10)))
+#' set.seed(123)
+#' dat <- simu(40, 0, 1.1)
+#' fit <- rocTree(Surv(Y, death) ~ z1 + z2, id = id, data = dat, control = list(CV = TRUE))
 #' fit
 rocTree <- function(formula, data, id, subset, control = list()) {
     ctrl <- rocTree.control(control)

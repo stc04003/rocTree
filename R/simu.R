@@ -10,32 +10,37 @@ globalVariables(c("n", "cen", "Y", "id")) ## global variables for simu
 #' \eqn{Z_1} and \eqn{Z_2} are the covariates.
 #' When time varying covariate is involved (scenario 2), only \eqn{Z_1} is assumed to dependent on time.
 #'
-#' The following scenarios are included.
+#' The following scenarios form the paper are included.
 #' \describe{
 #' \item{Scenario 1}{assumes time independent covariates with \eqn{\Lambda(0) = 2t}:}
 #' \describe{
 #' \item{1.1}{Proportional hazards model:
-#' \eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2)}}.}
-#' \item{1.2}{Proportional hazards model with nonlinear covariate effects:
-#' \eqn{\lambda(t, Z) = \lambda_0(t) e^{[2\sin(2\pi Z_1) + 2|Z_2 - 0.5|]}}.}
-#' \item{1.3}{Accelerated failure time model:
-#' \eqn{\log(T) = -2 + 2Z_1 + 2Z_2 + \epsilon}, where \eqn{\epsilon} follows \eqn{N(0, 0.5^2)}.}
-#' \item{1.4}{Generalized gamma family:
-#' \eqn{T = e^{\sigma\omega}} with \eqn{\omega = \log(Q^2 g) / Q}, \eqn{g} follows Gamma(\eqn{Q^{-2}, 1}),
-#' \eqn{\sigma = 2Z_1, Q = 2Z_2}.}
-#' \item{1.5}{Proportional hazards model with noise variable:
-#' \eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2 + 0Z_3 + 0Z_4 + 0Z_5)}}.}
-#' \item{1.6}{Proportional hazards model with 10 covaraites:
-#' \eqn{\lambda(t, Z) = \lambda_0(t) e^{\sum_{j = 1}^pZ_j}}, for \eqn{\eta_j = 0.1, j = 1, ..., 10.}}
-#' \item{1.7}{Proportional hazards model with noise variable:
-#' \eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2 + 0Z_3 + 0Z_4 + ... + 0Z_{10})}}.}
+#' \deqn{\lambda(t, Z) = \lambda_0(t) e^{(-0.5 Z_1 + 0.5 Z_2 - 0.5 Z_3 ... + 0.5 Z_{10})}.}}
+#' \item{1.2}{Proportional hazards model with noise variable:
+#' \deqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2 + 0Z_3 + ... + 0Z_{10})}.}}
+#' \item{1.3}{Proportional hazards model with nonlinear covariate effects:
+#' \deqn{\lambda(t, Z) = \lambda_0(t) e^{[2\sin(2\pi Z_1) + 2|Z_2 - 0.5|]}.}}
+#' \item{1.4}{Accelerated failure time model:
+#' \deqn{\log(T) = -2 + 2Z_1 + 2Z_2 + \epsilon,} where \eqn{\epsilon} follows \eqn{N(0, 0.5^2).}}
+#' \item{1.5}{Generalized gamma family:
+#' \deqn{T = e^{\sigma\omega},} with \eqn{\omega = \log(Q^2 g) / Q}, \eqn{g} follows Gamma(\eqn{Q^{-2}, 1}),
+#' \eqn{\sigma = 2Z_1, Q = 2Z_2.}}
 #' }
-#' \item{Scenario 2}{assumes time dependent covariate (\eqn{Z_1}) with \eqn{\Lambda(0) = 2t}.
-#' The survival times are generated from the hazard \eqn{\lambda(t, Z(t)) = \lambda_0(t)e^{Z_1(t) + Z_2}},
-#' where \eqn{Z_1(t)} is the time-dependent covariate.}
+#' \item{Scenario 2}{assumes a time dependent covariate, \eqn{Z_1(t)}:}
 #' \describe{
-#' \item{2.1}{assumes}
-#' \item{2.2}{assumes}
+#' \item{2.1}{Dichotomous time dependent covariate with at most one change in value:
+#'  \deqn{\lambda(t, Z(t)) = \lambda_0(t)e^{2Z_1(t) + 2Z_2},}
+#' where \eqn{Z_1(t)} is the time-dependent covariate: \eqn{Z_1(t) = \theta I(t \ge U_0) + (1 - \theta) I(t < U_0)},
+#' and \eqn{\theta} is a Bernoulli variable with equal probability.}
+#' \item{2.2}{Dichotomous time dependent covariate with multiple changes:
+#'  \deqn{\lambda(t, Z(t)) = e^{2Z_1(t) + 2Z_2},}
+#' where \eqn{Z_1(t) = \theta[I(U_1\le t < U_2) + I(U_3 \le t)] + (1 - \theta)[I(t < U_1) + I(U_2\le t < U_3)]},
+#' \eqn{\theta} is a Bernoulli variable with equal probability, and \eqn{U_1\le U_2\le U_3}
+#' are the first three terms of a stationary Poisson process with rate 10.}
+#' \item{2.3}{Continuous time dependent covariate:
+#' \deqn{\lambda(t, Z(t)) = 0.1 e^{Z_1(t) + Z_2},} where \eqn{Z_1(t) = kt + b},
+#' \eqn{k} and \eqn{b} follow independent uniform distributions over \eqn{(1, 2)}.
+#' }
 #' }
 #' }
 #' 
@@ -49,6 +54,7 @@ globalVariables(c("n", "cen", "Y", "id")) ## global variables for simu
 #' @importFrom stats delete.response rexp rgamma rnorm runif rbinom uniroot
 #' @importFrom tibble as.tibble
 #' @importFrom dplyr "%>%" arrange select
+#' @importFrom MASS mvrnorm
 #' 
 #' @return \code{simu} returns a \code{data.frame} in the class of "roc.simu".
 #' This is needed for \code{trueHaz} and \code{trueSurv}.
@@ -142,20 +148,8 @@ simuTest <- function(dat) {
 #' Background functions for simulation
 #' @keywords internal
 #' @noRd
-sim1.1 <- function(n, cen = 0) {
-    z1 <- runif(n)
-    z2 <- runif(n)
-    Time <- sqrt(rexp(n) * exp(-2 * z1 - 2 * z2))
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 1.41)
-    if (cen == .50) cens <- runif(n, 0, 0.66)
-    Y <- pmin(Time, cens)
-    d <- 1 * (Time <= cens)
-    do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), d[x]),  z1 = z1[x], z2 = z2[x])))
-}
 
-sim1.2 <- function(n, cen = 0) {
+sim1.3 <- function(n, cen = 0) {
     z1 <- runif(n)
     z2 <- runif(n)
     Time <- sqrt(rexp(n) * exp(-2 * sin(2 * pi * z1) - 2 * abs(z2 - .5)))
@@ -167,23 +161,7 @@ sim1.2 <- function(n, cen = 0) {
         data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
-sim1.5 <- function(n, cen = 0) {
-    z1 <- runif(n)
-    z2 <- runif(n)
-    z3 <- runif(n)
-    z4 <- runif(n)
-    z5 <- runif(n)
-    Time <- sqrt(rexp(n) * exp(-2 * z1 - 2 * z2))
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 1.41)
-    if (cen == .50) cens <- runif(n, 0, 0.66)
-    Y <- pmin(Time, cens)
-    do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
-                   z1 = z1[x], z2 = z2[x], z3 = z3[x], z4 = z4[x], z5 = z5[x])))
-}
-
-sim1.3 <- function(n, cen = 0) {
+sim1.4 <- function(n, cen = 0) {
     z1 <- runif(n)
     z2 <- runif(n)
     Time <- rlnorm(n, meanlog = -2 + 2 * z1 + 2 * z2, sdlog = .5)
@@ -197,25 +175,8 @@ sim1.3 <- function(n, cen = 0) {
         data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
-## sim1.4 <- function(n, cen = 0) {
-##     z1 <- runif(n)
-##     z2 <- runif(n)    
-##     sig <- 2 * z1
-##     Q <- 2 * z2
-##     g <- rgamma(n, Q^-2, 1)
-##     w <- log(Q^2 * g) / Q
-##     Time <- exp(sig * w)
-##     cens <- runif(n, 0, cen)
-##     if (cen == 0) cens <- rep(Inf, n)
-##     if (cen == .25) cens <- runif(n, 0, 4.12)
-##     if (cen == .50) cens <- runif(n, 0, 1.63)
-##     Y <- pmin(Time, cens)
-##     do.call(rbind, lapply(1:n, function(x)
-##         data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
-## }
-
 #' @importFrom flexsurv pgengamma rgengamma 
-sim1.4 <- function(n, cen = 0) {
+sim1.5 <- function(n, cen = 0) {
     z1 <- runif(n)
     z2 <- runif(n)
     Time <- rgengamma(n, mu = 0, sigma = 2 * z1, Q = 2 * z2)
@@ -228,9 +189,8 @@ sim1.4 <- function(n, cen = 0) {
         data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
-sim1.6 <- function(n, cen = 0) {
+sim1.2 <- function(n, cen = 0) {
     z <- matrix(runif(n * 10), n, 10)
-    ## z <- matrix(rnorm(n * 10), n, 10)
     Time <- sqrt(rexp(n) * exp(-rowSums(z[,1:2]) * 2))
     if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 2.76)
@@ -244,39 +204,7 @@ sim1.6 <- function(n, cen = 0) {
     dat
 }
 
-sim1.7 <- function(n, cen = 0) {
-    z <- matrix(runif(n * 10), n, 10)
-    Time <- sqrt(rexp(n) * exp(-rowSums(z[,1:2]) * 2))
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 1.41)
-    if (cen == .50) cens <- runif(n, 0, 0.66)
-    Y <- pmin(Time, cens)
-    d <- 1 * (Time <= cens)
-    dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), d[x]))))
-    dat <- cbind(dat, z[dat$id,])
-    names(dat)[4:13] <- paste("z", 1:10, sep = "")
-    dat    
-}
-
-#' @importFrom MASS mvrnorm
-sim1.8 <- function(n, cen = 0) {
-    V <- .75^as.matrix(dist(1:10, upper = TRUE))
-    z <- mvrnorm(n = n, mu = rep(0, 10), Sigma = V)
-    Time <- sqrt(rexp(n) * exp(-rowSums(z) * .5))
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 7.83)
-    if (cen == .50) cens <- runif(n, 0, 1.95)
-    Y <- pmin(Time, cens)
-    d <- 1 * (Time <= cens) 
-    dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), d[x]))))
-    dat <- cbind(dat, z[dat$id,])
-    names(dat)[4:13] <- paste("z", 1:10, sep = "")
-    dat   
-}
-
-sim1.9 <- function(n, cen = 0) {
+sim1.1 <- function(n, cen = 0) {
     V <- .75^as.matrix(dist(1:10, upper = TRUE))
     z <- mvrnorm(n = n, mu = rep(0, 10), Sigma = V)
     Time <- sqrt(rexp(n) * exp(- z %*% rep(c(-.5, .5), 5)))
@@ -292,494 +220,7 @@ sim1.9 <- function(n, cen = 0) {
     dat   
 }
 
-sim2.1 <- function(n, cen = 0) {
-    e <- rbinom(n, 1, .5)
-    u <- rexp(n, 5)
-    z2 <- runif(n)
-    Time <- rep(NA, n)
-    for (i in 1:n) {
-        sol <- rexp(1)
-        if (e[i] == 1)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u[i]) * exp(z2[i]) * x^2 -
-                (x >= u[i]) * exp(z2[i]) * (x^2 * exp(1) + u[i]^2 * (1 - exp(1))),
-                interval = c(0, 50))$root
-        if (e[i] == 0)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u[i]) * exp(z2[i] + 1) * x^2 -
-                (x > u[i]) * exp(z2[i]) * (exp(1) * x^2 + x^2 - u[i]^2),
-                interval = c(0, 50))$root
-    }
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 1.73)
-    if (cen == .50) cens <- runif(n, 0, 0.83)
-    Y <- pmin(Time, cens)
-    dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
-                   z2 = z2[x], e = e[x], u = u[x])))
-    dat$z1 <- with(dat, e * (Y < u) + (1 - e) * (Y >= u))
-    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u")])
-}
-
-sim2.2 <- function(n, cen = 0) {
-    e <- rbinom(n, 1, .5)
-    u1 <- rexp(n, 10)
-    u2 <- u1 + rexp(n, 10)
-    u3 <- u2 + rexp(n, 10)
-    z2 <- runif(n)
-    Time <- rep(NA, n)
-    for (i in 1:n) {
-        sol <- rexp(1)
-        if (e[i] == 1)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u1[i]) * exp(z2[i]) * x^2 - 
-                (x >= u1[i]) * (x < u2[i]) * exp(z2[i]) * (u1[i]^2 + exp(1) * (x^2 - u1[i]^2)) -
-                (x >= u2[i]) * (x < u3[i]) * exp(z2[i]) * (u1[i]^2 + exp(1) * (u2[i]^2 - u1[i]^2) + x^2 - u2[i]^2) -
-                (x >= u3[i]) * exp(z2[i]) * (u1[i]^2 + u3[i]^2 - u2[i]^2 + exp(1) * (u2[i]^2 - u1[i]^2 + x^2 - u3[i]^2)),
-                interval = c(0, 50))$root
-        if (e[i] == 0)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u1[i]) * exp(z2[i]) * exp(1) * x^2 -
-                (x >= u1[i]) * (x < u2[i]) * exp(z2[i]) * (exp(1) * u1[i]^2 + x^2 - u1[i]^2) - 
-                (x >= u2[i]) * (x < u3[i]) * exp(z2[i]) * (exp(1) * (u1[i]^2 + x^2 - u2[i]^2) + u2[i]^2 - u1[i]^2) -
-                (x >= u3[i]) * exp(z2[i]) * (exp(1) * (u1[i]^2 + u3[i]^2 - u2[i]^2) + u2[i]^2 - u1[i]^2 - u3[i]^2 + x^2),
-                interval = c(0, 50))$root
-    }
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 2.11) 
-    if (cen == .50) cens <- runif(n, 0, 1.02) 
-    Y <- pmin(Time, cens)
-    dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
-                   z2 = z2[x], e = e[x], u1 = u1[x], u2 = u2[x], u3 = u3[x])))
-    dat$z1 <- with(dat, e * (u1 <= Y) * (Y < u2) + e * (u3 <= Y) + (1 - e) * (Y < u1) + (1 - e) * (u2 <= Y) * (Y < u3))
-    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u1", "u2", "u3")])
-}
-
-sim2.3 <- function(n, cen = 0) {
-    k <- runif(n, 1, 2)
-    b <- runif(n, 1, 2)
-    z2 <- runif(n)
-    Time <- rep(NA, n)
-    for (i in 1:n) {
-        sol <- rexp(1)
-        Time[i] <- uniroot(f = function(x)
-            sol - 2 * exp(z2[i] + b[i]) * (x * exp(k[i] * x) / k[i] - (exp(k[i] * x) - 1) / k[i]^2),
-            interval = c(0, 50))$root
-    }
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 1.11)
-    if (cen == .50) cens <- runif(n, 0, 0.56)
-    Y <- pmin(Time, cens)
-    dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = sort(Y[Y <= Y[x]]),
-                   death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
-                   z2 = z2[x], k = k[x], b = b[x])))
-    dat$z1 <- with(dat, k * Y + b)
-    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
-}
-
-sim3.1 <- function(n, cen = 0) {
-    e <- rbinom(n, 1, .5)
-    u <- rexp(n, 5)
-    z2 <- runif(n)
-    Time <- rep(NA, n)    
-    for (i in 1:n) {
-        sol <- rexp(1)
-        if (e[i] == 1)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u[i]) * .1 * exp(z2[i]) * x -
-                (x >= u[i]) * .1 * exp(z2[i]) * (u[i] + exp(1) * (x - u[i])),
-                interval = c(0, 100))$root
-        if (e[i] == 0)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u[i]) * .1 * exp(z2[i] + 1) * x -
-                (x > u[i]) * .1 * exp(z2[i]) * (exp(1) * u[i] + x + u[i]),
-                interval = c(0, 100))$root
-    }
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 14.99)
-    if (cen == .50) cens <- runif(n, 0, 5.73)
-    Y <- pmin(Time, cens)
-    dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = sort(Y[Y <= Y[x]]),
-                   death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
-                   z2 = z2[x], e = e[x], u = u[x])))
-    dat$z1 <- with(dat, e * (Y < u) + (1 - e) * (Y >= u))
-    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u")])
-}
-
-sim3.2 <- function(n, cen = 0) {
-    e <- rbinom(n, 1, .5)
-    u <- matrix(rexp(3 * n, 5), n)
-    u <- t(apply(u, 1, sort))
-    u1 <- rexp(n, 10)
-    u2 <- u1 + rexp(n, 10)
-    u3 <- u2 + rexp(n, 10)
-    z2 <- runif(n)
-    Time <- rep(NA, n)
-    for (i in 1:n) {
-        sol <- rexp(1)
-        if (e[i] == 1)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u1[i]) * .1 * exp(z2[i]) * x - 
-                (x >= u1[i]) * (x < u2[i]) * .1 * exp(z2[i]) * (u1[i] + exp(1) * (x - u1[i])) -
-                (x >= u2[i]) * (x < u3[i]) * .1 * exp(z2[i]) * (u1[i] + exp(1) * (u2[i] - u1[i]) + x - u2[i]) -
-                (x >= u3[i]) * .1 * exp(z2[i]) * (u1[i] + u3[i] - u2[i] + exp(1) * (u2[i] - u1[i] + x - u3[i])),
-                interval = c(0, 100))$root
-        if (e[i] == 0)
-            Time[i] <- uniroot(f = function(x)
-                sol - (x < u1[i]) * .1 * exp(z2[i]) * exp(1) * x -
-                (x >= u1[i]) * (x < u2[i]) * .1 * exp(z2[i]) * (exp(1) * u1[i] + x - u1[i]) - 
-                (x >= u2[i]) * (x < u3[i]) * .1 * exp(z2[i]) * (exp(1) * (u1[i] + x - u2[i]) + u2[i] - u1[i]) -
-                (x >= u3[i]) * .1 * exp(z2[i]) * (exp(1) * (u1[i] + u3[i] - u2[i]) + u2[i] - u1[i] - u3[i] + x),
-                interval = c(0, 100))$root
-    }
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 15.54)
-    if (cen == .50) cens <- runif(n, 0, 5.78)
-    Y <- pmin(Time, cens)
-    dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = sort(Y[Y <= Y[x]]),
-                   death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
-                   z2 = z2[x], e = e[x], u1 = u1[x], u2 = u2[x], u3 = u3[x])))
-    dat$z1 <- with(dat, e * (u1 <= Y) * (Y < u2) + e * (u3 <= Y) + (1 - e) * (Y < u1) + (1 - e) * (u2 <= Y) * (Y < u3))
-    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u1", "u2", "u3")])
-}
-
-sim3.3 <- function(n, cen = 0) {
-    k <- runif(n, 1, 2)
-    b <- runif(n, 1, 2)
-    z2 <- runif(n)
-    Time <- log(10 * rexp(n) * exp(-z2 - b) * k + 1) / k
-    if (cen == 0) cens <- rep(Inf, n)
-    if (cen == .25) cens <- runif(n, 0, 2.48)
-    if (cen == .50) cens <- runif(n, 0, 1.23)
-    Y <- pmin(Time, cens)
-    dat <- do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = sort(Y[Y <= Y[x]]),
-                   death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
-                   z1 = sort(Y[Y <= Y[x]]) * k[x] + b[x],
-                   z2 = z2[x], k = k[x], b = b[x])))
-    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
-}
-
-#' #############################################################################################################
-#' #############################################################################################################
-#' Background functions for true survival and cumulative hazard curves given case and datasets
-#' @keywords internal
-#' @noRd
-trueHaz1.1 <- function(dat) with(dat, Y^2 * exp(2 * z1 + 2 * z2))
-trueSurv1.1 <- function(dat) exp(-with(dat, Y^2 * exp(2 * z1 + 2 * z2)))
-
-trueHaz1.2 <- function(dat) with(dat, Y^2 * exp(2 * sin(2 * pi * dat$z1) + 2 * abs(dat$z2 - .5)))
-trueSurv1.2 <- function(dat) with(dat, exp(-Y^2 * exp(2 * sin(2 * pi * dat$z1) + 2 * abs(dat$z2 - .5))))
-
-trueHaz1.3 <- function(dat) with(dat, -log(1 - plnorm(Y, meanlog = -2 + 2 * z1 + 2 * z2, sdlog = .5)))
-trueSurv1.3 <- function(dat) with(dat, 1 - plnorm(Y, meanlog = -2 + 2 * z1 + 2 * z2, sdlog = .5))
-
-trueHaz1.4 <- function(dat) with(dat, -log(1 - pgengamma(Y, mu = 0, sigma = 2 * z1, Q = 2 * z2)))
-trueSurv1.4 <- function(dat) with(dat, 1 - pgengamma(Y, mu = 0, sigma = 2 * z1, Q = 2 * z2))
-    
-trueHaz1.5 <- function(dat) trueHaz1.1(dat)
-trueSurv1.5 <- function(dat) trueSurv1.1(dat)
-
-trueHaz1.7 <- function(dat) trueHaz1.1(dat)
-trueSurv1.7 <- function(dat) trueSurv1.1(dat)
-
-trueHaz1.6 <- function(dat) {
-    z <- dat %>% select(paste("z", 1:10, sep = ""))
-    dat$Y^2 * exp(2 * rowSums(z[,1:2]))
-}
-trueSurv1.6 <- function(dat) {
-    z <- dat %>% select(paste("z", 1:10, sep = ""))
-    exp(-dat$Y^2 * exp(2 * rowSums(z[,1:2])))
-}
-
-trueHaz1.8 <- function(dat) {
-    z <- dat %>% select(paste("z", 1:10, sep = ""))
-    dat$Y^2 * exp(.5 * rowSums(z))
-}
-trueSurv1.8 <- function(dat) {
-    z <- dat %>% select(paste("z", 1:10, sep = ""))
-    exp(-dat$Y^2 * exp(.5 * rowSums(z)))
-}
-
-trueHaz1.9 <- function(dat) {
-    z <- dat %>% select(paste("z", 1:10, sep = ""))
-    dat$Y^2 * exp(as.matrix(z) %*% rep(c(-.5, .5), 5))
-}
-trueSurv1.9 <- function(dat) {
-    z <- dat %>% select(paste("z", 1:10, sep = ""))
-    exp(-dat$Y^2 * exp(as.matrix(z) %*% rep(c(-.5, .5), 5)))
-}
-
-trueSurv2.1 <- function(dat) {
-    e <- dat$e[1]
-    u <- dat$u[1]
-    z2 <- dat$z2[1]
-    Y <- dat$Y
-    oneSurv <- function(Y) {
-        if (e == 1) {
-            if (Y < u) return(exp(-exp(z2) * Y^2))
-            else return(exp(-(exp(z2) * u^2 + exp(z2 + 1) * (Y^2 - u^2))))
-        }
-        if (e == 0) {
-            if (Y < u) return(exp(-exp(z2 + 1) * Y^2))
-            else return(exp(-(exp(z2 + 1) * u^2 + exp(z2) * (Y^2 - u^2))))
-        }    
-    }
-    return(sapply(Y, oneSurv))
-}
-
-trueHaz2.1 <- function(dat) {
-    e <- dat$e[1]
-    u <- dat$u[1]
-    Y <- dat$Y
-    z2 <- dat$z2[1]
-    oneHaz <- function(Y) {
-        if (e == 1) {
-            if (Y < u) return(exp(z2) * Y^2)
-            else return(exp(z2) * u^2 + exp(z2 + 1) * (Y^2 - u^2))
-        }
-        if (e == 0) {
-            if (Y < u) return(exp(z2 + 1) * Y^2)
-            else return(exp(z2 + 1) * u^2 + exp(z2) * (Y^2 - u^2))
-        }
-    }
-    return(sapply(Y, oneHaz))
-}
-        
-trueHaz2.2 <- function(dat) {
-    e <- dat$e[1]
-    u1 <- dat$u1[1]
-    u2 <- dat$u2[1]
-    u3 <- dat$u3[1]
-    Y <- dat$Y
-    z2 <- dat$z2[1]
-    oneHaz <- function(Y) {
-        if (e == 1) {
-            if (Y < u1) return(exp(z2 + 1) * Y^2)
-            if (Y >= u1 & Y < u2) return(exp(z2) * (exp(1) * u1^2 + Y^2 - u1^2))
-            if (Y >= u2 & Y < u3) return(exp(z2) * (exp(1) * u1^2 + (u2^2 - u1^2) + exp(1) * (Y^2 - u2^2)))
-            if (Y > u3) return(exp(z2) * (exp(1) * u1^2 + u2^2 - u1^2 + exp(1) * (u3^2 - u2^2) + (Y^2 - u3^2)))
-        }
-        if (e == 0) {
-            if (Y < u1) return(exp(z2) * Y^2 )
-            if (Y >= u1 & Y < u2) return(exp(z2) * (u1^2 + exp(1) * (Y^2 - u1^2)))
-            if (Y >= u2 & Y < u3) return(exp(z2) * (u1^2 + exp(1) * (u2^2 - u1^2) + (Y^2 - u2^2)))
-            if (Y > u3) return(exp(z2) * (u1^2 + exp(1) * (u2^2 - u1^2) + (u3^2 - u2^2) + exp(1) * (Y^2 - u3^2)))
-        }
-    }
-    return(sapply(Y, oneHaz))
-}
-
-trueSurv2.2 <- function(dat) {
-    e <- dat$e[1]
-    u1 <- dat$u1[1]
-    u2 <- dat$u2[1]
-    u3 <- dat$u3[1]
-    Y <- dat$Y
-    z2 <- dat$z2[1]
-    oneSurv <- function(Y) {
-        if (e == 1) {
-            if (Y < u1) return(exp(-exp(z2 + 1) * Y^2))
-            if (Y >= u1 & Y < u2) return(exp(-(exp(z2) * (exp(1) * u1^2 + Y^2 - u1^2))))
-            if (Y >= u2 & Y < u3) return(exp(-(exp(z2) * (exp(1) * u1^2 + (u2^2 - u1^2) + exp(1) * (Y^2 - u2^2)))))
-            if (Y > u3) return(exp(-(exp(z2) * (exp(1) * u1^2 + u2^2 - u1^2 + exp(1) * (u3^2 - u2^2) + (Y^2 - u3^2)))))
-        }
-        if (e == 0) {
-            if (Y < u1) return(exp(-(exp(z2) * Y^2 )))
-            if (Y >= u1 & Y < u2) return(exp(-(exp(z2) * (u1^2 + exp(1) * (Y^2 - u1^2)))))
-            if (Y >= u2 & Y < u3) return(exp(-(exp(z2) * (u1^2 + exp(1) * (u2^2 - u1^2) + (Y^2 - u2^2)))))
-            if (Y > u3) return(exp(-(exp(z2) * (u1^2 + exp(1) * (u2^2 - u1^2) + (u3^2 - u2^2) + exp(1) * (Y^2 - u3^2)))))
-        }
-    }
-    return(sapply(Y, oneSurv))
-}
-    
-trueHaz3.1 <- function(dat) {
-    e <- dat$e[1]
-    u <- dat$u[1]
-    Y <- dat$Y
-    z2 <- dat$z2[1]
-    oneHaz <- function(Y) {
-        if (e == 1) {
-            if (Y < u) return(.1 * exp(z2) * Y)
-            else return(.1 * exp(z2) * u + .1 * exp(z2 + 1) * (Y - u))
-        }
-        if (e == 0) {
-            if (Y < u) return(exp(z2 + 1) * Y^2)
-            else return(.1 * exp(z2 + 1) * u + .1 * exp(z2) * (Y - u))
-        }
-    }
-    return(sapply(Y, oneHaz))
-}
-    
-trueSurv3.1 <- function(dat) {
-    e <- dat$e[1]
-    u <- dat$u[1]
-    Y <- dat$Y
-    z2 <- dat$z2[1]
-    oneSurv <- function(Y) {
-        if (e == 1) {
-            if (Y < u) return(exp(-.1 * exp(z2) * Y))
-            else return(exp(-(.1 * exp(z2) * u + .1 * exp(z2 + 1) * (Y - u))))
-        }
-        if (e == 0) {
-            if (Y < u) return(exp(-exp(z2 + 1) * Y^2))
-            else return(exp(-(.1 * exp(z2 + 1) * u + .1 * exp(z2) * (Y - u))))
-        }
-    }
-    return(sapply(Y, oneSurv))
-}
-
-trueHaz3.2 <- function(dat) {
-    e <- dat$e[1]
-    u1 <- dat$u1[1]
-    u2 <- dat$u2[1]
-    u3 <- dat$u3[1]
-    Y <- dat$Y
-    z2 <- dat$z2[1]
-    oneHaz <- function(Y) {
-        if (e == 1) {
-            if (Y < u1) return(.1 * exp(z2 + 1) * Y)
-            if (Y >= u1 & Y < u2) return(.1 * exp(z2) * (exp(1) * u1 + Y - u1))
-            if (Y >= u2 & Y < u3) return(.1 * exp(z2) * (exp(1) * u1 + (u2 - u1) + exp(1) * (Y - u2)))
-            if (Y > u3) return(.1 * exp(z2) * (exp(1) * u1 + (u2 - u1) + exp(1) * (u3 - u2) + (Y - u3)))
-        }
-        if (e == 0) {
-            if (Y < u1) return(.1 * exp(z2) * Y)
-            if (Y >= u1 & Y < u2) return(.1 * exp(z2) * (u1 + exp(1) * (Y - u1)))
-            if (Y >= u2 & Y < u3) return(.1 * exp(z2) * (u1 + exp(1) * (u2 - u1) + (Y - u2)))
-            if (Y > u3) return(.1 * exp(z2) * (u1 + exp(1) * (u2 - u1) + (u3 - u2) + exp(1) * (Y - u3)))
-        }
-    }
-    return(sapply(Y, oneHaz))
-}
-
-trueSurv3.2 <- function(dat) {
-    e <- dat$e[1]
-    u1 <- dat$u1[1]
-    u2 <- dat$u2[1]
-    u3 <- dat$u3[1]
-    Y <- dat$Y
-    z2 <- dat$z2[1]
-    oneSurv <- function(Y) {
-        if (e == 1) {
-            if (Y < u1) return(exp(-.1 * exp(z2 + 1) * Y))
-            if (Y >= u1 & Y < u2) return(exp(-.1 * exp(z2) * (exp(1) * u1 + Y - u1)))
-            if (Y >= u2 & Y < u3) return(exp(-.1 * exp(z2) * (exp(1) * u1 + (u2 - u1) + exp(1) * (Y - u2))))
-            if (Y > u3) return(exp(-.1 * exp(z2) * (exp(1) * u1 + (u2 - u1) + exp(1) * (u3 - u2) + (Y - u3))))
-        }
-        if (e == 0) {
-            if (Y < u1) return(exp(-.1 * exp(z2) * Y))
-            if (Y >= u1 & Y < u2) return(exp(-.1 * exp(z2) * (u1 + exp(1) * (Y - u1))))
-            if (Y >= u2 & Y < u3) return(exp(-.1 * exp(z2) * (u1 + exp(1) * (u2 - u1) + (Y - u2))))
-            if (Y > u3) return(exp(-.1 * exp(z2) * (u1 + exp(1) * (u2 - u1) + (u3 - u2) + exp(1) * (Y - u3))))
-        }
-    }
-    return(sapply(Y, oneSurv))
-}
-
-trueHaz2.3 <- function(dat) {
-    Y <- dat$Y
-    k <- dat$k[1]
-    b <- dat$b[1]
-    z2 <- dat$z2[1]
-    return(2 * exp(b + z2) * (Y * exp(k * Y) / k - (exp(k * Y) - 1) / k^2))
-}
-
-trueSurv2.3 <- function(dat) {
-    Y <- dat$Y
-    k <- dat$k[1]
-    b <- dat$b[1]
-    z2 <- dat$z2[1]
-    return(exp(-(2 * exp(b + z2) * (Y * exp(k * Y) / k - (exp(k * Y) - 1) / k^2))))
-}
-
-trueHaz3.3 <- function(dat) {
-    Y <- dat$Y
-    k <- dat$k[1]
-    b <- dat$b[1]
-    z2 <- dat$z2[1]
-    return(.1 * exp(z2 + b) * (exp(k * Y) - 1) / k)
-}
-
-trueSurv3.3 <- function(dat) {
-    Y <- dat$Y
-    k <- dat$k[1]
-    b <- dat$b[1]
-    z2 <- dat$z2[1]
-    return(exp(-.1 * exp(z2 + b) * (exp(k * Y) - 1) / k))
-}
-
-#' Background functions for generating testing sets given training data
-#'
-#' These functions give ONE draw of test set
-#' 
-#' @keywords internal
-#' @noRd
-simuTest1.1 <- function(dat) {
-    Y <- sort(unique(dat$Y))
-    data.frame(Y = Y, z1 = runif(1), z2 = runif(1))
-}
-
-simuTest1.2 <- function(dat) simuTest1.1(dat)
-simuTest1.3 <- function(dat) simuTest1.1(dat)
-simuTest1.4 <- function(dat) simuTest1.1(dat)
-
-simuTest1.6 <- function(dat) {
-    Y <- sort(unique(dat$Y))
-    data.frame(Y = Y, z1 = runif(1), z2 = runif(1), z3 = runif(1), z4 = runif(1), z5 = runif(1),
-               z6 = runif(1), z7 = runif(1), z8 = runif(1), z9 = runif(1), z10 = runif(1))
-}
-
-
-simuTest1.7 <- function(dat) simuTest1.6(dat)
-simuTest1.8 <- function(dat) {
-    Y <- sort(unique(dat$Y))
-    V <- .75^as.matrix(dist(1:10, upper = TRUE))
-    z <- mvrnorm(n = 1, mu = rep(0, 10), Sigma = V)
-    as.data.frame(cbind(Y = Y, z1 = z[1], z2 = z[2], z3 = z[3], z4 = z[4], z5 = z[5],
-                        z6 = z[6], z7 = z[7], z8 = z[8], z9 = z[9], z10 = z[10]))
-}
-simuTest1.9 <- function(dat) simuTest1.8(dat)
-
-simuTest1.5 <- function(dat) {
-    Y <- sort(unique(dat$Y))
-    data.frame(Y = Y, z1 = runif(1), z2 = runif(1), z3 = runif(1), z4 = runif(1), z5 = runif(1))
-}
-
-simuTest2.1 <- function(dat) {
-    Y <- sort(unique(dat$Y))
-    e <- rbinom(1, 1, .5)
-    u <- rexp(1, 5)
-    data.frame(Y = Y, z1 = e * (Y < u) + (1 - e) * (Y >= u), z2 = runif(1), e = e, u = u)
-}
-
-simuTest2.2 <- function(dat) {
-    Y <- sort(unique(dat$Y))
-    e <- rbinom(1, 1, .5)
-    u1 <- rexp(1, 10)
-    u2 <- u1 + rexp(1, 10)
-    u3 <- u2 + rexp(1, 10)
-    z1 <- e * ((u1 <= Y) * (Y < u2) + (u3 <= Y)) + (1 - e) * ((Y < u1) + (u2 <= Y) * (Y < u3))
-    data.frame(Y = Y, z1 = z1, z2 = runif(1), e = e, u1 = u1, u2 = u2, u3 = u3)
-}
-
-simuTest2.3 <- function(dat) {
-    Y <- sort(unique(dat$Y))
-    k <- runif(1, 1, 2)
-    b <- runif(1, 1, 2)
-    data.frame(Y = Y, z1 = k * Y + b, z2 = runif(1), k = k, b = b)
-}
-
-simuTest3.1 <- function(dat) simuTest2.1(dat)
-simuTest3.2 <- function(dat) simuTest2.2(dat)
-simuTest3.3 <- function(dat) simuTest2.3(dat)
-
-sim4.1 <- function(n, cen) {
+sim2.1 <- function(n, cen) {
     z2 <- runif(n)
     p1 <- rbinom(n, 1, .5)
     t0 <- rexp(n, 5)
@@ -807,26 +248,7 @@ sim4.1 <- function(n, cen) {
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u")])        
 }
 
-simuTest4.1 <- function(dat) simuTest2.1(dat)
-trueHaz4.1 <- function(dat) {
-    attach(dat)
-    b1 <- 2
-    b2 <- 2
-    a <- b2 * z2
-    nu <- 2
-    Surv <- exp(a) * Y^nu * (e == 1 & Y < u) +
-        (exp(a) * (u^nu + exp(b1) * Y^nu - exp(b1) * u^nu)) * (e == 1 & Y >= u) +
-        (exp(a + b1) * Y^nu) * (e == 0 & Y < u) +
-        (exp(a) * (exp(b1) * u^nu + Y^nu - u^nu)) * (e == 0 & Y >= u)
-    detach(dat)
-    return(Surv)
-}
-trueSurv4.1 <- function(dat) {
-    haz <- trueHaz4.1(dat)
-    return(exp(-haz))
-}
-
-sim4.2 <- function(n, cen) {
+sim2.2 <- function(n, cen) {
     U <- runif(n)
     z2 <- runif(n)
     b1 <- 2
@@ -867,9 +289,73 @@ sim4.2 <- function(n, cen) {
     return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "e", "u1", "u2", "u3")])      
 }
 
-simuTest4.2 <- function(dat) simuTest2.2(dat)
+sim2.3 <- function(n, cen = 0) {
+    k <- runif(n, 1, 2)
+    b <- runif(n, 1, 2)
+    z2 <- runif(n)
+    Time <- log(10 * rexp(n) * exp(-z2 - b) * k + 1) / k
+    if (cen == 0) cens <- rep(Inf, n)
+    if (cen == .25) cens <- runif(n, 0, 2.48)
+    if (cen == .50) cens <- runif(n, 0, 1.23)
+    Y <- pmin(Time, cens)
+    dat <- do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]),
+                   death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+                   z1 = sort(Y[Y <= Y[x]]) * k[x] + b[x],
+                   z2 = z2[x], k = k[x], b = b[x])))
+    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
+}
 
-trueHaz4.2 <- function(dat) {
+#' Background functions for true survival and cumulative hazard curves given case and datasets
+#' @keywords internal
+#' @noRd
+
+trueHaz1.1 <- function(dat) {
+    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    dat$Y^2 * exp(as.matrix(z) %*% rep(c(-.5, .5), 5))
+}
+trueSurv1.1 <- function(dat) {
+    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    exp(-dat$Y^2 * exp(as.matrix(z) %*% rep(c(-.5, .5), 5)))
+}
+    
+trueHaz1.2 <- function(dat) {
+    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    dat$Y^2 * exp(2 * rowSums(z[,1:2]))
+}
+trueSurv1.2 <- function(dat) {
+    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    exp(-dat$Y^2 * exp(2 * rowSums(z[,1:2])))
+}
+
+trueHaz1.3 <- function(dat) with(dat, Y^2 * exp(2 * sin(2 * pi * dat$z1) + 2 * abs(dat$z2 - .5)))
+trueSurv1.3 <- function(dat) with(dat, exp(-Y^2 * exp(2 * sin(2 * pi * dat$z1) + 2 * abs(dat$z2 - .5))))
+
+trueHaz1.4 <- function(dat) with(dat, -log(1 - plnorm(Y, meanlog = -2 + 2 * z1 + 2 * z2, sdlog = .5)))
+trueSurv1.4 <- function(dat) with(dat, 1 - plnorm(Y, meanlog = -2 + 2 * z1 + 2 * z2, sdlog = .5))
+
+trueHaz1.5 <- function(dat) with(dat, -log(1 - pgengamma(Y, mu = 0, sigma = 2 * z1, Q = 2 * z2)))
+trueSurv1.5 <- function(dat) with(dat, 1 - pgengamma(Y, mu = 0, sigma = 2 * z1, Q = 2 * z2))
+
+trueHaz2.1 <- function(dat) {
+    attach(dat)
+    b1 <- 2
+    b2 <- 2
+    a <- b2 * z2
+    nu <- 2
+    Surv <- exp(a) * Y^nu * (e == 1 & Y < u) +
+        (exp(a) * (u^nu + exp(b1) * Y^nu - exp(b1) * u^nu)) * (e == 1 & Y >= u) +
+        (exp(a + b1) * Y^nu) * (e == 0 & Y < u) +
+        (exp(a) * (exp(b1) * u^nu + Y^nu - u^nu)) * (e == 0 & Y >= u)
+    detach(dat)
+    return(Surv)
+}
+trueSurv2.1 <- function(dat) {
+    haz <- trueHaz2.1(dat)
+    return(exp(-haz))
+}
+
+trueHaz2.2 <- function(dat) {
     attach(dat)
     b1 <- 2
     b2 <- 2
@@ -887,7 +373,67 @@ trueHaz4.2 <- function(dat) {
     haz
 }
 
-trueSurv4.2 <- function(dat) {
-    haz <- trueHaz4.2(dat)
+trueSurv2.2 <- function(dat) {
+    haz <- trueHaz2.2(dat)
     return(exp(-haz))
+}
+
+trueSurv2.3 <- function(dat) {
+    Y <- dat$Y
+    k <- dat$k[1]
+    b <- dat$b[1]
+    z2 <- dat$z2[1]
+    return(exp(-.1 * exp(z2 + b) * (exp(k * Y) - 1) / k))
+}
+trueHaz2.3 <- function(dat) {
+    Y <- dat$Y
+    k <- dat$k[1]
+    b <- dat$b[1]
+    z2 <- dat$z2[1]
+    return(.1 * exp(z2 + b) * (exp(k * Y) - 1) / k)
+}
+
+#' Background functions for generating testing codes
+#' @keywords internal
+#' @noRd
+
+simuTest1.1 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    V <- .75^as.matrix(dist(1:10, upper = TRUE))
+    z <- mvrnorm(n = 1, mu = rep(0, 10), Sigma = V)
+    as.data.frame(cbind(Y = Y, z1 = z[1], z2 = z[2], z3 = z[3], z4 = z[4], z5 = z[5],
+                        z6 = z[6], z7 = z[7], z8 = z[8], z9 = z[9], z10 = z[10]))
+}
+simuTest1.2 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    data.frame(Y = Y, z1 = runif(1), z2 = runif(1), z3 = runif(1), z4 = runif(1), z5 = runif(1),
+               z6 = runif(1), z7 = runif(1), z8 = runif(1), z9 = runif(1), z10 = runif(1))
+}
+simuTest1.3 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    data.frame(Y = Y, z1 = runif(1), z2 = runif(1))
+}
+simuTest1.4 <- function(dat) simuTest1.3(dat)
+simuTest1.5 <- function(dat) simuTest1.3(dat)
+
+simuTest2.1 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    e <- rbinom(1, 1, .5)
+    u <- rexp(1, 5)
+    data.frame(Y = Y, z1 = e * (Y < u) + (1 - e) * (Y >= u), z2 = runif(1), e = e, u = u)
+}
+simuTest2.2 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    e <- rbinom(1, 1, .5)
+    u1 <- rexp(1, 10)
+    u2 <- u1 + rexp(1, 10)
+    u3 <- u2 + rexp(1, 10)
+    z1 <- e * ((u1 <= Y) * (Y < u2) + (u3 <= Y)) + (1 - e) * ((Y < u1) + (u2 <= Y) * (Y < u3))
+    data.frame(Y = Y, z1 = z1, z2 = runif(1), e = e, u1 = u1, u2 = u2, u3 = u3)
+}
+simuTest2.3 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    k <- runif(1, 1, 2)
+    b <- runif(1, 1, 2)
+    data.frame(Y = Y, z1 = k * Y + b, z2 = runif(1), k = k, b = b)
 }

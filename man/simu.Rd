@@ -55,32 +55,37 @@ This function is used to generate the true survival function for ONE ID used in 
 This function is used to generate testing sets for each scenario.
 }
 \details{
-The following scenarios are included.
+The following scenarios form the paper are included.
 \describe{
 \item{Scenario 1}{assumes time independent covariates with \eqn{\Lambda(0) = 2t}:}
 \describe{
 \item{1.1}{Proportional hazards model:
-\eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2)}}.}
-\item{1.2}{Proportional hazards model with nonlinear covariate effects:
-\eqn{\lambda(t, Z) = \lambda_0(t) e^{[2\sin(2\pi Z_1) + 2|Z_2 - 0.5|]}}.}
-\item{1.3}{Accelerated failure time model:
-\eqn{\log(T) = -2 + 2Z_1 + 2Z_2 + \epsilon}, where \eqn{\epsilon} follows \eqn{N(0, 0.5^2)}.}
-\item{1.4}{Generalized gamma family:
-\eqn{T = e^{\sigma\omega}} with \eqn{\omega = \log(Q^2 g) / Q}, \eqn{g} follows Gamma(\eqn{Q^{-2}, 1}),
-\eqn{\sigma = 2Z_1, Q = 2Z_2}.}
-\item{1.5}{Proportional hazards model with noise variable:
-\eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2 + 0Z_3 + 0Z_4 + 0Z_5)}}.}
-\item{1.6}{Proportional hazards model with 10 covaraites:
-\eqn{\lambda(t, Z) = \lambda_0(t) e^{\sum_{j = 1}^pZ_j}}, for \eqn{\eta_j = 0.1, j = 1, ..., 10.}}
-\item{1.7}{Proportional hazards model with noise variable:
-\eqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2 + 0Z_3 + 0Z_4 + ... + 0Z_{10})}}.}
+\deqn{\lambda(t, Z) = \lambda_0(t) e^{(-0.5 Z_1 + 0.5 Z_2 - 0.5 Z_3 ... + 0.5 Z_{10})}.}}
+\item{1.2}{Proportional hazards model with noise variable:
+\deqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2 + 0Z_3 + ... + 0Z_{10})}.}}
+\item{1.3}{Proportional hazards model with nonlinear covariate effects:
+\deqn{\lambda(t, Z) = \lambda_0(t) e^{[2\sin(2\pi Z_1) + 2|Z_2 - 0.5|]}.}}
+\item{1.4}{Accelerated failure time model:
+\deqn{\log(T) = -2 + 2Z_1 + 2Z_2 + \epsilon,} where \eqn{\epsilon} follows \eqn{N(0, 0.5^2).}}
+\item{1.5}{Generalized gamma family:
+\deqn{T = e^{\sigma\omega},} with \eqn{\omega = \log(Q^2 g) / Q}, \eqn{g} follows Gamma(\eqn{Q^{-2}, 1}),
+\eqn{\sigma = 2Z_1, Q = 2Z_2.}}
 }
-\item{Scenario 2}{assumes time dependent covariate (\eqn{Z_1}) with \eqn{\Lambda(0) = 2t}.
-The survival times are generated from the hazard \eqn{\lambda(t, Z(t)) = \lambda_0(t)e^{Z_1(t) + Z_2}},
-where \eqn{Z_1(t)} is the time-dependent covariate.}
+\item{Scenario 2}{assumes a time dependent covariate, \eqn{Z_1(t)}:}
 \describe{
-\item{2.1}{assumes}
-\item{2.2}{assumes}
+\item{2.1}{Dichotomous time dependent covariate with at most one change in value:
+ \deqn{\lambda(t, Z(t)) = \lambda_0(t)e^{2Z_1(t) + 2Z_2},}
+where \eqn{Z_1(t)} is the time-dependent covariate: \eqn{Z_1(t) = \theta I(t \ge U_0) + (1 - \theta) I(t < U_0)},
+and \eqn{\theta} is a Bernoulli variable with equal probability.}
+\item{2.2}{Dichotomous time dependent covariate with multiple changes:
+ \deqn{\lambda(t, Z(t)) = e^{2Z_1(t) + 2Z_2},}
+where \eqn{Z_1(t) = \theta[I(U_1\le t < U_2) + I(U_3 \le t)] + (1 - \theta)[I(t < U_1) + I(U_2\le t < U_3)]},
+\eqn{\theta} is a Bernoulli variable with equal probability, and \eqn{U_1\le U_2\le U_3}
+are the first three terms of a stationary Poisson process with rate 10.}
+\item{2.3}{Continuous time dependent covariate:
+\deqn{\lambda(t, Z(t)) = 0.1 e^{Z_1(t) + Z_2},} where \eqn{Z_1(t) = kt + b},
+\eqn{k} and \eqn{b} follow independent uniform distributions over \eqn{(1, 2)}.
+}
 }
 }
 }

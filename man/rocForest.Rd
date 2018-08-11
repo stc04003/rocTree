@@ -31,3 +31,11 @@ An object of S3 class "\code{rocForest}" representing the fit, with the followin
 \description{
 Fits a "\code{rocForest}" model.
 }
+\examples{
+library(survival)
+set.seed(123)
+dat <- simu(40, 0, 1.1)
+fit <- rocForest(Surv(Y, death) ~ z1 + z2, id = id, data = dat, control = list(minsp = 3, minsp2 = 1))
+fit
+
+}

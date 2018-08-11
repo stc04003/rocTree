@@ -17,6 +17,13 @@
 #' features of control parameters.
 #' @export
 #'
+#' @examples
+#' library(survival)
+#' set.seed(123)
+#' dat <- simu(40, 0, 1.1)
+#' fit <- rocForest(Surv(Y, death) ~ z1 + z2, id = id, data = dat, control = list(minsp = 3, minsp2 = 1))
+#' fit
+#' 
 #' @return An object of S3 class "\code{rocForest}" representing the fit, with the following components:
 rocForest <- function(formula, data, id, subset, control = list()) {
     ctrl <- rocTree.control(control)
