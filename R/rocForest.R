@@ -23,7 +23,11 @@
 #' dat <- simu(40, 0, 1.1)
 #' fit <- rocForest(Surv(Y, death) ~ z1 + z2, id = id, data = dat, control = list(minsp = 3, minsp2 = 1))
 #' fit
-#' 
+#'
+#' ## Print individual trees
+#' print(fit, 1)
+#' print(fit, 2)
+#'
 #' @return An object of S3 class "\code{rocForest}" representing the fit, with the following components:
 rocForest <- function(formula, data, id, subset, control = list()) {
     ctrl <- rocTree.control(control)
@@ -72,6 +76,7 @@ rocForest <- function(formula, data, id, subset, control = list()) {
     out$vNames <- vNames
     out$ctrl <- ctrl
     out$terms <- attr(m, "terms")
+    out$call <- match.call()
     attr(out$terms, "id") <- Call[[match("id", names(Call))]]
     if (!ctrl$parallel) out$forest <- lapply(1:ctrl$B, function(x) forest1(Y0, E0, xlist, ctrl))
     if (ctrl$parallel) {

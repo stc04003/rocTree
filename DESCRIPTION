@@ -17,7 +17,8 @@ Imports: DiagrammeR (>= 1.0.0), parallel, data.tree (>= 0.7.5),
     dplyr,
     ggplot2,
     MASS,
-    flexsurv
+    flexsurv,
+    Matrix
 URL: http://github.com/stc04003/rocTree
 BugReports: http://github.com/stc04003/rocTree/issues    
 NeedsCompilation: yes
