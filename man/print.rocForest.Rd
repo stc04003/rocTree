@@ -4,13 +4,13 @@
 \alias{print.rocForest}
 \title{Printing an \code{rocForest} object}
 \usage{
-\method{print}{rocForest}(x, tree = 1L, digits = 5, dt = TRUE, ...)
+\method{print}{rocForest}(x, tree = NULL, digits = 5, dt = TRUE, ...)
 }
 \arguments{
 \item{x}{an \code{rocForest} object.}
 
-\item{tree}{an integer specifying the \eqn{n^{th}} tree in the forest to print.
-The function prints the first tree in the forest by default.}
+\item{tree}{an optional integer specifying the \eqn{n^{th}} tree in the forest to print.
+The function prints the contents of an \code{rocForest} object by default.}
 
 \item{digits}{the number of digits of numbers to print.}
 
@@ -20,4 +20,7 @@ The function prints the first tree in the forest by default.}
 }
 \description{
 Prints a tree from an \code{rocForest} object.
+}
+\seealso{
+\code{\link{rocForest}}
 }

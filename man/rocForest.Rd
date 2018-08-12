@@ -38,4 +38,8 @@ dat <- simu(40, 0, 1.1)
 fit <- rocForest(Surv(Y, death) ~ z1 + z2, id = id, data = dat, control = list(minsp = 3, minsp2 = 1))
 fit
 
+## Print individual trees
+print(fit, 1)
+print(fit, 2)
+
 }

@@ -4,8 +4,8 @@
 \alias{plot.rocForest}
 \title{Plotting an \code{rocForest} object}
 \usage{
-\method{plot}{rocForest}(x, tree = 1L, output = c("graph", "visNetwork"),
-  digits = 4, control = list(), ...)
+\method{plot}{rocForest}(x, tree = 1L, output = c("graph",
+  "visNetwork"), digits = 4, control = list(), ...)
 }
 \arguments{
 \item{x}{an \code{rocForest} object.}

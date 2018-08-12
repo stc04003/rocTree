@@ -4,8 +4,8 @@
 \alias{plot.rocTree}
 \title{Plotting an \code{rocTree} object}
 \usage{
-\method{plot}{rocTree}(x, output = c("graph", "visNetwork"), digits = 4,
-  control = list(), ...)
+\method{plot}{rocTree}(x, output = c("graph", "visNetwork"),
+  digits = 4, control = list(), ...)
 }
 \arguments{
 \item{x}{an object of class "\code{rocTree}", usually returned by the rocTree function.}
