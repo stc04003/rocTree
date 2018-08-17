@@ -35,7 +35,8 @@ Fits a "\code{rocForest}" model.
 library(survival)
 set.seed(123)
 dat <- simu(40, 0, 1.1)
-fit <- rocForest(Surv(Y, death) ~ z1 + z2, id = id, data = dat, control = list(minsp = 3, minsp2 = 1))
+fit <- rocForest(Surv(Y, death) ~ z1 + z2, id = id, data = dat,
+    control = list(minsp = 3, minsp2 = 1))
 fit
 
 ## Print individual trees

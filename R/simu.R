@@ -1,4 +1,4 @@
-globalVariables(c("n", "cen", "Y", "id")) ## global variables for simu
+globalVariables(c("n", "cen", "Y", "id", "z2", "e", "u", "y", "z2", "u1", "u2", "u3")) ## global variables for simu
 
 #' Function to generate simulated data used in the manuscript.
 #'
@@ -55,6 +55,7 @@ globalVariables(c("n", "cen", "Y", "id")) ## global variables for simu
 #' @importFrom tibble as.tibble
 #' @importFrom dplyr "%>%" arrange select
 #' @importFrom MASS mvrnorm
+#' @importFrom stats dist quantile rlnorm
 #' 
 #' @return \code{simu} returns a \code{data.frame} in the class of "roc.simu".
 #' This is needed for \code{trueHaz} and \code{trueSurv}.

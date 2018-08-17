@@ -21,7 +21,8 @@
 #' library(survival)
 #' set.seed(123)
 #' dat <- simu(40, 0, 1.1)
-#' fit <- rocForest(Surv(Y, death) ~ z1 + z2, id = id, data = dat, control = list(minsp = 3, minsp2 = 1))
+#' fit <- rocForest(Surv(Y, death) ~ z1 + z2, id = id, data = dat,
+#'     control = list(minsp = 3, minsp2 = 1))
 #' fit
 #'
 #' ## Print individual trees
@@ -154,10 +155,10 @@ grow2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, control) {
             treeMat[sp[1], 5:6] <- sp[2:3]
             treeMat[sp[1] * 2, ] <- c(sp[1] * 2, 1,
                                       mean(diag(ndInd) == sp[1] * 2 & EE1),
-                                      min(rowMeans(ndInd[Y1 <= tau, ] == sp[1] * 2)), NA, NA)
+                                      min(rowMeans(ndInd[Y1 <= tau, ] == sp[1] * 2, drop = FALSE)), NA, NA)
             treeMat[sp[1] * 2 + 1, ] <- c(sp[1] * 2 + 1, 1,
                                           mean(diag(ndInd) == sp[1] * 2 + 1 & EE1),
-                                          min(rowMeans(ndInd[Y1 <= tau, ] == sp[1] * 2 + 1)), NA, NA)
+                                          min(rowMeans(ndInd[Y1 <= tau, ] == sp[1] * 2 + 1, drop = FALSE)), NA, NA)
             treeMat$terminal[which(treeMat$u < minsp / N1 & treeMat$u2 < minsp2 / N1)] <- 2
             if(sum(diag(ndInd) == 2 * sp[1]) > 1) {
                 fTree[sp[1] * 2, ] <- rowSums(fmat[EE1, diag(ndInd) == 2 * sp[1], drop = FALSE]) / N1
