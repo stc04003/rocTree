@@ -46,7 +46,7 @@ print.rocForest <- function(x, tree = NULL, digits = 5, dt = TRUE, ...) {
     if (is.null(tree)) {
         cat("rocForest result\n\n")
         cat("Call:\n", deparse(x$call), "\n\n")
-        cat("Sample size:                                 ", ncol(fit$xlist[[1]]), "\n")
+        cat("Sample size:                                 ", ncol(x$xlist[[1]]), "\n")
         cat("Number of independent variables:             ", length(x$xlist), "\n")
         cat("Number of trees:                             ", x$ctrl$B, "\n")
         cat("Split rule:                                  ", x$ctrl$splitBy, "\n")

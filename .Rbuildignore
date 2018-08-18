@@ -4,5 +4,6 @@
 ^README\.md$
 skipcheck*
 tests/
+inst/
 ^appveyor\.yml$
 ^\.travis\.yml$
