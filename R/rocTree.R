@@ -48,8 +48,9 @@
 #' @examples
 #' library(survival)
 #' set.seed(123)
-#' dat <- simu(40, 0, 1.1)
-#' fit <- rocTree(Surv(Y, death) ~ z1 + z2, id = id, data = dat, control = list(CV = TRUE))
+#' dat <- simu(100, 0, 1.1)
+#' fit <- rocTree(Surv(Y, death) ~ z1 + z2, id = id, data = dat,
+#'        control = list(CV = TRUE, nflds = 5))
 #' fit
 rocTree <- function(formula, data, id, subset, control = list()) {
     ctrl <- rocTree.control(control)

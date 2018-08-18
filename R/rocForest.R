@@ -20,16 +20,17 @@
 #' @examples
 #' library(survival)
 #' set.seed(123)
-#' dat <- simu(40, 0, 1.1)
+#' dat <- simu(100, 0, 1.1)
 #' fit <- rocForest(Surv(Y, death) ~ z1 + z2, id = id, data = dat,
-#'         control = list(minsp = 3, minsp2 = 1))
+#'         control = list(minsp = 3, minsp2 = 1, B = 50))
 #' fit
 #'
 #' ## Print individual trees
 #' print(fit, 1)
 #' print(fit, 2)
 #'
-#' @return An object of S3 class "\code{rocForest}" representing the fit, with the following components:
+#' @return An object of S3 class "\code{rocForest}" representing the fit,
+#' with the following components:
 rocForest <- function(formula, data, id, subset, control = list()) {
     ctrl <- rocTree.control(control)
     Call <- match.call()

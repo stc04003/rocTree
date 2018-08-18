@@ -26,7 +26,8 @@ the fitting process.}
 features of control parameters.}
 }
 \value{
-An object of S3 class "\code{rocForest}" representing the fit, with the following components:
+An object of S3 class "\code{rocForest}" representing the fit,
+with the following components:
 }
 \description{
 Fits a "\code{rocForest}" model.
@@ -34,9 +35,9 @@ Fits a "\code{rocForest}" model.
 \examples{
 library(survival)
 set.seed(123)
-dat <- simu(40, 0, 1.1)
+dat <- simu(100, 0, 1.1)
 fit <- rocForest(Surv(Y, death) ~ z1 + z2, id = id, data = dat,
-    control = list(minsp = 3, minsp2 = 1))
+        control = list(minsp = 3, minsp2 = 1, B = 50))
 fit
 
 ## Print individual trees
