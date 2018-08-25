@@ -201,8 +201,6 @@ void cutSearch2(int *n, int *cL, int *m, int *y, int *Ny,
   double *fR = Calloc(Ny[0], double);
   double *SL = Calloc(Ny[0], double);
   double *SR = Calloc(Ny[0], double);
-  double *rL = Calloc(Ny[0], double);
-  double *rR = Calloc(Ny[0], double);
   for (i = 0; i < cL[0]; i++) {
     // Reset vectors to zero to start 
     for (j = 0; j < n[0]; j++){
