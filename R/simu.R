@@ -98,7 +98,9 @@ simu <- function(n, cen, scenario, summary = FALSE) {
 
 #' Function to generate the true hazard used in the simulation.
 #'
-#' This function is used to generate the true cumulative hazard function for ONE ID used in the simulation.
+#' This function is used to generate the true cumulative hazard function for
+#' ONE ID (the 1st ID) used in the simulation.
+#' This function is usually called for the testing set.
 #'
 #' @param dat is a data.frame prepared by \code{simu}.
 #'
@@ -187,7 +189,8 @@ sim1.5 <- function(n, cen = 0) {
     if (cen == .50) cens <- runif(n, 0, 1.63)
     Y <- pmin(Time, cens)
     do.call(rbind, lapply(1:n, function(x)
-        data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]),
+                   death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])), z1 = z1[x], z2 = z2[x])))
 }
 
 sim1.2 <- function(n, cen = 0) {
@@ -329,8 +332,8 @@ trueSurv1.2 <- function(dat) {
     exp(-dat$Y^2 * exp(2 * rowSums(z[,1:2])))
 }
 
-trueHaz1.3 <- function(dat) with(dat, Y^2 * exp(2 * sin(2 * pi * dat$z1) + 2 * abs(dat$z2 - .5)))
-trueSurv1.3 <- function(dat) with(dat, exp(-Y^2 * exp(2 * sin(2 * pi * dat$z1) + 2 * abs(dat$z2 - .5))))
+trueHaz1.3 <- function(dat) with(dat, Y^2 * exp(2 * sin(2 * pi * z1) + 2 * abs(z2 - .5)))
+trueSurv1.3 <- function(dat) with(dat, exp(-Y^2 * exp(2 * sin(2 * pi * z1) + 2 * abs(z2 - .5))))
 
 trueHaz1.4 <- function(dat) with(dat, -log(1 - plnorm(Y, meanlog = -2 + 2 * z1 + 2 * z2, sdlog = .5)))
 trueSurv1.4 <- function(dat) with(dat, 1 - plnorm(Y, meanlog = -2 + 2 * z1 + 2 * z2, sdlog = .5))
@@ -437,4 +440,99 @@ simuTest2.3 <- function(dat) {
     k <- runif(1, 1, 2)
     b <- runif(1, 1, 2)
     data.frame(Y = Y, z1 = k * Y + b, z2 = runif(1), k = k, b = b)
+}
+
+
+#' Continuious time varying covariate with non-Cox model
+#'
+#' \lambda(t, Z(t)) = 0.1 \cdot \left[\sin(Z_1(t) + Z_2) + 1\right],
+#' where \eqn{Z_1(t) = kt + b},
+#' \eqn{k} and \eqn{b} follow independent uniform distributions over \eqn{(1, 2)}.
+sim2.4 <- function(n, cen = 0) {
+    k <- runif(n, 1, 2)
+    b <- runif(n, 1, 2)
+    z2 <- runif(n)
+    u <- runif(n)
+    invF <- function(x, k, b, z2, u) {
+        ## all assume to be 1 dimensional
+        10 * log(u) + x - cos(k * x + b + z2) / k + cos(b + z2) / k
+    }
+    Time <- sapply(1:n, function(y)
+        uniroot(f = invF, interval = c(0, 500), k = k[y], b = b[y], z2 = z2[y], u = u[y])$root)
+    if (cen == 0) cens <- rep(Inf, n)
+    if (cen == .25) cens <- runif(n, 0, 39.5)
+    if (cen == .50) cens <- runif(n, 0, 16.5)
+    Y <- pmin(Time, cens)
+    dat <- do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]),
+                   death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+                   z1 = sort(Y[Y <= Y[x]]) * k[x] + b[x],
+                   z2 = z2[x], k = k[x], b = b[x])))
+    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
+}
+trueSurv2.4 <- function(dat) {
+    haz <- trueHaz2.4(dat)
+    return(exp(-haz))
+}
+trueHaz2.4 <- function(dat) {
+    Y <- dat$Y
+    k <- dat$k[1]
+    b <- dat$b[1]
+    z2 <- dat$z2[1]
+    return(.1 * (Y - cos(k * Y + b + z2) / k + cos(b + z2) / k))
+}
+simuTest2.4 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    k <- runif(1, 1, 2)
+    b <- runif(1, 1, 2)
+    data.frame(Y = Y, z1 = k * Y + b, z2 = runif(1), k = k, b = b)
+}
+
+
+#' Continuious time varying covariate with non-Cox model and non-monotonic Z_1(t)
+#'
+#' \lambda(t, Z(t)) = 0.1 \cdot \left[\sin(Z_1(t) + Z_2) + 1\right],
+#' where \eqn{Z_1(t) = kt * (2 * I(t > 5) - 1) + b},
+#' \eqn{k} and \eqn{b} follow independent uniform distributions over \eqn{(1, 2)}.
+sim2.5 <- function(n, cen = 0) {
+    k <- runif(n, 1, 2)
+    b <- runif(n, 1, 2)
+    z2 <- runif(n)
+    u <- runif(n)
+    invF <- function(x, k, b, z2, u) {
+        ## all assume to be 1 dimensional
+        10 * log(u) + x - cos(k * x * (2 * (x > 5) - 1) + b + z2) / k + cos(b + z2) / k
+    }
+    Time <- sapply(1:n, function(y)
+        uniroot(f = invF, interval = c(0, 500), k = k[y], b = b[y], z2 = z2[y], u = u[y])$root)
+    if (cen == 0) cens <- rep(Inf, n)
+    if (cen == .25) cens <- runif(n, 0, 42)
+    if (cen == .50) cens <- runif(n, 0, 17)
+    Y <- pmin(Time, cens)
+    dat <- do.call(rbind, lapply(1:n, function(x)
+        data.frame(id = x, Y = sort(Y[Y <= Y[x]]),
+                   death = c(rep(0, sum(Y < Y[x])), 1 * (Time[x] <= cens[x])),
+                   z1 = sort(Y[Y <= Y[x]]) * k[x] * (2 * (sort(Y[Y <= Y[x]]) > 5) - 1) + b[x],
+                   z2 = z2[x], k = k[x], b = b[x])))
+    return(dat[order(dat$id, dat$Y), c("id", "Y", "death", "z1", "z2", "k", "b")])
+}
+
+trueSurv2.5 <- function(dat) {
+    haz <- trueHaz2.5(dat)
+    return(exp(-haz))
+}
+
+trueHaz2.5 <- function(dat) {
+    Y <- dat$Y
+    k <- dat$k[1]
+    b <- dat$b[1]
+    z2 <- dat$z2[1]
+    return(.1 * (Y - cos(k * Y * (2 * (Y > 5) - 1) + b + z2) / k + cos(b + z2) / k))
+}
+
+simuTest2.5 <- function(dat) {
+    Y <- sort(unique(dat$Y))
+    k <- runif(1, 1, 2)
+    b <- runif(1, 1, 2)
+    data.frame(Y = Y, z1 = k * Y * (2 * (Y > 5) - 1) + b, z2 = runif(1), k = k, b = b)
 }
