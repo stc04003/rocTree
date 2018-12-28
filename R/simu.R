@@ -195,7 +195,8 @@ sim1.5 <- function(n, cen = 0) {
 
 sim1.2 <- function(n, cen = 0) {
     z <- matrix(runif(n * 10), n, 10)
-    Time <- sqrt(rexp(n) * exp(-rowSums(z[,1:2]) * 2))
+    if (n == 1) Time <- sqrt(rexp(n) * exp(-sum(z[,1:2]) * 2))
+    else Time <- sqrt(rexp(n) * exp(-rowSums(z[,1:2]) * 2))
     if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 2.76)
     if (cen == .50) cens <- runif(n, 0, 1.36)
@@ -210,7 +211,7 @@ sim1.2 <- function(n, cen = 0) {
 
 sim1.1 <- function(n, cen = 0) {
     V <- .75^as.matrix(dist(1:10, upper = TRUE))
-    z <- mvrnorm(n = n, mu = rep(0, 10), Sigma = V)
+    z <- matrix(mvrnorm(n = n, mu = rep(0, 10), Sigma = V), ncol = 10)
     Time <- sqrt(rexp(n) * exp(- z %*% rep(c(-.5, .5), 5)))
     if (cen == 0) cens <- rep(Inf, n)
     if (cen == .25) cens <- runif(n, 0, 3.77)
