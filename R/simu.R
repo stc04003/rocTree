@@ -221,7 +221,8 @@ sim1.1 <- function(n, cen = 0) {
     d <- 1 * (Time <= cens) 
     dat <- do.call(rbind, lapply(1:n, function(x)
         data.frame(id = x, Y = sort(Y[Y <= Y[x]]), death = c(rep(0, sum(Y < Y[x])), d[x]))))
-    dat <- cbind(dat, z[dat$id,])
+    if (n == 1) dat <- cbind(dat, z)
+    else dat <- cbind(dat, z[dat$id,])
     names(dat)[4:13] <- paste("z", 1:10, sep = "")
     dat   
 }
