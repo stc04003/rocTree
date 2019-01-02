@@ -14,7 +14,7 @@
 If omitted, the fitted predictors are used.
 If the covariate observation time is not supplied, covariates will be treated as at baseline.}
 
-\item{type}{is an optional character string specifying whether to predict the survival probability or the hazard rate.}
+\item{type}{is an optional character string specifying whether to predict the survival probability or the cumulative hazard rate.}
 
 \item{...}{for future developments.}
 }
