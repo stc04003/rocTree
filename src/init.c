@@ -10,14 +10,16 @@ extern void con(void *, void *, void *, void *, void *, void *);
 extern void con3(void *, void *, void *, void *, void *, void *, void *, void *);
 extern void cutSearch(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void cutSearch2(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
+extern void giveVC(void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void giveWC(void *, void *, void *, void *, void *, void *, void *, void *, void *);
-  
+
 static const R_CMethodDef CEntries[] = {
     {"con",        (DL_FUNC) &con,         6},
     {"con3",       (DL_FUNC) &con3,        8},
     {"cutSearch",  (DL_FUNC) &cutSearch,  19},
     {"cutSearch2", (DL_FUNC) &cutSearch2, 19},
-    {"giveWC", (DL_FUNC) &giveWC, 9},
+    {"giveVC",     (DL_FUNC) &giveVC,      9},
+    {"giveWC",     (DL_FUNC) &giveWC,      9},
     {NULL, NULL, 0}
 };
 

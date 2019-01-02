@@ -448,9 +448,12 @@ simuTest2.3 <- function(dat) {
 
 #' Continuious time varying covariate with non-Cox model
 #'
-#' \lambda(t, Z(t)) = 0.1 \cdot \left[\sin(Z_1(t) + Z_2) + 1\right],
+#' \eqn{\lambda(t, Z(t)) = 0.1 \cdot \left[\sin(Z_1(t) + Z_2) + 1\right],}
 #' where \eqn{Z_1(t) = kt + b},
 #' \eqn{k} and \eqn{b} follow independent uniform distributions over \eqn{(1, 2)}.
+#'
+#' @keywords internal
+#' @noRd
 sim2.4 <- function(n, cen = 0) {
     k <- runif(n, 1, 2)
     b <- runif(n, 1, 2)
@@ -491,12 +494,13 @@ simuTest2.4 <- function(dat) {
     data.frame(Y = Y, z1 = k * Y + b, z2 = runif(1), k = k, b = b)
 }
 
-
-#' Continuious time varying covariate with non-Cox model and non-monotonic Z_1(t)
+#' Continuious time varying covariate with non-Cox model and non-monotonic \eqn{Z_1(t)}
 #'
-#' \lambda(t, Z(t)) = 0.1 \cdot \left[\sin(Z_1(t) + Z_2) + 1\right],
+#' \eqn{\lambda(t, Z(t)) = 0.1 \cdot \left[\sin(Z_1(t) + Z_2) + 1\right],}
 #' where \eqn{Z_1(t) = kt * (2 * I(t > 5) - 1) + b},
 #' \eqn{k} and \eqn{b} follow independent uniform distributions over \eqn{(1, 2)}.
+#' @keywords internal
+#' @noRd
 sim2.5 <- function(n, cen = 0) {
     k <- runif(n, 1, 2)
     b <- runif(n, 1, 2)

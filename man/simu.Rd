@@ -48,7 +48,9 @@ where \eqn{\lambda_0(t)} is the baseline hazard function,
 \eqn{Z_1} and \eqn{Z_2} are the covariates.
 When time varying covariate is involved (scenario 2), only \eqn{Z_1} is assumed to dependent on time.
 
-This function is used to generate the true cumulative hazard function for ONE ID used in the simulation.
+This function is used to generate the true cumulative hazard function for
+ONE ID (the 1st ID) used in the simulation.
+This function is usually called for the testing set.
 
 This function is used to generate the true survival function for ONE ID used in the simulation.
 
