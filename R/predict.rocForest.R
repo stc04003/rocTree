@@ -78,9 +78,6 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
             if (type == "cumHaz") {
                 pred[[i]] <- data.frame(Time = Y0, cumHaz = cumsum(rowSums(matk3 * Wi)))
             }
-            ## if (type == "hazard") {
-            ##     pred[[i]] <- data.frame(Time = Y0, haz = colSums(matk * t(W[[i]])) / length$E0)
-            ## }
         }
     }
     if (type == "hazard") {
@@ -90,10 +87,12 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
             W <- lapply(1:nID, function(x) tmp[[x]] + W[[x]])
             rm(tmp)
         }
-        matk <- sapply(Y0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN)
+        ## matk <- sapply(Y0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN)
+        matk <- sapply(t0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN)
         pred <- list()
         for (i in 1:nID) {
-            pred[[i]] <- data.frame(Time = Y0, haz = colSums(matk * W[[i]]) / length(object$forest))
+            ## pred[[i]] <- data.frame(Time = Y0, haz = colSums(matk * W[[i]]) / length(object$forest))
+            pred[[i]] <- data.frame(Time = t0, haz = colSums(matk * W[[i]][,findInterval(t0, Y0) + 1]) / length(object$forest))
         }
     }
     for (i in 1:length(xlist)) attr(xlist[[i]], "dimnames") <- NULL
