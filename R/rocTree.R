@@ -130,6 +130,9 @@ rocTree <- function(formula, data, id, subset, control = list()) {
     return(out)
 }
 
+#'
+#' @param fsz forest size; S in the codes
+#' 
 rocTree.control <- function(l) {
     if (missing(l)) l <- NULL
     ## default list
