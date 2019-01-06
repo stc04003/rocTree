@@ -153,12 +153,12 @@ ecdf(DF$KSC)(80)
 datA <- dat0 %>% mutate(ID = 1, KSC = seq(60, 90, length = 467))
 datB <- dat0 %>% mutate(ID = 2, KSC = seq(80, 40, length = 467))
 datC <- dat0 %>% mutate(ID = 3, KSC = 80)
-datD <- dat0 %>% mutate(ID = 3, KSC = seq(80, 40, length = 467)[2])
+datD <- dat0 %>% mutate(ID = 4, KSC = seq(80, 40, length = 467)[2])
 
 predA <- predB <- predC <- predD <- NULL
-system.time(predA <- predict(fit3, datA, type = "hazard"))
-system.time(predB <- predict(fit3, datB, type = "hazard"))
-system.time(predC <- predict(fit3, datC, type = "hazard"))
+system.time(predA <- predict(fit3, datA, type = "hazard0"))
+system.time(predB <- predict(fit3, datB, type = "hazard0"))
+system.time(predC <- predict(fit3, datC, type = "hazard0"))
 ## system.time(predD <- predict(fit3, datD, type = "hazard"))
 
 datgg <- rbind(predA$pred[[1]], predB$pred[[1]], predC$pred[[1]])
@@ -212,16 +212,21 @@ system.time(forest5 <- rocForest(fm, data = DF, id = ID,
 
 gg <- function(forest) {
     dat0 <- tibble(Y = sort(unique(DF$Y)), HEMOG = 12.5, AIDS = 1, TRT = 2, SEX = 1, CD4 = 27, OP = 1)
-    datA <- dat0 %>% mutate(ID = 1, KSC = seq(60, 90, length = 467))
-    datB <- dat0 %>% mutate(ID = 2, KSC = seq(80, 40, length = 467))
-    datC <- dat0 %>% mutate(ID = 3, KSC = 80)
-    datD <- dat0 %>% mutate(ID = 3, KSC = seq(80, 40, length = 467)[2])
+    ## datA <- dat0 %>% mutate(ID = 1, KSC = seq(60, 90, length = 467))
+    ## datB <- dat0 %>% mutate(ID = 2, KSC = seq(80, 40, length = 467))
+    ## datC <- dat0 %>% mutate(ID = 3, KSC = 80)
+    ## datD <- dat0 %>% mutate(ID = 4, KSC = seq(80, 40, length = 467)[2])
+    datA <- dat0 %>% mutate(ID = 1, KSC = 90)
+    datB <- dat0 %>% mutate(ID = 2, KSC = 70)
+    datC <- dat0 %>% mutate(ID = 3, KSC = 50)
+    datD <- dat0 %>% mutate(ID = 4, KSC = 30)
     predA <- predB <- predC <- predD <- NULL
     system.time(predA <- predict(forest, datA, type = "hazard"))
     system.time(predB <- predict(forest, datB, type = "hazard"))
     system.time(predC <- predict(forest, datC, type = "hazard"))
-    datgg <- rbind(predA$pred[[1]], predB$pred[[1]], predC$pred[[1]])
-    datgg$patient <- rep(LETTERS[1:3], each = dim(predA$pred[[1]])[1])
+    system.time(predD <- predict(forest, datD, type = "hazard"))
+    datgg <- rbind(predA$pred[[1]], predB$pred[[1]], predC$pred[[1]], predD$pred[[1]])
+    datgg$patient <- rep(LETTERS[1:4], each = dim(predA$pred[[1]])[1])
     gg <- ggplot(datgg, aes(x = Time, y = haz, group = patient)) +
         geom_line(aes(linetype = patient, color = patient), lwd = I(1.1)) +
         xlab("Time") + ylab("Hazard")
@@ -232,6 +237,8 @@ gg <- function(forest) {
               panel.border = element_blank(),
               panel.background = element_blank()) 
 }
+
+gg(fit3)
 
 gg(forest1)
 gg(forest2)
@@ -248,10 +255,11 @@ rocTree:::predict.rocForest(fit3, datB, type = "hazard")
 rocTree:::predict.rocForest(fit3, datC, type = "hazard")
 
 
-plot(Y0, colSums(matk * W[[1]] / 500), 's')
-invisible(sapply(1:467, function(z) lines(Y0, colSums(matk * W[[1]][,z]) / 500, 's', col = "gray")))
-lines(Y0, colSums(matk * W[[1]] / 500), 's')
-
+plot(Y0, colSums(matk * W[[1]] / 1000), 's')
+invisible(sapply(1:467, function(z) lines(Y0, colSums(matk * W[[1]][,z]) / 1000, 's', col = "gray")))
+lines(Y0, colSums(matk * W[[1]] / 1000), 's')
+lines(Y0, colSums(matk * W[[1]][,467] / 1000), 's')
+lines(Y0, colSums(matk * rowMeans(W[[1]]) / 1000), 's', col = 2)
 
 
 set.seed(1)
@@ -323,3 +331,25 @@ diag(matrix(giveW(rep(3, 10), idB2, ndInd2, ndTerm, szL2), 10))
 diag(matrix(giveW(ndInd[,1], idB2, ndInd2, ndTerm, szL2), 10))
 
 diag(lapply(1:dim(xlist[[1]])[2], function(z) giveV(ndInd[, z], idB2, ndInd2, ndTerm, szL2))[[1]])
+
+
+giveND <- function(xx) {
+    ndInd <- matrix(1, 467, 1)
+    for (i in 1:dim(Frame)[1]) {
+        if (Frame$terminal[i] == 0) {
+            ndInd[ndInd == Frame$nd[i] & xx[[Frame$p[i]]] <= Frame$cut[i]] <- Frame$nd[i] * 2
+            ndInd[ndInd == Frame$nd[i] & xx[[Frame$p[i]]] > Frame$cut[i]] <- Frame$nd[i] * 2 + 1
+        }
+    }
+    return(ndInd)
+}
+
+
+head(ndInd[,1], 10)
+xlist0 <- lapply(xlist, function(e) matrix(rep(e[4], 467), ncol = 1))
+table(giveND(xlist))
+table(giveND(xlist0))
+
+
+sapply(1:467, function(g) unique(giveND(lapply(xlist, function(e) matrix(rep(e[g], 467), ncol = 1)))))
+table(sapply(1:467, function(g) unique(giveND(lapply(xlist, function(e) matrix(rep(e[g], 467), ncol = 1))))))
