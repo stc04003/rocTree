@@ -85,17 +85,25 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
         }
     }
     if (type == "hazard") {
-        W <- oneV(ndInd, xlist, object$forest[[1]])
+        tmp <- oneV(ndInd, xlist, object$forest[[1]])
+        W <- lapply(tmp, function(l) l[[1]][1])
+        W.rs <- lapply(tmp, function(l) l[[1]][2])
         for (i in 2:length(object$forest)) {
             tmp <- oneV(ndInd, xlist, object$forest[[i]])
-            W <- lapply(1:nID, function(x) tmp[[x]] + W[[x]])
+            W <- lapply(1:nID, function(x) tmp[[x]][[1]] + W[[x]])
+            W.rs <- lapply(1:nID, function(x) tmp[[x]][[2]] + W.rs[[x]])
             rm(tmp)
         }
+        W <- lapply(W, matrix, nrow = n)
+        W.rs <- lapply(W.rs, matrix, nrow = n)
         matk <- sapply(Y0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN)
         ## matk <- sapply(t0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN)
         pred <- list()
         for (i in 1:nID) {
-            pred[[i]] <- data.frame(Time = Y0, haz = colSums(matk * W[[i]]) / length(object$forest))
+            tmp <- W[[i]] / W.rs[[i]]
+            ## tmp <- diag(W[[i]] / rowSums(W[[i]]))
+            tmp <- ifelse(is.na(tmp), 0, tmp)
+            pred[[i]] <- data.frame(Time = Y0, haz = colSums(matk * tmp))
             ## pred[[i]] <- data.frame(Time = t0,
             ##                         haz = colSums(matk * W[[i]][,findInterval(t0, Y0) + 1]) /
             ##                             length(object$forest))
@@ -165,5 +173,9 @@ giveV <- function(ndi, idB2, ndInd2, ndTerm, szL2) {
         .C("giveVC", as.integer(n), as.integer(length(idB2)), as.integer(length(ndTerm)),
            as.integer(rep(z, n)), as.integer(idB2 - 1), as.integer(ndInd2), as.integer(ndTerm),
            as.double(szL2), out = double(n), PACKAGE = "rocTree")$out)
-    return(tmp[, dense_rank(ndi)])
+    tmp2 <- sapply(sort(unique(ndi)), function(z)
+        .C("giveVrowSum", as.integer(n), as.integer(length(idB2)), as.integer(length(ndTerm)),
+           as.integer(rep(z, n)), as.integer(idB2 - 1), as.integer(ndInd2), as.integer(ndTerm),
+           as.double(szL2), out = double(n), PACKAGE = "rocTree")$out)
+    return(list(tmp[, dense_rank(ndi)], tmp2[, dense_rank(ndi)]))
 }

@@ -156,10 +156,13 @@ datC <- dat0 %>% mutate(ID = 3, KSC = 80)
 datD <- dat0 %>% mutate(ID = 4, KSC = seq(80, 40, length = 467)[2])
 
 predA <- predB <- predC <- predD <- NULL
-system.time(predA <- predict(fit3, datA, type = "hazard0"))
-system.time(predB <- predict(fit3, datB, type = "hazard0"))
-system.time(predC <- predict(fit3, datC, type = "hazard0"))
-## system.time(predD <- predict(fit3, datD, type = "hazard"))
+system.time(predA <- predict(fit3, datA, type = "hazard"))
+system.time(predB <- predict(fit3, datB, type = "hazard"))
+system.time(predC <- predict(fit3, datC, type = "hazard"))
+
+## system.time(predA <- predict(fit3, datA, type = "cumHaz"))
+## system.time(predB <- predict(fit3, datB, type = "cumHaz"))
+## system.time(predC <- predict(fit3, datC, type = "cumHaz"))
 
 datgg <- rbind(predA$pred[[1]], predB$pred[[1]], predC$pred[[1]])
 datgg$patient <- rep(LETTERS[1:3], each = dim(predA$pred[[1]])[1])
@@ -175,6 +178,7 @@ gg + theme_bw() +
           panel.border = element_blank(),
           panel.background = element_blank()) 
 
+
 ## ggsave(filename = "pred-fit3-hn05.pdf")
 
 
@@ -185,29 +189,29 @@ gg + theme_bw() +
 system.time(forest1 <- rocForest(fm, data = DF, id = ID,
                                  control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = .5,
                                                 tau = 1.5, minsp = 3, minsp2 = 1,
-                                                parallel = T, parCluster = 16)))
+                                                parallel = T, parCluster  = 6)))
 
 system.time(forest2 <- rocForest(fm, data = DF, id = ID,
                                  control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = 1,
                                                 tau = 1.5, minsp = 3, minsp2 = 1,
-                                                parallel = T, parCluster = 16)))
+                                                parallel = T, parCluster  = 6)))
 
 system.time(forest3 <- rocForest(fm, data = DF, id = ID,
                                  control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = 1,
                                                 tau = 1.5, minsp = 10, minsp2 = 3,
-                                                parallel = T, parCluster = 16)))
+                                                parallel = T, parCluster  = 6)))
 
 system.time(forest4 <- rocForest(fm, data = DF, id = ID,
                                  control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = 1,
                                                 tau = 1.5, minsp = 3, minsp2 = 1,
                                                 fsz = function(x) round(x / 3), 
-                                                parallel = T, parCluster = 16)))
+                                                parallel = T, parCluster  = 6)))
 
 system.time(forest5 <- rocForest(fm, data = DF, id = ID,
                                  control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = 1,
                                                 tau = 1.5, minsp = 3, minsp2 = 1,
                                                 fsz = function(x) round(0.8 * x),
-                                                parallel = T, parCluster = 16)))
+                                                parallel = T, parCluster  = 6)))
 
 
 gg <- function(forest) {
@@ -252,6 +256,7 @@ head(predC$pred[[1]])
 
 debug(rocTree:::predict.rocForest)
 rocTree:::predict.rocForest(fit3, datB, type = "hazard")
+rocTree:::predict.rocForest(fit3, datB, type = "hazard0")
 rocTree:::predict.rocForest(fit3, datC, type = "hazard")
 
 
@@ -260,6 +265,13 @@ invisible(sapply(1:467, function(z) lines(Y0, colSums(matk * W[[1]][,z]) / 1000,
 lines(Y0, colSums(matk * W[[1]] / 1000), 's')
 lines(Y0, colSums(matk * W[[1]][,467] / 1000), 's')
 lines(Y0, colSums(matk * rowMeans(W[[1]]) / 1000), 's', col = 2)
+
+plot(Y0, colSums(matk * W[[1]][,1] / W.rs[[1]][,1]), 's', ylim = c(0, 0.21))
+invisible(sapply(1:467, function(z)
+    lines(Y0, colSums(matk * W[[1]][,z] / W.rs[[1]][,z]), 's', col = "gray")))
+
+plot(Y0, colSums(matk * W[[1]] / W.rs[[1]]), 's')
+plot(Y0, colSums(matk * W[[1]]), 's')
 
 
 set.seed(1)

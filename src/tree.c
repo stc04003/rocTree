@@ -298,23 +298,34 @@ void giveWC(int *n, int *lidB2, int *lndTerm,
   }
 }
 
-// C function to replace the "giveV" function in R.
 void giveVC(int *n, int *lidB2, int *lndTerm,
 	    int *ndi, int *idB2, int *ndInd2, int *ndTerm, double *szL2, double *result) {
   int i, j, k;
   for (i = 0; i < lidB2[0]; i++) {
     for (j = 0; j < n[0]; j++) {
       if (idB2[i] == j && ndInd2[i * n[0] + j] == ndi[j]) {
-      	for (k = 0; k < lndTerm[0]; k++) {
+	for (k = 0; k < lndTerm[0]; k++) {
 	  if (ndTerm[k] == ndi[j] && szL2[k * n[0] + j] != 0) {
-	    result[j] += szL2[k * n[0] + j];
-    	  }
+	    result[j] = 1 / szL2[k * n[0] + j];
+	  }
 	}
       }
     }
   }
-  for (j = 0; j < n[0]; j++) {
-    if (result[j] > 0)
-      result[j] = 1/result[j];
+}
+
+void giveVrowSum(int *n, int *lidB2, int *lndTerm,
+	    int *ndi, int *idB2, int *ndInd2, int *ndTerm, double *szL2, double *result) {
+  int i, j, k;
+  for (i = 0; i < lidB2[0]; i++) {
+    for (j = 0; j < n[0]; j++) {
+      if (ndInd2[i * n[0] + j] == ndi[j]) {
+    	for (k = 0; k < lndTerm[0]; k++) {
+    	  if (ndTerm[k] == ndi[j] && szL2[k * n[0] + j] != 0) {
+	    result[j] += 1 / szL2[k * n[0] + j];
+    	  }
+    	}
+      }
+    }
   }
 }
