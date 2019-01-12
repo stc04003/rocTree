@@ -181,187 +181,41 @@ gg + theme_bw() +
 
 ## ggsave(filename = "pred-fit3-hn05.pdf")
 
+#' Testing sets with fixed KS(t)
+#'
+#' CD4, KSC, OP are time varying covariates
+#' The order of the covariates can be seem from `fm`
+#'
+#' dat0 has all time independent variable
+#' 
+#' Fix CD4 and OP at .5
 
-#' ------------------------------------------------------------------------------------------
-#' Forest plot
-#' ------------------------------------------------------------------------------------------
+dat0 <- tibble(Y = sort(unique(DF$Y)), HEMOG = 12.5, AIDS = 1, TRT = 2, SEX = 1, CD4 = 27, OP = 1)
 
-system.time(forest1 <- rocForest(fm, data = DF, id = ID,
-                                 control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = .5,
-                                                tau = 1.5, minsp = 3, minsp2 = 1,
-                                                parallel = T, parCluster  = 6)))
+dat0 <- tibble(Y = sort(unique(DF$Y)), AIDS = 1, TRT = 2, SEX = 1, OP = 1,
+               HEMOG = apply(fit3$xlist0[[1]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .5)),               
+               CD4 = apply(fit3$xlist0[[6]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .5)))
 
-system.time(forest2 <- rocForest(fm, data = DF, id = ID,
-                                 control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = 1,
-                                                tau = 1.5, minsp = 3, minsp2 = 1,
-                                                parallel = T, parCluster  = 6)))
+dat0 <- tibble(Y = sort(unique(DF$Y)), HEMOG = 12.5, AIDS = 1, TRT = 2, SEX = 1, 
+               OP = apply(fit3$xlist0[[7]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .5)),
+               CD4 = apply(fit3$xlist0[[6]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .5)))
 
-system.time(forest3 <- rocForest(fm, data = DF, id = ID,
-                                 control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = 1,
-                                                tau = 1.5, minsp = 10, minsp2 = 3,
-                                                parallel = T, parCluster  = 6)))
+dat0 <- tibble(Y = sort(unique(DF$Y)),
+               HEMOG = apply(fit3$xlist0[[1]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .5)),
+               AIDS = apply(fit3$xlist0[[2]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .5)),
+               TRT = apply(fit3$xlist0[[3]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .5)),
+               SEX = apply(fit3$xlist0[[4]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .5)),
+               CD4 = apply(fit3$xlist0[[6]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .5)),
+               OP = apply(fit3$xlist0[[7]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .5)))
 
-system.time(forest4 <- rocForest(fm, data = DF, id = ID,
-                                 control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = 1,
-                                                tau = 1.5, minsp = 3, minsp2 = 1,
-                                                fsz = function(x) round(x / 3), 
-                                                parallel = T, parCluster  = 6)))
+summary(dat0)
 
-system.time(forest5 <- rocForest(fm, data = DF, id = ID,
-                                 control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = 1,
-                                                tau = 1.5, minsp = 3, minsp2 = 1,
-                                                fsz = function(x) round(0.8 * x),
-                                                parallel = T, parCluster  = 6)))
+datA <- dat0 %>% mutate(ID = 1, KSC = apply(fit3$xlist0[[5]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .1)))
+datB <- dat0 %>% mutate(ID = 2, KSC = apply(fit3$xlist0[[5]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .3)))
+datC <- dat0 %>% mutate(ID = 3, KSC = apply(fit3$xlist0[[5]], 1, function(e) quantile(e, na.rm = TRUE, type = 1, prob = .7)))
 
-
-gg <- function(forest) {
-    dat0 <- tibble(Y = sort(unique(DF$Y)), HEMOG = 12.5, AIDS = 1, TRT = 2, SEX = 1, CD4 = 27, OP = 1)
-    ## datA <- dat0 %>% mutate(ID = 1, KSC = seq(60, 90, length = 467))
-    ## datB <- dat0 %>% mutate(ID = 2, KSC = seq(80, 40, length = 467))
-    ## datC <- dat0 %>% mutate(ID = 3, KSC = 80)
-    ## datD <- dat0 %>% mutate(ID = 4, KSC = seq(80, 40, length = 467)[2])
-    datA <- dat0 %>% mutate(ID = 1, KSC = 90)
-    datB <- dat0 %>% mutate(ID = 2, KSC = 70)
-    datC <- dat0 %>% mutate(ID = 3, KSC = 50)
-    datD <- dat0 %>% mutate(ID = 4, KSC = 30)
-    predA <- predB <- predC <- predD <- NULL
-    system.time(predA <- predict(forest, datA, type = "hazard"))
-    system.time(predB <- predict(forest, datB, type = "hazard"))
-    system.time(predC <- predict(forest, datC, type = "hazard"))
-    system.time(predD <- predict(forest, datD, type = "hazard"))
-    datgg <- rbind(predA$pred[[1]], predB$pred[[1]], predC$pred[[1]], predD$pred[[1]])
-    datgg$patient <- rep(LETTERS[1:4], each = dim(predA$pred[[1]])[1])
-    gg <- ggplot(datgg, aes(x = Time, y = haz, group = patient)) +
-        geom_line(aes(linetype = patient, color = patient), lwd = I(1.1)) +
-        xlab("Time") + ylab("Hazard")
-    gg + theme_bw() +
-        theme(axis.line = element_line(colour = "black"),
-              panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank(),
-              panel.border = element_blank(),
-              panel.background = element_blank()) 
-}
-
-gg(fit3)
-
-gg(forest1)
-gg(forest2)
-gg(forest3)
-gg(forest4)
-gg(forest5)
-
-head(predA$pred[[1]])
-head(predB$pred[[1]])
-head(predC$pred[[1]])
+system.time(predA <- predict(fit3, datA, type = "hazard"))
+with(predA$pred[[1]], plot(Time, haz, 's'))
 
 debug(rocTree:::predict.rocForest)
-rocTree:::predict.rocForest(fit3, datB, type = "hazard")
-rocTree:::predict.rocForest(fit3, datB, type = "hazard0")
-rocTree:::predict.rocForest(fit3, datC, type = "hazard")
-
-
-plot(Y0, colSums(matk * W[[1]] / 1000), 's')
-invisible(sapply(1:467, function(z) lines(Y0, colSums(matk * W[[1]][,z]) / 1000, 's', col = "gray")))
-lines(Y0, colSums(matk * W[[1]] / 1000), 's')
-lines(Y0, colSums(matk * W[[1]][,467] / 1000), 's')
-lines(Y0, colSums(matk * rowMeans(W[[1]]) / 1000), 's', col = 2)
-
-plot(Y0, colSums(matk * W[[1]][,1] / W.rs[[1]][,1]), 's', ylim = c(0, 0.21))
-invisible(sapply(1:467, function(z)
-    lines(Y0, colSums(matk * W[[1]][,z] / W.rs[[1]][,z]), 's', col = "gray")))
-
-plot(Y0, colSums(matk * W[[1]] / W.rs[[1]]), 's')
-plot(Y0, colSums(matk * W[[1]]), 's')
-
-
-set.seed(1)
-dat <- simu(200, 0, 1.2)
-dat.test <- simuTest(dat)
-fit <- rocForest(Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5 + z6 + z7 + z8 + z9 + z10,
-                 data = dat, id = id,
-                 control =  list(ghN = .5, tau = 1.5, minsp = 3, minsp2 = 1))
-
-haz.pred <- predict(fit, dat.test, type = "hazard")
-surv.pred <- predict(fit, dat.test, type = "survival")
-cumH.pred <- predict(fit, dat.test, type = "cumHaz")
-
-
-with(haz.pred$pred[[1]], plot(Time, haz, 's'))
-
-with(surv.pred$pred[[1]], plot(Time, Surv, 's'))
-with(surv.pred$pred[[1]], lines(Time, trueSurv(dat.test)(Time), 's', col = 2))
-
-with(cumH.pred$pred[[1]], plot(Time, cumHaz, 's'))
-with(cumH.pred$pred[[1]], lines(Time, trueHaz(dat.test)(Time), 's', col = 2))
-
-
-##############################################################################
-
-set.seed(11)
-dat <- simu(10, 0.25, 2.1)
-dat.test1 <- simuTest(dat)
-dat.test2 <- simuTest(dat)
-dat.test3 <- simuTest(dat)
-dat.test4 <- simuTest(dat)
-
-foo <- rocForest(Surv(Y, death) ~ z1 + z2, data = dat, id = id,
-                 control = list(parallel = T, parCluster = 16,
-                                ghN = .5, minsp = 3, minsp2 = 1))
-
-foo.pred1 <- predict(foo, dat.test1, type = "hazard")
-foo.pred2 <- predict(foo, dat.test2, type = "hazard")
-foo.pred3 <- predict(foo, dat.test3, type = "hazard")
-foo.pred4 <- predict(foo, dat.test4, type = "hazard")
-
-with(foo.pred1$pred[[1]], plot(Time, haz, 's', ylim = c(0.8, 1.8)))
-with(foo.pred2$pred[[1]], lines(Time, haz, 's', col = 2))
-with(foo.pred3$pred[[1]], lines(Time, haz, 's', col = 2))
-with(foo.pred4$pred[[1]], lines(Time, haz, 's', col = 2))
-
-
-undebug(rocTree:::predict.rocForest)
-debug(rocTree:::predict.rocForest)
-rocTree:::predict.rocForest(predict(foo, dat.test1, type = "hazard"))
-
-
-rr <- 7
-matrix(oneW(ndInd, xlist, object$forest[[rr]])[[1]], 10)
-matrix(oneV(ndInd, xlist, object$forest[[rr]])[[1]], 10)
-dim(unique(t(oneV(ndInd, xlist, object$forest[[rr]])[[1]])))
-rbind(diag(matrix(oneW(ndInd, xlist, object$forest[[rr]])[[1]], 10)),
-      oneV(ndInd, xlist, object$forest[[rr]])[[1]][,1])
-
-
-table(t(sapply(1:500, function(x) dim(unique(t(oneV(ndInd, xlist, object$forest[[x]])[[1]]))))))
-
-
-matrix(lapply(1:dim(xlist[[1]])[2], function(z) giveW(ndInd[, z], idB2, ndInd2, ndTerm, szL2))[[1]],10)
-
-lapply(1:dim(xlist[[1]])[2], function(z) giveV(ndInd[, z], idB2, ndInd2, ndTerm, szL2))
-diag(matrix(giveW(rep(2, 10), idB2, ndInd2, ndTerm, szL2), 10))
-diag(matrix(giveW(rep(3, 10), idB2, ndInd2, ndTerm, szL2), 10))
-diag(matrix(giveW(ndInd[,1], idB2, ndInd2, ndTerm, szL2), 10))
-
-diag(lapply(1:dim(xlist[[1]])[2], function(z) giveV(ndInd[, z], idB2, ndInd2, ndTerm, szL2))[[1]])
-
-
-giveND <- function(xx) {
-    ndInd <- matrix(1, 467, 1)
-    for (i in 1:dim(Frame)[1]) {
-        if (Frame$terminal[i] == 0) {
-            ndInd[ndInd == Frame$nd[i] & xx[[Frame$p[i]]] <= Frame$cut[i]] <- Frame$nd[i] * 2
-            ndInd[ndInd == Frame$nd[i] & xx[[Frame$p[i]]] > Frame$cut[i]] <- Frame$nd[i] * 2 + 1
-        }
-    }
-    return(ndInd)
-}
-
-
-head(ndInd[,1], 10)
-xlist0 <- lapply(xlist, function(e) matrix(rep(e[4], 467), ncol = 1))
-table(giveND(xlist))
-table(giveND(xlist0))
-
-
-sapply(1:467, function(g) unique(giveND(lapply(xlist, function(e) matrix(rep(e[g], 467), ncol = 1)))))
-table(sapply(1:467, function(g) unique(giveND(lapply(xlist, function(e) matrix(rep(e[g], 467), ncol = 1))))))
+rocTree:::predict.rocForest(fit3, datA, type = "hazard")
