@@ -66,21 +66,20 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
         ## matk <- sapply(t0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN)
         ## matk2 <- outer(t0, Y0, "<=")
         matk3 <- outer(Y0, Y0, "==") * object$E0
-        pred <- list()
+        pred <- Wi <- list()
         W0 <- upper.tri(matrix(0, n, n), TRUE) * 1:n / n ## for NA's in Wi
         for (i in 1:nID) {
-            Vi <- colSums(W[[i]]) / length(object$forest)
-            Wi <- W[[i]] / rowSums(W[[i]])
-            Wi[rowSums(W[[i]]) == 0,] <- W0[rowSums(W[[i]]) == 0,]
+            Wi[[i]] <- W[[i]] / rowSums(W[[i]])
+            Wi[[i]][rowSums(W[[i]]) == 0,] <- W0[rowSums(W[[i]]) == 0,]
             if (type == "survival") {
-                pred[[i]] <- data.frame(Time = Y0, Surv = exp(-cumsum(rowSums(matk3 * Wi))))
+                pred[[i]] <- data.frame(Time = Y0, Surv = exp(-cumsum(rowSums(matk3 * Wi[[i]]))))
             }
             if (type == "cumHaz") {
-                pred[[i]] <- data.frame(Time = Y0, cumHaz = cumsum(rowSums(matk3 * Wi)))
+                pred[[i]] <- data.frame(Time = Y0, cumHaz = cumsum(rowSums(matk3 * Wi[[i]])))
             }
             if (type == "hazard0") {
                 matk <- t(sapply(t0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN))
-                pred[[i]] <- data.frame(Time = t0, haz = colSums(t(matk) * diag(Wi)))
+                pred[[i]] <- data.frame(Time = t0, haz = colSums(t(matk) * diag(Wi[[i]])))
             }
         }
     }
@@ -97,20 +96,15 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
         W <- lapply(W, matrix, nrow = n)
         W.rs <- lapply(W.rs, matrix, nrow = n)
         matk <- sapply(Y0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN)
-        ## matk <- sapply(t0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN)
-        pred <- list()
+        pred <- Wi <- list()
         for (i in 1:nID) {
-            tmp <- W[[i]] / W.rs[[i]]
-            ## tmp <- diag(W[[i]] / rowSums(W[[i]]))
-            tmp <- ifelse(is.na(tmp), 0, tmp)
-            pred[[i]] <- data.frame(Time = Y0, haz = colSums(matk * tmp))
-            ## pred[[i]] <- data.frame(Time = t0,
-            ##                         haz = colSums(matk * W[[i]][,findInterval(t0, Y0) + 1]) /
-            ##                             length(object$forest))
+            Wi[[i]] <- W[[i]] / W.rs[[i]]
+            Wi[[i]] <- ifelse(is.na(Wi[[i]]), 0, Wi[[i]])
+            pred[[i]] <- data.frame(Time = Y0, haz = colSums(matk * Wi[[i]]))
         }
     }
     for (i in 1:length(xlist)) attr(xlist[[i]], "dimnames") <- NULL
-    out <- list(xlist = xlist, W = W, pred = pred)
+    out <- list(xlist = xlist, Wi = Wi, pred = pred)
     class(out) <- "predict.rocForest"
     return(out)
 }  
