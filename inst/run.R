@@ -222,6 +222,25 @@ gg + theme_bw() +
 ## ggsave(filename = "pred-hn05-sm10-op1.pdf")
 ## ggsave(filename = "pred-hn05-sm10-op0.pdf")
 
+#' Save data in datgg0 and datgg1 for op = 0 and 1, then row bind the two
+datgg <- rbind(datgg0, datgg1)
+datgg$OP <- as.factor(datgg$OP)
+levels(datgg$OP) <- c("OP = 0", "OP = 1")
+
+ggplot(datgg, aes(x = Time, y = haz, group = patient)) +
+    stat_smooth(aes(linetype = patient, color = patient), lwd = I(1.1), se = FALSE, n = 10) +
+    xlab("Time") + ylab("Hazard") + facet_grid(rows = vars(OP), switch = "both") +
+    theme_bw() +
+    theme(axis.line = element_line(colour = "black"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank(),
+          legend.title = element_blank()) + xlim(0, 1.55) +
+    theme(panel.background = element_rect(fill = NA, color = "black"))
+## ggsave(filename = "pred-hn05-sm10-op0-facet.pdf")
+
+
 ###########################################################################################
 #' Testing sets with fixed KS(t)
 #'
