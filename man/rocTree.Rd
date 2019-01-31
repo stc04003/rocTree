@@ -4,7 +4,8 @@
 \alias{rocTree}
 \title{ROC-guided Regression Trees}
 \usage{
-rocTree(formula, data, id, subset, control = list())
+rocTree(formula, data, id, subset, splitBy = c("CON", "dCON"),
+  control = list())
 }
 \arguments{
 \item{formula}{a formula object, with the response on the left of a '~' operator,

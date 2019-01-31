@@ -43,36 +43,103 @@ do.haz <- function(n, cen, sce = 1.1) {
     list(dat = dat, fit = fit, pred = pred, pred0 = pred0)
 }
 
-foo <- do.haz(200, 0, 1.2)
+set.seed(1)
+foo <- do.haz(100, 0, 1.2)
 
 
-with(foo$pred$pred[[1]], 
-     plot(Time, haz, 's', ylim = c(0, max(truehaz1.2(foo$dat)(foo$pred$pred[[1]]$Time)))))
-invisible(sapply(1:50, function(e) with(foo$pred$pred[[e]],
-                                        lines(Time, haz, 's', col = "lightgray"))))
-lines(foo$pred$pred[[1]]$Time, truehaz1.2(foo$dat)(foo$pred$pred[[1]]$Time), 's', col = 2)
+##################################################################################
+## Benchmark
 
-with(foo$pred0$pred[[1]],
-     plot(Time, haz, 's', ylim = c(0, max(truehaz1.2(foo$dat)(foo$pred$pred[[1]]$Time)))))
-invisible(sapply(1:50, function(e) with(foo$pred0$pred[[e]],
-                                        lines(Time, haz, 's', col = "lightgray"))))
-lines(foo$pred$pred[[1]]$Time, truehaz1.2(foo$dat)(foo$pred$pred[[1]]$Time), 's', col = 2)
-invisible(sapply(1:50, function(e) with(foo$pred$pred[[e]],
-                                        lines(Time, haz, 's', col = "gray55"))))
-legend("topleft", c("True", "Original", "Modified"),
-       col = c(2, "lightgray", "gray55"), lty = 1, lwd = 2, bty = "n")
+do.tree <- function(n, cen, sce = 1.1) {
+    dat <- simu(n, cen, sce)
+    dat0 <- dat[cumsum(with(dat, unlist(lapply(split(id, id), length), use.names = FALSE))),]
+    ctrl <- list(CV = TRUE, tau = quantile(dat0$Y, .95), minsp = 20, minsp2 = 5)
+    tt <- seq(0, ctrl$tau, length = 100)
+    ## Fitting
+    if (sce %in% c(1.1, 1.2))
+        fm <- Surv(Y, death) ~ z1 + z2 + z3 + z4 + z5 + z6 + z7 + z8 + z9 + z10
+    else fm <- Surv(Y, death) ~ z1 + z2
+    fit <- rocTree(fm, data = dat, id = id, control = ctrl)
+    fit.dcon <- rocTree(fm, data = dat, id = id, splitBy = "dCON", control = ctrl)
+    print(fit)
+    print(fit.dcon)
+}
 
-foo$pred$W[[1]][,1]
-foo$pred$W[[1]][,50]
-diag(foo$pred0$W[[1]])
+debug(rocTree)
+traceback()
 
+set.seed(1)
+system.time(do.tree(100, 0, 1.1))
 
+## Root                      
+##  ¦--2) z1 <= 0.36000      
+##  ¦   ¦--4) z10 <= 0.30000*
+##  ¦   °--5) z10 > 0.30000* 
+##  °--3) z1 > 0.36000       
+##      ¦--6) z2 <= 0.59000* 
+##      °--7) z2 > 0.59000*  
+## Root                     
+##  ¦--2) z1 <= 0.36000*    
+##  °--3) z1 > 0.36000      
+##      ¦--6) z2 <= 0.59000*
+##      °--7) z2 > 0.59000* 
+##  user  system elapsed 
+## 7.884   0.160   8.081
 
-debug(rocTree:::predict.rocForest)
-undebug(rocTree:::predict.rocForest)
-foo <- do.haz(20, 0, 1.2)
+set.seed(1)
+system.time(do.tree(100, 0.25, 1.3))
 
-str(foo$pred$W[[1]])
-str(foo$pred0$W[[1]])
-summary(c(foo$pred$W[[1]]))
-summary(c(foo$pred0$W[[1]]))
+## Root                     
+##  ¦--2) z1 <= 0.33000     
+##  ¦   ¦--4) z1 <= 0.10000*
+##  ¦   °--5) z1 > 0.10000* 
+##  °--3) z1 > 0.33000      
+##      ¦--6) z2 <= 0.89000*
+##      °--7) z2 > 0.89000* 
+## Root                     
+##  ¦--2) z1 <= 0.33000     
+##  ¦   ¦--4) z1 <= 0.10000*
+##  ¦   °--5) z1 > 0.10000* 
+##  °--3) z1 > 0.33000*     
+##    user  system elapsed 
+##   1.395   0.102   1.509     
+
+set.seed(1)
+system.time(do.tree(100, 0.25, 2.3))
+
+## Root                     
+##  ¦--2) z2 <= 0.77000     
+##  ¦   ¦--4) z1 <= 0.51000*
+##  ¦   °--5) z1 > 0.51000* 
+##  °--3) z2 > 0.77000*     
+## Root                 
+##  ¦--2) z2 <= 0.77000*
+##  °--3) z2 > 0.77000* 
+##    user  system elapsed 
+##   1.636   0.112   1.765 
+
+set.seed(1)
+system.time(do.tree(100, 0.50, 2.5))
+
+## Root                     
+##  ¦--2) z1 <= 0.51000*    
+##  °--3) z1 > 0.51000      
+##      ¦--6) z1 <= 0.72000*
+##      °--7) z1 > 0.72000* 
+## Root                 
+##  ¦--2) z1 <= 0.51000*
+##  °--3) z1 > 0.51000* 
+##    user  system elapsed 
+##   1.325   0.110   1.455 
+
+set.seed(1)
+system.time(do.tree(100, 0.50, 1.5))
+
+## Root                 
+##  ¦--2) z1 <= 0.80000*
+##  °--3) z1 > 0.80000* 
+## Root                 
+##  ¦--2) z1 <= 0.80000*
+##  °--3) z1 > 0.80000* 
+##    user  system elapsed 
+##   1.151   0.098   1.264 

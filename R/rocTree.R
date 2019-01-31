@@ -1,3 +1,22 @@
+#' Class definition
+setClass("splitClass",
+         representation(tau = "numeric", M = "numeric", hN = "numeric", h = "numeric",
+                        minsp = "numeric", minsp2 = "numeric", disc = "numeric", nflds = "numeric",
+                        CV = "logical", Trace = "logical", parallel = "logical", parCluster = "numeric",
+                        B = "numeric", ghN = "numeric", fsz = "numeric"),
+         prototype(tau = 0.4, M = 1000, hN = 0, h = 0, minsp = 20, minsp2 = 5, disc = -1, nflds = 10,
+                   CV = FALSE, Trace = FALSE, parallel = FALSE,
+                   parCluster = parallel::detectCores() / 2,
+                   B = 500, ghN = 0.2, fsz = 0),
+         contains = "VIRTUAL")
+setClass("CON", contains = "splitClass")
+setClass("dCON", contains = "splitClass")
+#' Method dispatch
+setGeneric("grow", function(Y, E, X.list, parm) standardGeneric("grow"))
+
+setMethod("grow", signature(parm = "CON"), growSeq)
+setMethod("grow", signature(parm = "dCON"), growRP)
+
 #' ROC-guided Regression Trees
 #'
 #' Fits a "\code{rocTree}" model.
@@ -52,8 +71,10 @@
 #' fit <- rocTree(Surv(Y, death) ~ z1 + z2, id = id, data = dat,
 #'        control = list(CV = TRUE, nflds = 5))
 #' fit
-rocTree <- function(formula, data, id, subset, control = list()) {
-    ctrl <- rocTree.control(control)
+rocTree <- function(formula, data, id, subset, splitBy = c("CON", "dCON"), control = list()) {
+    splitBy  <- match.arg(splitBy)
+    parm.control <- control[names(control) %in% names(attr(getClass(splitBy), "slots"))]
+    parm <- do.call("new", c(list(Class = splitBy), parm.control))
     Call <- match.call()
     indx <- match(c("formula", "data", "id", "subset"), names(Call), nomatch = 0L)
     if (indx[1] == 0L) stop("A 'formula' argument is required")
@@ -87,16 +108,19 @@ rocTree <- function(formula, data, id, subset, control = list()) {
         X <- as.matrix(X[, -which(colnames(X) == "(Intercept)")])
     p <- ncol(X)
     vNames <- colnames(X)
-    if (is.null(ctrl$disc)) ctrl$disc <- rep(0, p)
-    if (length(ctrl$disc) == 1) ctrl$disc <- rep(ctrl$disc, p)
-    xlist <- sapply(1:p, function(z) rocTree.Xlist(X[,z], ctrl$disc[z], Y, id), simplify = FALSE)
+    if (parm@disc[1] < 0) parm@disc <- rep(0, p)
+    if (length(parm@disc) == 1) parm@disc <- rep(parm@disc, p)
+    xlist <- sapply(1:p, function(z) rocTree.Xlist(X[,z], parm@disc[z], Y, id), simplify = FALSE)
     xlist0 <- sapply(1:p, function(z) rocTree.Xlist(X[,z], 1, Y, id), simplify = FALSE) ## for prediction
     Y0 <- unlist(lapply(split(Y, id), max), use.names = FALSE)
     E0 <- unlist(lapply(split(Status, id), max), use.names = FALSE)
+    if (parm@h <= 0) parm@h <- parm@tau / 20
+    if (parm@hN <= 0) parm@hN <- parm@tau / 20    
+    if (parm@fsz <= 0) parm@fsz <- round(length(Y0) / 2)
     ## Grow
-    out <- grow(Y0, E0, xlist, ctrl)
+    out <- grow(Y0, E0, xlist, parm)
     ## CV
-    if (ctrl$CV & length(out$beta.seq) > 2) 
+    if (parm@CV & length(out$beta.seq) > 2) 
         out$con2.seq <- rocTree.cv(out$beta.seq, Y, Status, id, X, ctrl)
     out <- c(out, rocTree.final(out, Y0, E0, xlist, ctrl))
     ## out <- c(out, rocTree.haz(out$dfFinal, Y0, ctrl))
@@ -131,21 +155,19 @@ rocTree <- function(formula, data, id, subset, control = list()) {
 }
 
 #'
-#' @param fsz forest size; S in the codes
-#' 
+#' @param fsz forest size; S in the codes; removing this 
+#' @noRd
 rocTree.control <- function(l) {
     if (missing(l)) l <- NULL
     ## default list
     dl <- list(tau = 0.4, M = 1000, hN = NULL, h = NULL,
                minsp = 20, minsp2 = 5, disc = 0, nflds = 10, CV = FALSE, Trace = FALSE,
                parallel = FALSE, parCluster = detectCores() / 2, B = 500, ghN = .2,
-               fsz = function(n) round(n/2), splitBy = "CON")
+               fsz = function(n) round(n/2))
     naml <- names(l)
     if (!all(naml %in% names(dl)))
         stop("unknown names in control: ", naml[!(naml %in% names(dl))])
     dl[naml] <- l
-    if (!(dl$splitBy %in% c("CON", "dCON")))
-        stop("invalid splitBy: must be either \"CON\" or \"dCON\".")
     if (is.null(dl$hN)) dl$hN <- dl$tau / 20
     if (is.null(dl$h)) dl$h <- dl$tau / 20
     return(dl)
@@ -453,397 +475,4 @@ rocTree.cv <- function(beta.seq, Y, Status, id, X, control = list()) {
     colnames(con2.seq) <- paste("result.", 1:nflds, sep = "")
     rownames(con2.seq) <- NULL
     con2.seq
-}
-
-#' Function used to grow tree
-#'
-#' This is an internal function, called by \code{rocTree}.
-#' Inputs are based on an ordered Y.
-#'
-#' @param Y is a size N vector specifying the ordered follow-up time.
-#' @param E is the censoring indicator, \code{length(E) = length(Y)}.
-#' @param X.list covaraite path, created by \code{rocTree.Xlist}.
-#' @param control see rocTree.control for default values.
-#'
-#' Variables defined in this function:
-#' @param const size = sum(E). Two ways to compute const:
-#' 1. -diff(c(ss, Stau)) / (rowMeans(fmat)[Y <= tau * E])
-#' 2. 1 / rowMeans(fmat)[Y <= tau * E] / sc[Y <= tau * E] / N
-#' This gives the inverse of the denominator in CON; f^{uc}_tau(t) P(Y \ge t, Z(t) \in \tau^\prime).
-#' 
-#' Prepration and split stage:
-#' @param fmat is a N by N matrix, the [i, j]th element gives \Delta_i K_n(Y_j - Y_i). rowMeans(fmat) gives \hat{f}^{UC}(Y_i).
-#' @param Smat is a N by N matrix, the [i, j]th element gives (Y_j \le Y_i)\Delta. rowMeans(Smat) gives \hat{S}(Y_i) = \hat{P}(Y \ge Y_i).
-#' @param fTree is a M by (E = 1) matrix, estimated density function (\hat{f}^{UC}(Y_i)) at each node.
-#' @param STree is a M by (E = 1) matrix, estimated survival function (\hat{S}(Y_i) at each node.
-#' @param sc estimated S_c(Y).
-#' @param ss estimated S(Y).
-#' @param Stau S(tau).
-#' @param treeMat tree-matrix; 6 columns. ("nd", "terminal", "u", "u2", "p", "cut")
-#' \describe{
-#' \item{nd}{is the node number}
-#' \item{terminal}{node property: 0 = internal, 1 = terminal node that can be split, 2 = terminal node that can't be split.
-#' A node is classified as terminal = 2 is there are too few cases}
-#' \item{u}{ is the proportion being split in \tau_L.}
-#' \item{u2}{ is the minimum proporiton in \tau_L across time.}
-#' \item{p}{ is the covariate being split at the node.}
-#' \item{cut}{ is the covariate value being split at the node.}
-#' }
-#'
-#' Prune stage:
-#' @param treeMatTerm gives all potential nodes id that is splitted.
-#' @param left The left most node in the bottom of the tree (assume tree grows downward with root on top).
-#' @param right The right most node in the bottom of the tree.
-#' @param treeMatTerm2 ordered treeMatTerm
-#' @param ndTerm terminal nodes, constructed from the above arguments.
-#'        This gives priority ordering on which node to prune first.
-#' @param fuTerm a tempory vector, gives the estimated density function at a given (ndTerm) node.
-#' @param SuTerm a tempory vector, gives the estimated survival function at a given (ndTerm) node.
-#' @param sizeTree is the number of terminal nodes.
-#' Lists used in prune stage: 
-#' @param indList terminal code list for prune steps (0 = internal, 1, = terminal).
-#' @param conList CON list for prune steps.
-#' @param termList terminal node list for prune steps.
-#' @param optTreeList optimum tree list. This list consists of all possible tree nodes after prune.
-#' It's possible to have multiple rows in each list, indicating different ways to prune on the same node.
-#' 
-#' @return Return a list. Variables are here:
-#' @param alpha is the penalty, defined as (CON[j] - CON[-(1:j)]) / #Tree.
-#' @param beta.seq beta
-#' @param optTree.seq optimum tree in sequence?
-#' @param treeMat tree matrix for the fully grew tree.
-#' 
-#' @keywords internal
-#' @noRd 
-grow <- function(Y, E, X.list, control) {
-    tau <- control$tau
-    M <- control$M
-    hN <- control$hN
-    minsp <- control$minsp
-    minsp2 <- control$minsp2
-    N <- length(Y)
-    fitc <- survfit(Surv(Y, 1 - E) ~ 1)
-    fit <- survfit(Surv(Y, E) ~ 1)
-    fit$surv <- c(1, fit$surv)
-    fitc$surv <- c(1, fitc$surv)
-    sc <- fitc$surv[findInterval(Y, fitc$time)]
-    ss <- fit$surv[findInterval(Y, fit$time)]
-    Smat <- matk2 <- outer(ifelse(E, Y, NA), Y, "<=") 
-    fmat <- matk <- t(E * sapply(ifelse(E, Y, NA), K2, vec = Y, h = hN) / hN)
-    if (min(rowMeans(fmat)[E == 1]) < 0) 
-        fmat[E == 1 & rowMeans(fmat) < 0, ] <- fmat[which(rowMeans(fmat) > 0)[1], ]
-    Stau <- fit$surv[findInterval(tau, fit$time) + 1]
-    EE <- Y <= tau * E
-    ss <- ss[EE]
-    fall <- rowMeans(fmat)
-    const <- -diff(c(ss, Stau)) / (rowMeans(fmat)[EE])
-    ## Initialization
-    fTree <- STree <- matrix(NA, M, sum(Y <= E * tau))
-    fTree[1, ] <- rowMeans(fmat)[EE]
-    STree[1, ] <- rowMeans(Smat)[EE]
-    ## Define a tree object
-    treeMat <- data.frame(nd = 1:M, terminal = 0, u = NA, u2 = NA, p = NA, cut = NA)
-    treeMat[1, ] <- c(1, 1, 1, 1, NA, NA)
-    ## node number of each observation
-    ndInd <- matrix(1, N, N)
-    ndInd[lower.tri(ndInd)] <- 0
-    ## ndInd is N N matrix
-    conTree <- sum(0.5 * const * ss * rowMeans(fmat)[EE])
-    while (sum(treeMat$terminal == 1) > 0) {
-        sp <- splitTree(X.list, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, control)
-        if (sp[1] * 2 < M & !is.na(sp[2])) {
-            ndInd[ndInd == sp[1] & X.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
-            ndInd[ndInd == sp[1] & X.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1
-            fTree[sp[1] * 2, ] <- rowSums(fmat[EE, diag(ndInd) == 2 * sp[1], drop = FALSE]) / N
-            fTree[sp[1] * 2 + 1, ] <- rowSums(fmat[EE, diag(ndInd) == 2 * sp[1] + 1, drop = FALSE]) / N
-            STree[sp[1] * 2, ] <- rowSums(Smat * (ndInd == 2 * sp[1]))[EE] / N
-            STree[sp[1] * 2 + 1, ] <- rowSums(Smat * (ndInd == 2 * sp[1] + 1))[EE] / N
-            treeMat[sp[1], 2] <- 0
-            treeMat[sp[1], 5:6] <- sp[2:3]
-            treeMat[sp[1] * 2, ] <- c(sp[1] * 2, 1,
-                                      mean(diag(ndInd) == sp[1] * 2 & EE),
-                                      min(rowMeans(ndInd[Y <= tau, ] == sp[1] * 2)), NA, NA)
-            treeMat[sp[1] * 2 + 1, ] <- c(sp[1] * 2 + 1, 1,
-                                          mean(diag(ndInd) == sp[1] * 2 + 1 & EE),
-                                          min(rowMeans(ndInd[Y <= tau, ] == sp[1] * 2 + 1)), NA, NA)
-            treeMat$terminal[which(treeMat$u < minsp / N & treeMat$u2 < minsp2 / N)] <- 2
-            conTree <- conTree + sp[4]
-        } else {
-            if (sum(!is.na(treeMat$p)) > 1) break
-            else treeMat$terminal[treeMat$nd == sp[1]] <- 2
-            break
-        }
-        if (control$Trace) print(sp)
-    }
-    ## prune
-    treeMatTerm <- treeMat$nd[treeMat$terminal >= 1 & is.na(treeMat$p)]
-    ## sort the node
-    left <- 2 ^ round(log(max(treeMatTerm), 2))
-    right <- 2 * left - 1
-    treeMatTerm2 <- treeMatTerm
-    for (i in 1:length(treeMatTerm)) {
-        nd <- treeMatTerm[i]
-        treeMatTerm2[i] <- nd * 2 ^ ceiling(log(left / nd) / log(2))
-    }
-    ndTerm <- treeMatTerm <- treeMatTerm[order(treeMatTerm2)]
-    ## exhaustive searching of all subtrees
-    sizeTree <- length(ndTerm)
-    termList <- list()
-    indList <- list()
-    conList <- list()
-    termList[[1]] <- matrix(ndTerm, nrow = 1)
-    indList[[1]] <- matrix(1, nrow = 1, ncol = sizeTree)
-    fuTerm <- fTree[ndTerm[order(ndTerm)], ]
-    SuTerm <- STree[ndTerm[order(ndTerm)], ]
-    conList[[1]] <- .C("con",
-                       as.integer(length(fuTerm) / sum(EE)),
-                       as.integer(sum(EE)),
-                       as.double(t(fuTerm)),
-                       as.double(t(SuTerm)),
-                       as.double(const), 
-                       out = double(1), PACKAGE = "rocTree")$out
-    for (k in 1:(sizeTree - 1)) {
-        sizeNew <- sizeTree - k
-        mat1 <- termList[[k]]
-        mat2 <- indList[[k]]
-        num <- 0
-        termMat <- matrix(ncol = sizeNew, nrow = 1)
-        indMat <- matrix(ncol = sizeNew, nrow = 1)
-        consub <- c()
-        for (l in 1:dim(mat1)[1]) {
-            ndTerml <- mat1[l, ]
-            indl <- mat2[l, ]
-            ## change here
-            locl <- which(diff(ndTerml) == 1 & ndTerml[-length(ndTerml)] %% 2 == 0 &
-                          indl[-length(ndTerml)] == 1)
-            for (q in locl) {
-                ndNew <- ndTerml
-                ndNew[q] <- ndNew[q] / 2
-                ndNew <- ndNew[-(q + 1)]
-                if (l == 1 & q == locl[1]) indNew <- rep(1, sizeNew)
-                else indNew <- rep(0:1, c(q - 1, sizeNew - q + 1))
-                termMat <- rbind(termMat, ndNew)
-                indMat <- rbind(indMat, indNew)
-                num <- num + 1
-                fuTerm <- fTree[ndNew[order(ndNew)], ]
-                SuTerm <- STree[ndNew[order(ndNew)], ]
-                consub <- c(consub, .C("con",
-                                       as.integer(length(fuTerm) / sum(EE)),
-                                       as.integer(sum(EE)),
-                                       as.double(t(fuTerm)),
-                                       as.double(t(SuTerm)),
-                                       as.double(const), 
-                                       out = double(1), PACKAGE = "rocTree")$out)
-            }
-        } ## end for l
-        termMat <- termMat[-1, ]
-        indMat <- indMat[-1, ]
-        if (is.vector(termMat)) {
-            termList[[k + 1]] <- matrix(termMat, nrow = 1)
-            indList[[k + 1]] <- matrix(indMat, nrow = 1)
-        } else {
-            termList[[k + 1]] <- termMat
-            indList[[k + 1]] <- indMat
-        }
-        conList[[k + 1]] <- consub
-    } ## end for k
-    optTreeList <- list()
-    con1 <- rep(NA, length(conList))
-    for (k in 1:sizeTree) {
-        con1[k] <- max(conList[[k]])
-        optTreeList[[k]] <- termList[[k]][which(conList[[k]] == con1[k]), ]
-    }
-    sz1 <- sizeTree:1
-    j <- 1
-    res <- matrix(c(1, 0), nrow = 1)
-    while (j < sizeTree) {
-        alpha <- (con1[j] - con1[-(1:j)]) / (1:(sizeTree - j))
-        j <- j + which.min(alpha)
-        res <- rbind(res, c(j, min(alpha)))
-    }
-    ## beta.seq <- sqrt(c(res[, 2] * c(res[-1, 2], Inf)))
-    beta.seq <- sqrt(abs(res[,2] * c(res[-1, 2], Inf)))
-    beta.seq[length(beta.seq)] <- rev(res[,2])[1]
-    list(beta.seq = beta.seq,
-         optTree.seq = optTreeList[res[, 1]],
-         treeMat = treeMat)
-}
-
-#' Function used to in the splitting procedure
-#'
-#' This is an internal function, called by \code{grow}. Inputs are based on an ordered Y.
-#'
-#' @section Variables
-#' @param X is the covariate path (list). The length of the list is equation to the number of covaraites (p).
-#' Each list is of size N by N, row indicates time (Yi), col indicates ID (i).
-#' @param Y is the follow-up time, size N, consists of both censored and uncensored times.
-#' @param E is the censoring indicator, size N.
-#' @param fmat is a N by N matrix, the [i, j]th element gives \Delta_i K_n(Y_j - Y_i). rowMeans(fmat) gives \hat{f}^{UC}(Y_i).
-#' @param Smat is a N by N matrix, the [i, j]th element gives (Y_j \le Y_i)\Delta. rowMeans(Smat) gives \hat{S}Y(Y_i) = \hat{P}(Y \ge Y_i).
-#' @param treeMat tree-matrix. This is used to track what to split.
-#' @param ndInd nodes to split. This is an indicator matrix, at each step, this points to what values to consider splitting.
-#' @param const size = sum(E). Two ways to compute const:
-#'   1. -diff(c(ss, Stau)) / (rowMeans(fmat)[Y <= tau * E])
-#'   2. 1 / rowMeans(fmat)[Y <= tau * E] / sc[Y <= tau * E] / N
-#'   This gives inverse the denominator in CON; f^{uc}_tau(t) P(Y \ge t, Z(t) \in \tau^\prime).
-#' @param fTree is a M by sum(E) matrix. Use to track \hat{f}^{UC}(Y_i) at each step for i = 1, 2, ..., sum(E).
-#' @param STree is a M by sum(E) matrix. Use to track \hat{S}Y(Y_i) at each step for i = 1, 2, ..., sum(E).
-#' @param randP is a scalar value <= P. When \code{randP} is provided, only a random subset of p will be considered for splitting.
-#' @param control see rocTree.control for default values
-#'
-#' @section Variables defined in this function:
-#' @param nd.terminal potenial nodes to split; nd.terminal <- treeMat[treeMat[, 2] == 1, 1]
-#'
-#' @section At each nd.terminal: 
-#' @param cutAll a vector contains all possible values to cut.
-#' @param cutList a size p list. Each list is a \code{cutAll}.
-#' @param dconList a size p list. Each list gives a vector of CON, corresponding to each cutAll value.
-#' These values are set at -1 if length(cutAll) == 0 (nothing to cut).
-#' @param dconmaxP a size p vector. Gives the max CON in each covariate.
-#' @param r is the hazard estimates (f / S) for all terminal nodes that are not m in the nd.terminal loop.
-#' @param rm is the hazard estimates (fm / Sm) for the mth terminal node that's being considering to split. 
-#'
-#' @section After checking all nd.terminal (set m in nd.terminal):
-#' @param dconopt is a size M vector. Max CON at the mth check.
-#' @param indm a scalar; "which covaraite gives the the max(CON) at the mth check (or dconopt[m]).
-#' @param cutindm a scalar gives the value to cut at \code{indm}.
-#' @param dconindm a scalar gives the CON if to cut at \code{indm}. This and \code{cutindm} are used to compute sopt. Not in outputs.
-#' @param sopt is a M by 2 matrix. The first column gives "which covariate to split?"; the second column gives "Cut at where?".
-#'
-#' @section After all computation, here are the returned variables:
-#' @param nd.split a scalar, indicating which node to split.
-#' @param sopt2 a size 2 vector, the row in \code{sopt}.
-#' @param dconopt2 a scalar, the corresponding CON.
-#'
-#' @section C codes;
-#' In \code{cutAll} c codes, the concordance was computed with the property that
-#' S_\tau(t) = S_{\tau_L}(t) + S_{\tau_R}(t) and f_\tau(t) = f_{\tau_L}(t) + f_{\tau_R}(t).
-#' This is different then the \code{con} C code.
-#'
-#' @return returns a size 4 vector, (nd.split, sopt2, dconopt2) gives the information:
-#' 1. which node to split
-#' 2. which covariate to split
-#' 3. given that covariate, where to cut? (split value)
-#' 4. the corresponding CON
-#' 
-#' @keywords internal
-#' @noRd 
-splitTree <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, control, randP = NULL)  {
-    N <- dim(X[[1]])[1]
-    P <- length(X)
-    if (is.null(randP)) randP <- P
-    disc <- control$disc
-    minsp <- control$minsp
-    minsp2 <- control$minsp2
-    M <- control$M
-    tau <- control$tau
-    ## all the terminal nodes that can be split; not all the terminal nodes
-    nd.terminal <- treeMat$nd[treeMat$terminal == 1]
-    sopt <- matrix(NA, M, 2)
-    dconopt <- rep(0, M)
-    ## lnd <- length(nd.terminal)-1
-    lt <- sum(Y <= tau * E)
-    for (m in nd.terminal) {
-        ## need to change with discrete data
-        dconList <- dconList2 <- list()
-        cutList <- list()
-        f <- fTree[(treeMat$terminal >= 1) & (treeMat$nd != m), ]
-        S <- STree[(treeMat$terminal >= 1) & (treeMat$nd != m), ]
-        ## size of nodes
-        fm <- fTree[m, ]
-        Sm <- STree[m, ]
-        rm <- fm / Sm
-        r <- f / S
-        r[is.na(r)] <- Inf
-        rm[is.na(rm)] <- Inf
-        if (control$splitBy == "dCON") {
-            if (length(dconList2) < m || is.null(dconList2[[m]])) {
-                dconList2[[m]] <- list()
-                for (p in sample(1:P, randP)) {
-                    if (disc[p] == 0) {
-                        cutAll <- sort(unique(X[[p]][1, ndInd[1, ] == m]))
-                    } else {
-                        cutAll <- sort(unique(X[[p]][ndInd == m]))
-                    }
-                    cutAll <- cutAll[-length(cutAll)]
-                    ## if there is no potential cut off, skip
-                    ## need to add check l2 size
-                    if (length(cutAll) == 0) {
-                        dconList[[p]] <- -1
-                        next
-                    }
-                    cutList[[p]] <- cutAll
-                    dconList2[[m]][[p]] <- .C("cutSearch2", as.integer(N), as.integer(length(cutAll)), as.integer(m),
-                                              as.integer(which(Y <= tau * E) - 1), as.integer(sum(Y <= tau * E)), 
-                                              as.double(minsp), as.double(minsp2), 
-                                              as.double(ifelse(is.na(X[[p]]), 0, X[[p]])),
-                                              as.double(ndInd), as.double(cutAll),
-                                              as.double(ifelse(is.na(fmat), 0, fmat)), 
-                                              as.double(ifelse(is.na(Smat), 0, Smat)), 
-                                              as.double(const), as.double(t(f)), as.double(t(S)), 
-                                              as.double(t(ifelse(r == Inf, 99999, r))),
-                                              as.double(ifelse(rm == Inf, 99999, rm)), 
-                                              as.integer(sum(treeMat$terminal >= 1 & treeMat$nd != m)),
-                                              out = double(length(cutAll)), PACKAGE = "rocTree")$out
-                }
-            }
-            dconList <- dconList2[[m]]
-        }
-        if (control$splitBy == "CON") {
-            for (p in sample(1:P, randP)) {
-                if (disc[p] == 0) {
-                    cutAll <- sort(unique(X[[p]][1, ndInd[1, ] == m]))
-                } else {
-                    cutAll <- sort(unique(X[[p]][ndInd == m]))
-                }
-                cutAll <- cutAll[-length(cutAll)]
-                ## if there is no potential cut off, skip
-                ## need to add check l2 size
-                if (length(cutAll) == 0) {
-                    dconList[[p]] <- -1
-                    next
-                }
-                cutList[[p]] <- cutAll
-                dconList[[p]] <- .C("cutSearch",
-                                    as.integer(N), ## n
-                                    as.integer(length(cutAll)), ## cL
-                                    as.integer(m), ## m
-                                    as.integer(which(Y <= tau * E) - 1), ## y
-                                    as.integer(sum(Y <= tau * E)), ## Ny
-                                    as.double(minsp), ## minsp
-                                    as.double(minsp2), ## minsp2
-                                    as.double(ifelse(is.na(X[[p]]), 0, X[[p]])), ## X
-                                    as.double(ndInd), ## ndInd
-                                    as.double(cutAll), ## cut
-                                    as.double(ifelse(is.na(fmat), 0, fmat)), ## fmat
-                                    as.double(ifelse(is.na(Smat), 0, Smat)), ## Smat
-                                    as.double(const), ## const cL by 1
-                                    as.double(t(f)), ## length(nd.terminal) by Ny
-                                    as.double(t(S)), ## length(nd.terminal) by Ny
-                                    as.double(t(ifelse(r == Inf, 99999, r))), ## length(nd.terminal) by Ny
-                                    as.double(ifelse(rm == Inf , 99999, rm)), ## Ny by 1
-                                    as.integer(sum(treeMat$terminal >= 1 & treeMat$nd != m)), ## sum(treeMat[,2] >= 1 & treeMat[,1] != m)
-                                    out = double(length(cutAll)), PACKAGE = "rocTree")$out
-            } ## end P
-        }
-        ## dconmaxP <- unlist(lapply(dconList, max))
-        ## print(m)
-        ## print(lapply(dconList, summary))
-        dconmaxP <- unlist(lapply(dconList, function(x) max(x, -1)))
-        if (max(dconmaxP) < 0) {
-            sopt[m, ] <- c(P + 1, 999)
-            dconopt[m] <- -1
-        } else {
-            dconopt[m] <- max(dconmaxP)
-            indm <- which.max(dconmaxP)
-            cutindm <- cutList[[indm[1]]]
-            dconindm <- dconList[[indm[1]]]
-            sopt[m, ] <- c(indm[1], cutindm[which.max(dconindm)])
-        }
-    }
-    nd.split <- which.max(dconopt)
-    sopt2 <- sopt[nd.split, ]
-    dconopt2 <- max(dconopt)
-    c(nd.split, sopt2, dconopt2)
-    ## which node to split, which variable, which cut off, which dcon
 }

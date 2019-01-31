@@ -5,7 +5,7 @@
 \title{Predicting based on a \code{rocForest} model.}
 \usage{
 \method{predict}{rocForest}(object, newdata, type = c("survival",
-  "hazard", "cumHaz"), ...)
+  "hazard", "cumHaz", "hazard0"), ...)
 }
 \arguments{
 \item{object}{is an \code{rocForest} object.}
