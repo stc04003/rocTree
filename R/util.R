@@ -20,8 +20,8 @@
 #' 
 #' @keywords internal
 #' @noRd
-rocTree.final <- function(tree, Y0, E0, xlist, control) {
-    hN <- control$hN
+rocTree.final <- function(tree, Y0, E0, xlist, parm) {
+    hN <- parm@hN
     n <- length(Y0)
     con2.seq <- tree$con2.seq
     tree2 <- data.frame(tree$treeMat)
@@ -65,9 +65,9 @@ rocTree.final <- function(tree, Y0, E0, xlist, control) {
 #' 
 #' @keywords internal
 #' @noRd
-rocTree.haz <- function(dfFinal, Y0, control) {
-    hN <- control$ghN
-    tau <- control$tau
+rocTree.haz <- function(dfFinal, Y0, parm) {
+    hN <- parm@ghN
+    tau <- parm@tau
     tt <- seq(0, tau, length = 500) ## move 500 to control later
     r2Final <- matrix(NA, 500, NCOL(dfFinal))
     for (i in 1:NCOL(dfFinal)) {

@@ -93,7 +93,7 @@ growRP <- function(Y, E, X.list, parm) {
     ## ndInd is N N matrix
     conTree <- sum(0.5 * const * ss * rowMeans(fmat)[EE])
     while (sum(treeMat$terminal == 1) > 0) {
-        sp <- splitTree(X.list, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, parm)
+        sp <- splitRP(X.list, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, parm)
         if (sp[1] * 2 < M & !is.na(sp[2])) {
             ndInd[ndInd == sp[1] & X.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
             ndInd[ndInd == sp[1] & X.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1
