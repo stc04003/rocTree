@@ -14,7 +14,7 @@
 predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "cumHaz", "hazard0"), ...) {
     if (!is.rocForest(object)) stop("Response must be a \"rocForest\" object")
     type <- match.arg(type)
-    ctrl <- object$ctrl
+    parm <- object$parm
     if (missing(newdata)) {
         xlist <- object$xlist
         Y <- object$Y0
@@ -63,8 +63,6 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
             rm(tmp)
         }
         W <- lapply(W, matrix, n)
-        ## matk <- sapply(t0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN)
-        ## matk2 <- outer(t0, Y0, "<=")
         matk3 <- outer(Y0, Y0, "==") * object$E0
         pred <- Wi <- list()
         W0 <- upper.tri(matrix(0, n, n), TRUE) * 1:n / n ## for NA's in Wi
@@ -78,7 +76,7 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
                 pred[[i]] <- data.frame(Time = Y0, cumHaz = cumsum(rowSums(matk3 * Wi[[i]])))
             }
             if (type == "hazard0") {
-                matk <- t(sapply(t0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN))
+                matk <- t(sapply(t0, function(z) object$E0 * K3(z, Y0, object$parm@ghN) / object$parm@ghN))
                 pred[[i]] <- data.frame(Time = t0, haz = colSums(t(matk) * diag(Wi[[i]])))
             }
         }
@@ -95,7 +93,7 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
         }
         W <- lapply(W, matrix, nrow = n)
         W.rs <- lapply(W.rs, matrix, nrow = n)
-        matk <- sapply(Y0, function(z) object$E0 * K3(z, Y0, object$ctrl$ghN) / object$ctrl$ghN)
+        matk <- sapply(Y0, function(z) object$E0 * K3(z, Y0, object$parm@ghN) / object$parm@ghN)
         pred <- Wi <- list()
         for (i in 1:nID) {
             Wi[[i]] <- W[[i]] / W.rs[[i]]

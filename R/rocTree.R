@@ -75,7 +75,7 @@ setMethod("grow", signature(parm = "dCON"), growRP)
 #'        control = list(CV = TRUE, nflds = 5))
 #' fit
 rocTree <- function(formula, data, id, subset, splitBy = c("CON", "dCON"), control = list()) {
-    splitBy  <- match.arg(splitBy)
+    splitBy <- match.arg(splitBy)
     parm.control <- control[names(control) %in% names(attr(getClass(splitBy), "slots"))]
     parm <- do.call("new", c(list(Class = splitBy), parm.control))
     parm@splitBy <- splitBy

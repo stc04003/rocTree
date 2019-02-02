@@ -4,7 +4,8 @@
 \alias{rocForest}
 \title{ROC-guided Regression Forest}
 \usage{
-rocForest(formula, data, id, subset, control = list())
+rocForest(formula, data, id, subset, splitBy = c("CON", "dCON"),
+  control = list())
 }
 \arguments{
 \item{formula}{a formula object, with the response on the left of a '~' operator,

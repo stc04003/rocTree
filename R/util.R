@@ -61,7 +61,7 @@ rocTree.final <- function(tree, Y0, E0, xlist, parm) {
 #'
 #' @param dfFinal is a n by nd matrix with each column consists unsmoothed \eqn{\hat{f}^{uc}_\tau = d\hat{F}^{uc}_\tau}.
 #' @param Y0 is the ordered follow-up times.
-#' @param control a list of control parameters.
+#' @param parm a list of control parameters.
 #' 
 #' @keywords internal
 #' @noRd

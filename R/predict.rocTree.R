@@ -17,7 +17,7 @@
 predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...) {
     if (!is.rocTree(object)) stop("Response must be a \"rocTree\" object")
     type <- match.arg(type)
-    ctrl <- object$ctrl
+    parm <- object$parm
     if (missing(newdata)) {
         xlist <- object$xlist
         Y <- object$Y0
