@@ -228,8 +228,12 @@ growRP2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, parm) {
     ndInd[lower.tri(ndInd)] <- 0
     ndInd2 <- matrix(1, N, N2)
     ndInd2[outer(Y, Y2, FUN = ">")] <- 0
+    dconList <- list()
     while (sum(treeMat[, 2] == 1) > 0) {
-        sp <- splitRP(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd, const, fTree, STree, parm, ceiling(sqrt(length(X1.list))))
+        sp <- splitRP(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd, const, fTree, STree, parm, ceiling(sqrt(length(X1.list))),
+                      dconList = dconList)
+        dconList <- sp$dconList
+        sp <- sp$sp
         if (sp[1] * 2 < M & !is.na(sp[2])) {
             ndInd[ndInd == sp[1] & X1.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
             ndInd[ndInd == sp[1] & X1.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1

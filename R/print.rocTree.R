@@ -21,27 +21,33 @@ print.rocTree <- function(x, digits = 5, dt = TRUE, ...) {
     Frame <- x$Frame
     ## create data.tree
     root <- Node$new("Root", type = "root", decision = "", nd = 1)
-    for (i in 2:nrow(Frame)) {
-        if (i <= 3) parent <- "root"
-        if (i > 3) parent <- paste0("Node", Frame$nd[i] %/% 2)
-        if (Frame$terminal[i] == 2) {
-            type <- "terminal"
-            display <- with(Frame, paste0(nd[i], ") ", tree.split.names(nd[i], nd, p, cut, x$vNames, digits), "*"))
-        } else {
-            type <- "interior"
-            display <- with(Frame, paste0(nd[i], ") ", tree.split.names(nd[i], nd, p, cut, x$vNames, digits)))
+    if (nrow(Frame) > 1) {
+        for (i in 2:nrow(Frame)) {
+            if (i <= 3) parent <- "root"
+            if (i > 3) parent <- paste0("Node", Frame$nd[i] %/% 2)
+            if (Frame$terminal[i] == 2) {
+                type <- "terminal"
+                display <- with(Frame, paste0(nd[i], ") ", tree.split.names(nd[i], nd, p, cut, x$vNames, digits), "*"))
+            } else {
+                type <- "interior"
+                display <- with(Frame, paste0(nd[i], ") ", tree.split.names(nd[i], nd, p, cut, x$vNames, digits)))
+            }
+            eval(parse(text = paste0("Node", Frame$nd[i], "<-", parent,
+                                     "$AddChild(display, type = type, nd = Frame$nd[i])")))
         }
-        eval(parse(text = paste0("Node", Frame$nd[i], "<-", parent,
-                                 "$AddChild(display, type = type, nd = Frame$nd[i])")))
     }
     if (!dt) classic.rocTree(x, ...)
     else{
         toPrint <- ToDataFrameTree(root)[[1]]
         cat(" ROC-guided survival tree\n")
-        cat("\n")
-        cat(" node), split\n")
-        cat("   * denotes terminal node\n")
-        cat("  ", toPrint, sep = "\n")
+        if (nrow(Frame) > 1) {        
+            cat("\n")
+            cat(" node), split\n")
+            cat("   * denotes terminal node\n")
+            cat("  ", toPrint, sep = "\n")
+        } else {
+            cat(" Decision tree found no splits.")
+        }
         cat("\n")
     }
 }

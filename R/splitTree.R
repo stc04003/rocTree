@@ -1,4 +1,3 @@
-
 #' Function used to in the splitting procedure
 #'
 #' This is an internal function, called by \code{grow.Seq}. Inputs are based on an ordered Y.
@@ -145,7 +144,8 @@ splitSeq <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, p
 }
 
 #' This is an internal function, called by \code{grow.RP}. Inputs are based on an ordered Y.
-splitRP <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, parm, randP = NULL)  {
+splitRP <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree,
+                    parm, randP = NULL, dconList)  {
     N <- dim(X[[1]])[1]
     P <- length(X)
     if (is.null(randP)) randP <- P
@@ -162,7 +162,6 @@ splitRP <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, pa
     lt <- sum(Y <= tau * E)
     for (m in nd.terminal) {
         ## need to change with discrete data
-        dconList <- list()
         cutList <- list()
         f <- fTree[(treeMat$terminal >= 1) & (treeMat$nd != m), ]
         S <- STree[(treeMat$terminal >= 1) & (treeMat$nd != m), ]
@@ -173,38 +172,59 @@ splitRP <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, pa
         r <- f / S
         r[is.na(r)] <- Inf
         rm[is.na(rm)] <- Inf
-        for (p in sample(1:P, randP)) {
-            if (disc[p] == 0) {
-                cutAll <- sort(unique(X[[p]][1, ndInd[1, ] == m]))
-            } else {
-                cutAll <- sort(unique(X[[p]][ndInd == m]))
-            }
-            cutAll <- cutAll[-length(cutAll)]
-            ## if there is no potential cut off, skip
-            ## need to add check l2 size
-            if (length(cutAll) == 0) {
-                dconList[[p]] <- -1
-                next
-            }
-            cutList[[p]] <- cutAll
-            dconList[[p]] <- .C("cutSearch2", as.integer(N), as.integer(length(cutAll)), as.integer(m),
-                                as.integer(which(Y <= tau * E) - 1), as.integer(sum(Y <= tau * E)), 
-                                as.double(minsp), as.double(minsp2), 
-                                as.double(ifelse(is.na(X[[p]]), 0, X[[p]])),
-                                as.double(ndInd), as.double(cutAll),
-                                as.double(ifelse(is.na(fmat), 0, fmat)), 
-                                as.double(ifelse(is.na(Smat), 0, Smat)), 
-                                as.double(const), as.double(t(f)), as.double(t(S)), 
-                                as.double(t(ifelse(r == Inf, 99999, r))),
-                                as.double(ifelse(rm == Inf, 99999, rm)), 
-                                as.integer(sum(treeMat$terminal >= 1 & treeMat$nd != m)),
-                                out = double(length(cutAll)), PACKAGE = "rocTree")$out
+        if ((length(dconList) < m) || is.null(dconList[[m]])) {
+            dconList[[m]] <- list()
+            for (p in sample(1:P, randP)) {
+                if (disc[p] == 0) {
+                    cutAll <- sort(unique(X[[p]][1, ndInd[1, ] == m]))
+                } else {
+                    cutAll <- sort(unique(X[[p]][ndInd == m]))
+                }
+                cutAll <- cutAll[-length(cutAll)]
+                ## if there is no potential cut off, skip
+                ## need to add check l2 size
+                if (length(cutAll) == 0) {
+                    dconList[[p]] <- -1
+                    next
+                }
+                cutList[[p]] <- cutAll
+                dconList[[m]][[p]] <- .C("cutSearch2",
+                                         as.integer(N), as.integer(length(cutAll)), as.integer(m),
+                                         as.integer(which(Y <= tau * E) - 1),
+                                         as.integer(sum(Y <= tau * E)), 
+                                         as.double(minsp), as.double(minsp2), 
+                                         as.double(ifelse(is.na(X[[p]]), 0, X[[p]])),
+                                         as.double(ndInd), as.double(cutAll),
+                                         as.double(ifelse(is.na(fmat), 0, fmat)), 
+                                         as.double(ifelse(is.na(Smat), 0, Smat)), 
+                                         as.double(const), as.double(t(f)), as.double(t(S)), 
+                                         as.double(t(ifelse(r == Inf, 99999, r))),
+                                         as.double(ifelse(rm == Inf, 99999, rm)), 
+                                         as.integer(sum(treeMat$terminal >= 1 & treeMat$nd != m)),
+                                         out = double(length(cutAll)), PACKAGE = "rocTree")$out
+            } ## end p
+        } else {
+            for (p in sample(1:P, randP)) {
+                if (disc[p] == 0) {
+                    cutAll <- sort(unique(X[[p]][1, ndInd[1, ] == m]))
+                } else {
+                    cutAll <- sort(unique(X[[p]][ndInd == m]))
+                }
+                cutAll <- cutAll[-length(cutAll)]
+                ## if there is no potential cut off, skip
+                ## need to add check l2 size
+                if (length(cutAll) == 0) {
+                    dconList[[p]] <- -1
+                    next
+                }
+                cutList[[p]] <- cutAll
+            } ## end p
         }
         ## dconList <- dconList2[[m]]
         ## dconmaxP <- unlist(lapply(dconList, max))
         ## print(m)
         ## print(lapply(dconList, summary))
-        dconmaxP <- unlist(lapply(dconList, function(x) max(x, -1)))
+        dconmaxP <- unlist(lapply(dconList[[m]], function(x) max(x, -1)))
         if (max(dconmaxP) < 0) {
             sopt[m, ] <- c(P + 1, 999)
             dconopt[m] <- -1
@@ -212,13 +232,13 @@ splitRP <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, pa
             dconopt[m] <- max(dconmaxP)
             indm <- which.max(dconmaxP)
             cutindm <- cutList[[indm[1]]]
-            dconindm <- dconList[[indm[1]]]
+            dconindm <- dconList[[m]][[indm[1]]]
             sopt[m, ] <- c(indm[1], cutindm[which.max(dconindm)])
         }
     }
     nd.split <- which.max(dconopt)
     sopt2 <- sopt[nd.split, ]
     dconopt2 <- max(dconopt)
-    c(nd.split, sopt2, dconopt2)
+    list(dconList = dconList, sp = c(nd.split, sopt2, dconopt2))
     ## which node to split, which variable, which cut off, which dcon
 }

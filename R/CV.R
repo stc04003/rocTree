@@ -297,8 +297,12 @@ CVRP <- function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, parm) {
     ndInd2[lower.tri(ndInd2)] <- 0
     ndInd12[is.na(X12.list[[1]])] <- 0
     tlst <- which(Y1 >= tau)[1] - 1
+    dconList <- list()
     while (sum(treeMat$terminal == 1) > 0) {
-        sp <- splitRP(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd1, const, fTree, STree, parm)
+        sp <- splitRP(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd1, const, fTree, STree, parm,
+                      dconList = dconList)
+        dconList <- sp$dconList
+        sp <- sp$sp
         if (sp[1] * 2 < M & !is.na(sp[2])) {
             ndInd1[ndInd1 == sp[1] & X1.list[[sp[2]]] <= sp[3]] <- sp[1] * 2
             ndInd1[ndInd1 == sp[1] & X1.list[[sp[2]]] > sp[3]] <- sp[1] * 2 + 1
