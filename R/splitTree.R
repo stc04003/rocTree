@@ -172,9 +172,11 @@ splitRP <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree,
         r <- f / S
         r[is.na(r)] <- Inf
         rm[is.na(rm)] <- Inf
-        if ((length(dconList) < m) || is.null(dconList[[m]])) {
-            dconList[[m]] <- list()
-            for (p in sample(1:P, randP)) {
+        splitP <- sort(sample(1:P, randP))
+        if ((length(dconList) < m) || is.null(dconList[[m]]) ||
+            any(unlist(lapply(dconList[[m]][splitP], is.null)))) {
+            if (length(dconList) < m) dconList[[m]] <- list()
+            for (p in splitP) {
                 if (disc[p] == 0) {
                     cutAll <- sort(unique(X[[p]][1, ndInd[1, ] == m]))
                 } else {
@@ -184,7 +186,7 @@ splitRP <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree,
                 ## if there is no potential cut off, skip
                 ## need to add check l2 size
                 if (length(cutAll) == 0) {
-                    dconList[[p]] <- -1
+                    dconList[[m]][[p]] <- -1
                     next
                 }
                 cutList[[p]] <- cutAll
@@ -202,35 +204,33 @@ splitRP <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree,
                                          as.double(ifelse(rm == Inf, 99999, rm)), 
                                          as.integer(sum(treeMat$terminal >= 1 & treeMat$nd != m)),
                                          out = double(length(cutAll)), PACKAGE = "rocTree")$out
-            } ## end p
+            }
         } else {
-            for (p in sample(1:P, randP)) {
+            for (p in splitP) {
                 if (disc[p] == 0) {
                     cutAll <- sort(unique(X[[p]][1, ndInd[1, ] == m]))
                 } else {
                     cutAll <- sort(unique(X[[p]][ndInd == m]))
                 }
                 cutAll <- cutAll[-length(cutAll)]
-                ## if there is no potential cut off, skip
-                ## need to add check l2 size
                 if (length(cutAll) == 0) {
-                    dconList[[p]] <- -1
+                    dconList[[m]][[p]] <- -1
                     next
                 }
                 cutList[[p]] <- cutAll
             } ## end p
         }
-        ## dconList <- dconList2[[m]]
-        ## dconmaxP <- unlist(lapply(dconList, max))
-        ## print(m)
-        ## print(lapply(dconList, summary))
-        dconmaxP <- unlist(lapply(dconList[[m]], function(x) max(x, -1)))
-        if (max(dconmaxP) < 0) {
+        dconmaxP <- unlist(lapply(dconList[[m]][splitP], function(x) max(x, -1, na.rm = TRUE)))
+        ## print(paste("m:", m, "splitP", splitP))
+        ## print(dconList)
+        ## print(dconList[[m]][splitP])
+        ## print(dconmaxP)
+        if (max(dconmaxP) < 0 || all(is.na(dconmaxP))) {
             sopt[m, ] <- c(P + 1, 999)
             dconopt[m] <- -1
         } else {
             dconopt[m] <- max(dconmaxP)
-            indm <- which.max(dconmaxP)
+            indm <- splitP[which.max(dconmaxP)]
             cutindm <- cutList[[indm[1]]]
             dconindm <- dconList[[m]][[indm[1]]]
             sopt[m, ] <- c(indm[1], cutindm[which.max(dconindm)])

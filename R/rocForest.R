@@ -230,8 +230,8 @@ growRP2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, parm) {
     ndInd2[outer(Y, Y2, FUN = ">")] <- 0
     dconList <- list()
     while (sum(treeMat[, 2] == 1) > 0) {
-        sp <- splitRP(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd, const, fTree, STree, parm, ceiling(sqrt(length(X1.list))),
-                      dconList = dconList)
+        sp <- splitRP(X1.list, Y1, E1, fmat, Smat, treeMat, ndInd, const, fTree, STree, parm,
+                      ceiling(sqrt(length(X1.list))), dconList = dconList)
         dconList <- sp$dconList
         sp <- sp$sp
         if (sp[1] * 2 < M & !is.na(sp[2])) {

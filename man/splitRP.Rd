@@ -5,7 +5,7 @@
 \title{This is an internal function, called by \code{grow.RP}. Inputs are based on an ordered Y.}
 \usage{
 splitRP(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, parm,
-  randP = NULL)
+  randP = NULL, dconList)
 }
 \description{
 This is an internal function, called by \code{grow.RP}. Inputs are based on an ordered Y.
