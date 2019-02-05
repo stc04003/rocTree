@@ -190,6 +190,7 @@ splitRP <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree,
                     next
                 }
                 cutList[[p]] <- cutAll
+                dconList[[m]][[p]] <- vector("list", 1)
                 dconList[[m]][[p]] <- .C("cutSearch2",
                                          as.integer(N), as.integer(length(cutAll)), as.integer(m),
                                          as.integer(which(Y <= tau * E) - 1),

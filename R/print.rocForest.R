@@ -48,11 +48,11 @@ print.rocForest <- function(x, tree = NULL, digits = 5, dt = TRUE, ...) {
         cat("Call:\n", deparse(x$call), "\n\n")
         cat("Sample size:                                 ", ncol(x$xlist[[1]]), "\n")
         cat("Number of independent variables:             ", length(x$xlist), "\n")
-        cat("Number of trees:                             ", x$ctrl$B, "\n")
-        cat("Split rule:                                  ", x$ctrl$splitBy, "\n")
+        cat("Number of trees:                             ", x$parm@B, "\n")
+        cat("Split rule:                                  ", x$parm@splitBy, "\n")
         cat("Number of variables tried at each split:     ", ceiling(sqrt(length(x$xlist))), "\n")
-        cat("Minimum number of failure in a node:         ", x$ctrl$minsp, "\n")
-        cat("Minimum number of failure in a teminal node: ", x$ctrl$minsp2, "\n")
+        cat("Minimum number of failure in a node:         ", x$parm@minsp, "\n")
+        cat("Minimum number of failure in a teminal node: ", x$parm@minsp2, "\n")
     }
 }
 
