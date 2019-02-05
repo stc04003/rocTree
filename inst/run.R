@@ -103,6 +103,13 @@ system.time(fit1 <- rocTree(fm, data = DF, id = ID,
                            control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
                                           minsp = 20, minsp2 = 5, CV = TRUE,
                                           parallel = T, parCluster = 8)))
+
+set.seed(1)
+system.time(fit12 <- rocTree(fm, data = DF, id = ID, splitBy = "dCON", 
+                           control = list(disc = c(0, 1, 1, 1, 0, 0, 1), tau = 1.5,
+                                          minsp = 20, minsp2 = 5, CV = TRUE,
+                                          parallel = T, parCluster = 8)))
+
 ## adding (t) to emphasize they are time-dependent covariates.
 fit1$vNames[5] <- "KSC(t)"
 fit1$vNames[7] <- "OP(t)"
@@ -138,6 +145,13 @@ system.time(fit3 <- rocForest(fm, data = DF, id = ID,
                               control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = .5,
                                              tau = 1.5, minsp = 3, minsp2 = 1,
                                              parallel = T, parCluster = 16)))
+
+set.seed(1)
+system.time(fit32 <- rocForest(fm, data = DF, id = ID, splitBy = "dCON", 
+                               control = list(disc = c(0, 1, 1, 1, 0, 0, 1), ghN = .5,
+                                              tau = 1.5, minsp = 3, minsp2 = 1,
+                                              parallel = T, parCluster = 16)))
+
 ## save(fit3, file = "fit3.RData")
 load("fit3.RData")
 
@@ -163,9 +177,9 @@ system.time(predA <- predict(fit3, datA, type = "hazard"))
 system.time(predB <- predict(fit3, datB, type = "hazard"))
 system.time(predC <- predict(fit3, datC, type = "hazard"))
 
-## system.time(predA <- predict(fit3, datA, type = "cumHaz"))
-## system.time(predB <- predict(fit3, datB, type = "cumHaz"))
-## system.time(predC <- predict(fit3, datC, type = "cumHaz"))
+system.time(predA <- predict(fit3, datA, type = "cumHaz"))
+system.time(predB <- predict(fit3, datB, type = "cumHaz"))
+system.time(predC <- predict(fit3, datC, type = "cumHaz"))
 
 datgg <- rbind(predA$pred[[1]], predB$pred[[1]], predC$pred[[1]])
 datgg$patient <- rep(LETTERS[1:3], each = dim(predA$pred[[1]])[1])
