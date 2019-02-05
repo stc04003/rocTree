@@ -216,6 +216,8 @@ growRP <- function(Y, E, X.list, parm) {
          treeMat = treeMat)
 }
 
+#' @keywords internal
+#' @noRd 
 growSeq <- function(Y, E, X.list, parm) {
     tau <- parm@tau
     M <- parm@M
@@ -465,6 +467,8 @@ growSeq2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, parm) {
     list(treeMat = treeMat, szL2 = szL2, ndInd2 = ndInd2)
 }
 
+#' @keywords internal
+#' @noRd 
 growRP2 <- function(Y1, E1, X1.list, Y2, X2.list, Y, parm) {
     tau <- parm@tau
     M <- parm@M

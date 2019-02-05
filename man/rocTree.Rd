@@ -23,6 +23,8 @@ should be the same as the number of observations.}
 \item{subset}{an optional vector specifying a subset of observations to be used in
 the fitting process.}
 
+\item{splitBy}{a character string specifying the splitting algorithm. See *Details*.}
+
 \item{control}{a list of control parameters. See 'details' for important special
 features of control parameters.}
 }

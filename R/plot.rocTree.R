@@ -101,8 +101,8 @@ plot.rocTree.control <- function(rankdir = c("TB", "BT", "LR", "RL", "TD"),
 #' data = simudat, control = list(CV = TRUE, nflds = 10)))
 #' plotTreeHaz(fit)
 plotTreeHaz <- function(x, control = list()) {
-    if (is.null(control$tau)) control$tau <- x$ctrl$tau
-    if (is.null(control$ghN)) control$ghN <- x$ctrl$ghN    
+    if (is.null(control$tau)) control$tau <- x$parm@tau
+    if (is.null(control$ghN)) control$ghN <- x$parm@ghN    
     if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object")
     x <- c(x, rocTree.haz(x$dfFinal, x$Y0, control))
     tmp <- data.frame(x = x$tt, y = unlist(x$r2Final), Node = rep(x$ndFinal, each = length(x$tt)), row.names = NULL)

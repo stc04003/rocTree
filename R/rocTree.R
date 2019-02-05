@@ -1,4 +1,6 @@
 #' Class definition
+#' @importFrom methods getClass
+#' @noRd 
 setClass("splitClass",
          representation(tau = "numeric", M = "numeric", hN = "numeric", h = "numeric",
                         minsp = "numeric", minsp2 = "numeric", disc = "numeric", nflds = "numeric",
@@ -12,6 +14,7 @@ setClass("splitClass",
 setClass("CON", contains = "splitClass")
 setClass("dCON", contains = "splitClass")
 #' Method dispatch
+#' @noRd
 setGeneric("grow", function(Y, E, X.list, parm) standardGeneric("grow"))
 setMethod("grow", signature(parm = "CON"), growSeq)
 setMethod("grow", signature(parm = "dCON"), growRP)
@@ -53,6 +56,7 @@ setMethod("grow", signature(parm = "dCON"), growRP)
 #' should be the same as the number of observations.
 #' @param subset an optional vector specifying a subset of observations to be used in
 #' the fitting process.
+#' @param splitBy a character string specifying the splitting algorithm. See *Details*.
 #' @param control a list of control parameters. See 'details' for important special
 #' features of control parameters.
 #' @export

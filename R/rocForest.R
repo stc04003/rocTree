@@ -13,6 +13,7 @@
 #' should be the same as the number of observations.
 #' @param subset an optional vector specifying a subset of observations to be used in
 #' the fitting process.
+#' @param splitBy a character string specifying the splitting algorithm. See *Details*.
 #' @param control a list of control parameters. See 'details' for important special
 #' features of control parameters.
 #' @export

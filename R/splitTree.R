@@ -144,6 +144,8 @@ splitSeq <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree, p
 }
 
 #' This is an internal function, called by \code{grow.RP}. Inputs are based on an ordered Y.
+#' @keywords internal
+#' @noRd
 splitRP <- function(X, Y, E, fmat, Smat, treeMat, ndInd, const, fTree, STree,
                     parm, randP = NULL, dconList)  {
     N <- dim(X[[1]])[1]
