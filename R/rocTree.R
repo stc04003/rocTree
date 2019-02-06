@@ -73,8 +73,8 @@ setMethod("grow", signature(parm = "dCON"), growRP)
 #' @seealso See \code{\link{print.rocTree}} and \code{\link{plot.rocTree}} for printing and plotting an \code{rocTree}, respectively.
 #' @examples
 #' library(survival)
-#' set.seed(123)
-#' dat <- simu(100, 0, 1.1)
+#' set.seed(1)
+#' dat <- simu(100, 0, 1.3)
 #' fit <- rocTree(Surv(Y, death) ~ z1 + z2, id = id, data = dat,
 #'        control = list(CV = TRUE, nflds = 5))
 #' fit

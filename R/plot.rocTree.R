@@ -21,10 +21,11 @@
 #' @seealso See \code{\link{rocTree}} for creating \code{rocTree} objects.
 #' @export
 #' @examples
-#' data(simudat)
+#' set.seed(1)
+#' dat <- simu(100, 0, 1.3)
 #' library(survival)
-#' system.time(fit <- rocTree(Surv(Time, Status) ~ X1 + X2 + X3, id = ID,
-#' data = simudat, control = list(CV = TRUE, nflds = 10)))
+#' system.time(fit <- rocTree(Surv(Y, death) ~ z1 + z2, id = id,
+#' data = dat, control = list(CV = TRUE, nflds = 10)))
 #' plot(fit)
 #' plot(fit, control = list(rankdir = "LR", nodeOnly = TRUE))
 #' plot(fit, output = "visNetwork", control = list(nodeOnly = TRUE, shape = "box"))
@@ -95,16 +96,17 @@ plot.rocTree.control <- function(rankdir = c("TB", "BT", "LR", "RL", "TD"),
 #' @importFrom ggplot2 ggplot geom_line xlab ylab aes
 #' 
 #' @examples
-#' data(simudat)
+#' set.seed(1)
+#' dat <- simu(100, 0, 1.3)
 #' library(survival)
-#' system.time(fit <- rocTree(Surv(Time, Status) ~ X1 + X2 + X3, id = ID,
-#' data = simudat, control = list(CV = TRUE, nflds = 10)))
+#' system.time(fit <- rocTree(Surv(Y, death) ~ z1 + z2, id = id,
+#' data = dat, control = list(CV = TRUE, nflds = 10)))
 #' plotTreeHaz(fit)
 plotTreeHaz <- function(x, control = list()) {
-    if (is.null(control$tau)) control$tau <- x$parm@tau
-    if (is.null(control$ghN)) control$ghN <- x$parm@ghN    
+    if (!is.null(control$tau)) x$parm@tau <- control$tau
+    if (!is.null(control$ghN)) x$parm@ghN <- control$ghN 
     if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object")
-    x <- c(x, rocTree.haz(x$dfFinal, x$Y0, control))
+    x <- c(x, rocTree.haz(x$dfFinal, x$Y0, x$parm))
     tmp <- data.frame(x = x$tt, y = unlist(x$r2Final), Node = rep(x$ndFinal, each = length(x$tt)), row.names = NULL)
     tmp$Node <- factor(tmp$Node)
     gg <- ggplot(tmp, aes(x = x, y = y, group = Node)) +

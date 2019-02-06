@@ -345,16 +345,14 @@ trueHaz1.5 <- function(dat) with(dat, -log(1 - pgengamma(Y, mu = 0, sigma = 2 * 
 trueSurv1.5 <- function(dat) with(dat, 1 - pgengamma(Y, mu = 0, sigma = 2 * z1, Q = 2 * z2))
 
 trueHaz2.1 <- function(dat) {
-    attach(dat)
     b1 <- 2
     b2 <- 2
-    a <- b2 * z2
+    a <- b2 * dat$z2
     nu <- 2
-    Surv <- exp(a) * Y^nu * (e == 1 & Y < u) +
-        (exp(a) * (u^nu + exp(b1) * Y^nu - exp(b1) * u^nu)) * (e == 1 & Y >= u) +
-        (exp(a + b1) * Y^nu) * (e == 0 & Y < u) +
-        (exp(a) * (exp(b1) * u^nu + Y^nu - u^nu)) * (e == 0 & Y >= u)
-    detach(dat)
+    Surv <- with(dat, exp(a) * Y^nu * (e == 1 & Y < u) +
+                      (exp(a) * (u^nu + exp(b1) * Y^nu - exp(b1) * u^nu)) * (e == 1 & Y >= u) +
+                      (exp(a + b1) * Y^nu) * (e == 0 & Y < u) +
+                      (exp(a) * (exp(b1) * u^nu + Y^nu - u^nu)) * (e == 0 & Y >= u))
     return(Surv)
 }
 trueSurv2.1 <- function(dat) {
@@ -363,20 +361,18 @@ trueSurv2.1 <- function(dat) {
 }
 
 trueHaz2.2 <- function(dat) {
-    attach(dat)
     b1 <- 2
     b2 <- 2
-    a <- b2 * z2
-    haz <- (exp(a) * Y) * (e == 1 & Y < u1) +
-        (exp(a) * (u1 + exp(b1) * Y - exp(b1) * u1)) * (e == 1 & Y >= u1 & Y < u2) + 
-        (exp(a) * (u1 + exp(b1) * u2 - exp(b1) * u1 + Y - u2)) * (e == 1 & Y >= u2 & Y < u3) + 
-        (exp(a) * (u1 + exp(b1) * u2 - exp(b1) * u1 + u3 - u2 + exp(b1) * (Y - u3))) *
-        (e == 1 & Y >= u3) + 
-        (exp(a + b1) * Y) * (e == 0 & Y < u1) + (exp(a) * (exp(b1) * u1 + Y - u1)) *
-        (e == 0 & Y >= u1 & Y < u2) +
-        (exp(a) * (exp(b1) * u1 + u2 - u1 + exp(b1) * (Y - u2))) * (e == 0 & Y >= u2 & Y < u3) + 
-        (exp(a) * (exp(b1) * u1 + u2 - u1 + exp(b1) * (u3 - u2) + (Y - u3))) * (e == 0 & Y >= u3)    
-    detach(dat)
+    a <- b2 * dat$z2
+    haz <- with(dat, (exp(a) * Y) * (e == 1 & Y < u1) +
+                     (exp(a) * (u1 + exp(b1) * Y - exp(b1) * u1)) * (e == 1 & Y >= u1 & Y < u2) + 
+                     (exp(a) * (u1 + exp(b1) * u2 - exp(b1) * u1 + Y - u2)) * (e == 1 & Y >= u2 & Y < u3) + 
+                     (exp(a) * (u1 + exp(b1) * u2 - exp(b1) * u1 + u3 - u2 + exp(b1) * (Y - u3))) *
+                     (e == 1 & Y >= u3) + 
+                     (exp(a + b1) * Y) * (e == 0 & Y < u1) + (exp(a) * (exp(b1) * u1 + Y - u1)) *
+                     (e == 0 & Y >= u1 & Y < u2) +
+                     (exp(a) * (exp(b1) * u1 + u2 - u1 + exp(b1) * (Y - u2))) * (e == 0 & Y >= u2 & Y < u3) + 
+                     (exp(a) * (exp(b1) * u1 + u2 - u1 + exp(b1) * (u3 - u2) + (Y - u3))) * (e == 0 & Y >= u3))
     haz
 }
 

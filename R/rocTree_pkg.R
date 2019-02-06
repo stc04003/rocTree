@@ -15,9 +15,11 @@
 #' The package contains functions to construct ROC-guided survival trees (\code{\link{rocTree}}).
 #'
 #' @examples
+#' set.seed(1)
+#' dat <- simu(100, 0, 1.3)
 #' library(survival)
 #' data(simudat)
-#' system.time(fit <- rocTree(Surv(Time, Status) ~ X1 + X2, id = ID, data = simudat,
+#' system.time(fit <- rocTree(Surv(Y, death) ~ z1 + z2, id = id, data = dat,
 #' control = list(CV = TRUE, nflds = 10)))
 #' fit
 #' 

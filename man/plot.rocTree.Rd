@@ -33,10 +33,11 @@ Other options include \code{BT} (bottom-to-top), \code{LR} (left-to-right), and 
 }
 }
 \examples{
-data(simudat)
+set.seed(1)
+dat <- simu(100, 0, 1.3)
 library(survival)
-system.time(fit <- rocTree(Surv(Time, Status) ~ X1 + X2 + X3, id = ID,
-data = simudat, control = list(CV = TRUE, nflds = 10)))
+system.time(fit <- rocTree(Surv(Y, death) ~ z1 + z2, id = id,
+data = dat, control = list(CV = TRUE, nflds = 10)))
 plot(fit)
 plot(fit, control = list(rankdir = "LR", nodeOnly = TRUE))
 plot(fit, output = "visNetwork", control = list(nodeOnly = TRUE, shape = "box"))
