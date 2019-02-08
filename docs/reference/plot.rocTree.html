@@ -86,6 +86,9 @@
     <li>
       <a href="../articles/rocTree-sim.html">Generating simulated data in `rocTree` package</a>
     </li>
+    <li>
+      <a href="../articles/rocTree-tree.html">Fitting time-invariant survival tree in `rocTree` package</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -171,7 +174,7 @@ Other options include <code>BT</code> (bottom-to-top), <code>LR</code> (left-to-
 <span class='fu'>library</span>(<span class='no'>survival</span>)
 <span class='fu'>system.time</span>(<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rocTree.html'>rocTree</a></span>(<span class='fu'><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>,
 <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>dat</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>CV</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>nflds</span> <span class='kw'>=</span> <span class='fl'>10</span>)))</div><div class='output co'>#&gt;    user  system elapsed 
-#&gt;   2.606   0.004   2.615 </div><div class='input'><span class='fu'>plot</span>(<span class='no'>fit</span>)
+#&gt;   2.417   0.008   2.428 </div><div class='input'><span class='fu'>plot</span>(<span class='no'>fit</span>)
 <span class='fu'>plot</span>(<span class='no'>fit</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>rankdir</span> <span class='kw'>=</span> <span class='st'>"LR"</span>, <span class='kw'>nodeOnly</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>))
 <span class='fu'>plot</span>(<span class='no'>fit</span>, <span class='kw'>output</span> <span class='kw'>=</span> <span class='st'>"visNetwork"</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>nodeOnly</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>shape</span> <span class='kw'>=</span> <span class='st'>"box"</span>))</div></pre>
   </div>

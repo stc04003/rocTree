@@ -1,0 +1,23 @@
+---
+title: "Fitting time-invariant survival tree in `rocTree` package"
+author: Sy Han (Steven) Chiou
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+bibliography: ../inst/bib/tree.bib
+vignette: >
+  %\VignetteIndexEntry{Fitting semiparametric regression model to recurrent event data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}{inputenc}
+---
+
+```{r default, include = FALSE}
+knitr::opts_chunk$set(prompt = TRUE, comment = "", collapse = TRUE)
+```	
+
+In this vignette, we demonstrate how to use the `rocTree` function in __`rocTree`__ package
+to fit time-invariant survival tree.
+
