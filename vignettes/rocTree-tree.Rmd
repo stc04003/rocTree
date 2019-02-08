@@ -21,3 +21,33 @@ knitr::opts_chunk$set(prompt = TRUE, comment = "", collapse = TRUE)
 In this vignette, we demonstrate how to use the `rocTree` function in __`rocTree`__ package
 to fit time-invariant survival tree.
 
+## Load data
+
+We will demonstrate the usage of `rocTree` function with a simulated data prepared by the `simu` function.
+```{R load}
+library(rocTree)
+set.seed(2019)
+dat <- simu(n = 100, cen = 0.25, sce = 2.1, summary = TRUE)
+```
+
+## The `rocTree` function 
+
+The complete list of arguments for the `rocTree` function are as follow:
+```{R rocTree-arg}
+args(rocTree)
+```
+
+## Fitting time-invariant survival tree
+
+```{R tree}
+library(survival)
+fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat)
+fit
+```
+
+```{R tree2, tidy = TRUE}
+set.seed(2019)
+fit2 <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, 
+                control = list(CV = TRUE, nfld = 5))
+fit2
+```

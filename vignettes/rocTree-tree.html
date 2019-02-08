@@ -11,7 +11,7 @@
 
 <meta name="author" content="Sy Han (Steven) Chiou" />
 
-<meta name="date" content="2019-02-07" />
+<meta name="date" content="2019-02-08" />
 
 <title>Fitting time-invariant survival tree in rocTree package</title>
 
@@ -222,12 +222,81 @@ div.tocify {
 
 <h1 class="title toc-ignore">Fitting time-invariant survival tree in <code>rocTree</code> package</h1>
 <h4 class="author"><em>Sy Han (Steven) Chiou</em></h4>
-<h4 class="date"><em>2019-02-07</em></h4>
+<h4 class="date"><em>2019-02-08</em></h4>
 
 </div>
 
 
 <p>In this vignette, we demonstrate how to use the <code>rocTree</code> function in <strong><code>rocTree</code></strong> package to fit time-invariant survival tree.</p>
+<div id="load-data" class="section level2">
+<h2>Load data</h2>
+<p>We will demonstrate the usage of <code>rocTree</code> function with a simulated data prepared by the <code>simu</code> function.</p>
+<pre class="r"><code>&gt; library(rocTree)
+&gt; set.seed(2019)
+&gt; dat &lt;- simu(n = 100, cen = 0.25, sce = 2.1, summary = TRUE)
+Summary results:
+Number of subjects: 100
+Number of subjects experienced death: 77
+Number of covariates: 2
+Time independent covaraites: z1.
+Time dependent covaraites: z2.
+Number of unique observation times: 100
+Median survival time: 0.3213932</code></pre>
+</div>
+<div id="the-roctree-function" class="section level2">
+<h2>The <code>rocTree</code> function</h2>
+<p>The complete list of arguments for the <code>rocTree</code> function are as follow:</p>
+<pre class="r"><code>&gt; args(rocTree)
+function (formula, data, id, subset, splitBy = c(&quot;CON&quot;, &quot;dCON&quot;), 
+    control = list()) 
+NULL</code></pre>
+</div>
+<div id="fitting-time-invariant-survival-tree" class="section level2">
+<h2>Fitting time-invariant survival tree</h2>
+<pre class="r"><code>&gt; library(survival)
+&gt; fit &lt;- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat)
+&gt; fit
+ ROC-guided survival tree
+
+ node), split
+   * denotes terminal node
+  
+Root                                      
+ ¦--2) z1 &lt;= 0.56000                      
+ ¦   ¦--4) z2 &lt;= 0.66000*                 
+ ¦   °--5) z2 &gt; 0.66000                   
+ ¦       ¦--10) z2 &lt;= 0.84000*            
+ ¦       °--11) z2 &gt; 0.84000*             
+ °--3) z1 &gt; 0.56000                       
+     ¦--6) z2 &lt;= 0.80000                  
+     ¦   ¦--12) z2 &lt;= 0.57000             
+     ¦   ¦   ¦--24) z2 &lt;= 0.42000         
+     ¦   ¦   ¦   ¦--48) z2 &lt;= 0.20000*    
+     ¦   ¦   ¦   °--49) z2 &gt; 0.20000      
+     ¦   ¦   ¦       ¦--98) z2 &lt;= 0.29000*
+     ¦   ¦   ¦       °--99) z2 &gt; 0.29000* 
+     ¦   ¦   °--25) z2 &gt; 0.42000*         
+     ¦   °--13) z2 &gt; 0.57000              
+     ¦       ¦--26) z2 &lt;= 0.67000*        
+     ¦       °--27) z2 &gt; 0.67000*         
+     °--7) z2 &gt; 0.80000                   
+         ¦--14) z2 &lt;= 0.92000*            
+         °--15) z2 &gt; 0.92000*             </code></pre>
+<pre class="r"><code>&gt; set.seed(2019)
+&gt; fit2 &lt;- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, 
++                 control = list(CV = TRUE, nfld = 5))
+&gt; fit2
+ ROC-guided survival tree
+
+ node), split
+   * denotes terminal node
+  
+Root                     
+ ¦--2) z1 &lt;= 0.56000*    
+ °--3) z1 &gt; 0.56000      
+     ¦--6) z2 &lt;= 0.80000*
+     °--7) z2 &gt; 0.80000* </code></pre>
+</div>
 
 
 
