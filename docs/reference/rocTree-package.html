@@ -152,7 +152,7 @@ Then a criterion based on ROC is used in the tree-building algorithm.</p>
 <span class='fu'>library</span>(<span class='no'>survival</span>)
 <span class='fu'>data</span>(<span class='no'>simudat</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: data set ‘simudat’ not found</span></div><div class='input'><span class='fu'>system.time</span>(<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rocTree.html'>rocTree</a></span>(<span class='fu'><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>dat</span>,
 <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>CV</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>nflds</span> <span class='kw'>=</span> <span class='fl'>10</span>)))</div><div class='output co'>#&gt;    user  system elapsed 
-#&gt;   2.017   0.004   2.024 </div><div class='input'><span class='no'>fit</span></div><div class='output co'>#&gt;  ROC-guided survival tree
+#&gt;   2.178   0.004   2.184 </div><div class='input'><span class='no'>fit</span></div><div class='output co'>#&gt;  ROC-guided survival tree
 #&gt; 
 #&gt;  node), split
 #&gt;    * denotes terminal node

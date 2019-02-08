@@ -26,5 +26,5 @@ devtools::install_github("stc04003/rocTree")
 
 [Online document](https://www.sychiou.com/rocTree/index.html) includes:
 
--   Package vignette on [simulating data used in examples](https://www.sychiou.com/reReg/articles/rocTree-sim.html).
--   Package vignette on [fitting time-invariant survival tree](https://www.sychiou.com/reReg/articles/rocTree-tree.html).
+-   Package vignette on [simulating data used in examples](https://www.sychiou.com/rocTree/articles/rocTree-sim.html).
+-   Package vignette on [fitting time-invariant survival tree](https://www.sychiou.com/rocTree/articles/rocTree-tree.html).
