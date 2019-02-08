@@ -1,0 +1,142 @@
+---
+title: "Generating simulated data in `rocTree` package"
+author: Sy Han (Steven) Chiou
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+bibliography: ../inst/bib/tree.bib
+vignette: >
+  %\VignetteIndexEntry{Fitting semiparametric regression model to recurrent event data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}{inputenc}
+---
+
+```{r default, include = FALSE}
+knitr::opts_chunk$set(prompt = TRUE, comment = "", collapse = TRUE)
+```	
+
+In this vignette, we demonstrate how to use the `simu` function in __`rocTree`__ package
+to generate simulated data from various scenarios.
+
+## Notations \& Simulation Settings
+
+Let $Z$ be a $p$-dimensional vector of possible time-dependent covariate and $\beta$ be the vector of regression coefficient. 
+The function `simu` generates survival times ($T$) under the following scenarios:
+
+#### **Time-independent covariate**
+
+**Scenario 1.1, proportional hazards model:**
+
+Survival times are generated from the hazard function
+$$\lambda(t|Z) = \lambda_0(t)\exp\{-0.5Z_1 + 0.5Z_2 - 0.5Z_3 + \ldots + 0.5Z_{10}\},$$
+with $\lambda_0(t)=2t$.
+
+**Scenario 1.2, proportional hazards model with noise variable:**
+
+Survival times are generated from the hazard function
+$$\lambda(t|Z) = \lambda_0(t)\exp\{2Z_1 + 2Z_2 + 0\cdot Z_3 + 0\cdot Z_4 + \ldots + 0\cdot Z_{10}\},$$
+with $\lambda_0(t)=2t$.
+
+**Scenario 1.3, proportional hazards model with nonlinear covariate effects:**
+
+Survival times are generated from the hazard function
+$$\lambda(t|Z) = \lambda_0(t) \exp\{2\sin(2\pi Z_1) + 2 |Z_2 - 0.5|\}, $$
+with $\lambda_0(t)=2t$.
+
+**Scenario 1.4, accelerated failure time model:**
+
+Survival times are generated from 
+$$\log(T) = -2 + 2Z_1 + 2Z_2 + \epsilon, $$
+where $\epsilon\sim\mbox{N}(0, 0.5^2)$.
+
+**Scenario 1.5, generalized gamma family:**
+
+Survival times are generated from 
+$$T = e^{\sigma\omega}, $$
+where $\omega = \log(Q^2g)/Q$, $g$ follows gamma$(Q^{-2}, 1)$, $\sigma = 2Z_1$, $Q=2Z_2$.
+
+
+#### **Time-dependent covariate**
+
+**Scenario 2.1, dichotomous time dependent covariate with at most one change in value:**
+
+Survival times are generated from the hazard function
+$$\lambda(t|Z(t)) = e^{2Z_1(t) + 2Z_2}, $$
+where $Z_1(t) = \theta I(t\ge U_0) + (1 - \theta)I(t<U_0)$, $\theta$ is a Bernoulli variable with equal probability, and
+$U_0$ follows a uniform over $[0,1]$.
+
+**Scenario 2.2, dichotomous time dependent covariate with multiple jumps:**
+
+Survival times are generated from the hazard function
+$$\lambda(t|Z(t)) = e^{2Z_1(t) + 2Z_2}, $$
+where $Z_1(t) = \theta\left[I(U_1 \le t < U_2) + I(U_3\le t)\right] + (1 - \theta)\left[I(t < U_1) + I(U_2\le t < U_3)\right]$,
+$\theta$ is a Bernoulli variable with equal probability and $U_1\le U_2\le U_3$ are the first three terms of a stationary Poisson process with rate 10.
+
+**Scenario 2.3, proportional hazard model with a continuous time dependent covariate:** 
+
+Survival times are generated from the hazard function 
+$$\lambda(t|Z(t)) = 0.1 e^{Z_1(t) + Z_2}, $$
+where $Z_1(t)=kt+b$, $k$ and $b$ are independent uniform random variables over $[1, 2]$.
+
+**Scenario 2.4, non-proportional hazard model with a continuous time dependent covariate:** 
+
+Survival times are generated from the hazard function 
+$$\lambda(t|Z(t)) = 0.1 \cdot\left[1 + \sin\{Z_1(t) + Z_2\}\right],$$
+where $Z_1(t)=kt+b$, $k$ and $b$ are independent uniform random variables over $[1, 2]$.
+
+**Scenario 2.5, non-proportional hazard model with a nonlinear time dependent covariate:** 
+
+Survival times are generated from the hazard function 
+$$\lambda(t|Z(t)) = 0.1 \cdot\left[1 + \sin\{Z_1(t) + Z_2\}\right],$$
+where $Z_1(t)=2kt\cdot\{I(t>5) - 1\}$, $k$ and $b$ are independent uniform random variables over $[1, 2]$.
+
+
+## The `simu` function
+
+The `simu` function can be used to generate survival times from the above scenarios.
+The complete list of arguments in `simu` are as follow:
+```{r reReg-args}
+library(rocTree)
+args(simu)
+```
+The arguments are as follows
+
+* `n` an integer value indicating the number of subjects.
+* `cen` is a numeric value indicating the censoring percentage; three levels, 0\%, 25\%, 50\%, are allowed.
+* `scenario` can be either a numeric value or a character sting. This indicates the simulation scenario noted above. 
+* `summary` a logical value indicating whether a brief data summary will be printed.
+
+The `simu` places the simulated data in a `tibble` environment with the columns:
+
+* `id` is the subject id.
+* `Time` is the observed follow-up time.
+* `death` is the death indicator; `death = 1` if an event (death) occurs and `death = 0` if censored.
+* `z1`--`z10` are the possible time-dependent covariate.
+* `k`, `b`, `U` are the latent variables used to generate $Z_1(t)$ in Scenario 2.1 -- 2.5.
+
+## Example 1
+
+We first generate a small dataset with `n = 5`, 25\% censoring rate, under scenario 1.2.
+```{r ex1}
+set.seed(2019)
+dat1 <- simu(n = 5, cen = 0.25, sce = 1.2, summary = TRUE)
+dat1
+class(dat1)
+```
+In this scenario, the covariate information was observed at `Time = 0.0931`, `0.146`, `0.340`, and `0.423` for subject \#1, who died (`death = 1`) at `Time = 0.423`.
+Since the covariate are time-independent, its values is invariant to time. 
+
+## Example 2
+
+The following codes generate a small dataset with `n = 5`, 50\% censoring rate, under scenario 2.1.
+```{r ex2}
+set.seed(2019)
+dat2 <- simu(n = 5, cen = 0.5, sce = 2.1, summary = TRUE)
+dat2
+```
+In this scenario, the covariate information was observed at `Time = 0.00883` and `0.102` for subject \#1, who died (`death = 1`) at `Time = 0.102`.
+Similarly, the covaraite information was observed at `Time = 0.00883`, `0.102`, `0.105`, and `0.137` for subject \#2, who was censored (`death = 0`) at `Time 0.137`. 
+Moreover, `z1` is a time-dependent covariate and its value changed from 1 (at `Time = 0.00883`) to 0 ( at `Time` $\ge$ `0.102`) for subject \#2.

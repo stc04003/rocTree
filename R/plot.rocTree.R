@@ -24,7 +24,7 @@
 #' set.seed(1)
 #' dat <- simu(100, 0, 1.3)
 #' library(survival)
-#' system.time(fit <- rocTree(Surv(Y, death) ~ z1 + z2, id = id,
+#' system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id,
 #' data = dat, control = list(CV = TRUE, nflds = 10)))
 #' plot(fit)
 #' plot(fit, control = list(rankdir = "LR", nodeOnly = TRUE))
@@ -99,7 +99,7 @@ plot.rocTree.control <- function(rankdir = c("TB", "BT", "LR", "RL", "TD"),
 #' set.seed(1)
 #' dat <- simu(100, 0, 1.3)
 #' library(survival)
-#' system.time(fit <- rocTree(Surv(Y, death) ~ z1 + z2, id = id,
+#' system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id,
 #' data = dat, control = list(CV = TRUE, nflds = 10)))
 #' plotTreeHaz(fit)
 plotTreeHaz <- function(x, control = list()) {

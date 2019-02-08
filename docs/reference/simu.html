@@ -32,16 +32,45 @@
 
 <meta property="og:title" content="Function to generate simulated data used in the manuscript. — simu" />
 
-<meta property="og:description" content="This function is used to generate simulated data in the manuscript.
-The underlying model is assumed to be
-$$\lambda(t, Z) = \lambda_0(t) e^{(\beta_1 * Z_1 + \beta_2 * Z_2)},$$
-where \(\lambda_0(t)\) is the baseline hazard function,
-(\(b_1, b_2\)) is the regression coefficient, and
-\(Z_1\) and \(Z_2\) are the covariates.
-When time varying covariate is involved (scenario 2), only \(Z_1\) is assumed to dependent on time.
-This function is used to generate the true cumulative hazard function for ONE ID used in the simulation.
-This function is used to generate the true survival function for ONE ID used in the simulation.
-This function is used to generate testing sets for each scenario." />
+<meta property="og:description" content="This function is used to generate simulated data under various settings.
+Let \(Z\) be a \(p\)-dimensional vector of possible time-dependent covariates and
+\(\beta\) be the vector of regression coefficient.
+The survival times (\(T\)) are generated from the hazard function sepecified as follow:
+Scenario 1.1Proportional hazards model:
+$$\lambda(t|Z) = \lambda_0(t) e^{-0.5 Z_1 + 0.5 Z_2 - 0.5 Z_3 ... + 0.5 Z_{10}},$$
+where \lambda_0(t) = 2t.
+Scenario 1.2Proportional hazards model with noise variable:
+$$\lambda(t|Z) = \lambda_0(t) e^{2Z_1 + 2Z_2 + 0Z_3 + ... + 0Z_{10}},$$
+where \lambda_0(t) = 2t.
+Scenario 1.3Proportional hazards model with nonlinear covariate effects:
+$$\lambda(t|Z) = \lambda_0(t) e^{[2\sin(2\pi Z_1) + 2|Z_2 - 0.5|]},$$
+where \lambda_0(t) = 2t.
+Scenario 1.4Accelerated failure time model:
+$$\log(T) = -2 + 2Z_1 + 2Z_2 + \epsilon,$$ where \(\epsilon\) follows \(N(0, 0.5^2).\)
+Scenario 1.5Generalized gamma family:
+$$T = e^{\sigma\omega},$$ where \(\omega = \log(Q^2 g) / Q\), \(g\) follows Gamma(\(Q^{-2}, 1\)),
+\(\sigma = 2Z_1, Q = 2Z_2.\)
+Scenario 2.1Dichotomous time dependent covariate with at most one change in value:
+ $$\lambda(t|Z(t)) = \lambda_0(t)e^{2Z_1(t) + 2Z_2},$$
+where \(Z_1(t)\) is the time-dependent covariate: \(Z_1(t) = \theta I(t \ge U_0) + (1 - \theta) I(t &amp;lt; U_0)\),
+,\(\theta\) is a Bernoulli variable with equal probability, and \(U_0\) follows a uniform distribution over \([0, 1]\).
+Scenario 2.2Dichotomous time dependent covariate with multiple changes:
+ $$\lambda(t|Z(t)) = e^{2Z_1(t) + 2Z_2},$$
+where \(Z_1(t) = \theta[I(U_1\le t &amp;lt; U_2) + I(U_3 \le t)] + (1 - \theta)[I(t &amp;lt; U_1) + I(U_2\le t &amp;lt; U_3)]\),
+\(\theta\) is a Bernoulli variable with equal probability, and \(U_1\le U_2\le U_3\)
+are the first three terms of a stationary Poisson process with rate 10.
+Scenario 2.3Proportional hazard model with a continuous time dependent covariate:
+$$\lambda(t|Z(t)) = 0.1 e^{Z_1(t) + Z_2},$$ where \(Z_1(t) = kt + b\),
+\(k\) and \(b\) are independent uniform random variables over \([1, 2]\).
+Scenario 2.4Non-proportional hazards model with a continuous time dependent covariate:
+$$\lambda(t|Z(t)) = 0.1 \cdot[1 + \sin\{Z_1(t) + Z_2\}],$$ where \(Z_1(t) = kt + b\),
+\(k\) and \(b\) follow independent uniform distributions over \([1, 2]\).
+Scenario 2.5Non-proportional hazards model with a nonlinear time dependent covariate:
+$$\lambda(t|Z(t)) = 0.1 \cdot[1 + \sin\{Z_1(t) + Z_2\}],$$ where \(Z_1(t) = 2kt\cdot \{I(t &amp;gt; 5) - 1\} + b\),
+\(k\) and \(b\) follow independent uniform distributions over \([1, 2]\).
+The censoring times are generated from an independent uniform distribution over [0, c],
+where c was tuned to yield censoring percentages of 25% and 50%.
+" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -70,7 +99,7 @@ This function is used to generate testing sets for each scenario." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rocTree</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.99.7</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.99.9</span>
       </span>
     </div>
 
@@ -84,6 +113,18 @@ This function is used to generate testing sets for each scenario." />
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/rocTree-sim.html">Generating simulated data in `rocTree` package</a>
+    </li>
+  </ul>
 </li>
       </ul>
       
@@ -113,16 +154,45 @@ This function is used to generate testing sets for each scenario." />
 
     <div class="ref-description">
     
-    <p>This function is used to generate simulated data in the manuscript.
-The underlying model is assumed to be
-$$\lambda(t, Z) = \lambda_0(t) e^{(\beta_1 * Z_1 + \beta_2 * Z_2)},$$
-where \(\lambda_0(t)\) is the baseline hazard function,
-(\(b_1, b_2\)) is the regression coefficient, and
-\(Z_1\) and \(Z_2\) are the covariates.
-When time varying covariate is involved (scenario 2), only \(Z_1\) is assumed to dependent on time.</p>
-<p>This function is used to generate the true cumulative hazard function for ONE ID used in the simulation.</p>
-<p>This function is used to generate the true survival function for ONE ID used in the simulation.</p>
-<p>This function is used to generate testing sets for each scenario.</p>
+    <p>This function is used to generate simulated data under various settings.
+Let \(Z\) be a \(p\)-dimensional vector of possible time-dependent covariates and
+\(\beta\) be the vector of regression coefficient.
+The survival times (\(T\)) are generated from the hazard function sepecified as follow:</p><dl class='dl-horizontal'>
+<dt>Scenario 1.1</dt><dd><p>Proportional hazards model:
+$$\lambda(t|Z) = \lambda_0(t) e^{-0.5 Z_1 + 0.5 Z_2 - 0.5 Z_3 ... + 0.5 Z_{10}},$$</p></dd>
+where \lambda_0(t) = 2t.
+<dt>Scenario 1.2</dt><dd><p>Proportional hazards model with noise variable:
+$$\lambda(t|Z) = \lambda_0(t) e^{2Z_1 + 2Z_2 + 0Z_3 + ... + 0Z_{10}},$$</p></dd>
+where \lambda_0(t) = 2t.
+<dt>Scenario 1.3</dt><dd><p>Proportional hazards model with nonlinear covariate effects:
+$$\lambda(t|Z) = \lambda_0(t) e^{[2\sin(2\pi Z_1) + 2|Z_2 - 0.5|]},$$</p></dd>
+where \lambda_0(t) = 2t.
+<dt>Scenario 1.4</dt><dd><p>Accelerated failure time model:
+$$\log(T) = -2 + 2Z_1 + 2Z_2 + \epsilon,$$ where \(\epsilon\) follows \(N(0, 0.5^2).\)</p></dd>
+<dt>Scenario 1.5</dt><dd><p>Generalized gamma family:
+$$T = e^{\sigma\omega},$$ where \(\omega = \log(Q^2 g) / Q\), \(g\) follows Gamma(\(Q^{-2}, 1\)),
+\(\sigma = 2Z_1, Q = 2Z_2.\)</p></dd>
+<dt>Scenario 2.1</dt><dd><p>Dichotomous time dependent covariate with at most one change in value:
+ $$\lambda(t|Z(t)) = \lambda_0(t)e^{2Z_1(t) + 2Z_2},$$
+where \(Z_1(t)\) is the time-dependent covariate: \(Z_1(t) = \theta I(t \ge U_0) + (1 - \theta) I(t &lt; U_0)\),
+,\(\theta\) is a Bernoulli variable with equal probability, and \(U_0\) follows a uniform distribution over \([0, 1]\).</p></dd>
+<dt>Scenario 2.2</dt><dd><p>Dichotomous time dependent covariate with multiple changes:
+ $$\lambda(t|Z(t)) = e^{2Z_1(t) + 2Z_2},$$
+where \(Z_1(t) = \theta[I(U_1\le t &lt; U_2) + I(U_3 \le t)] + (1 - \theta)[I(t &lt; U_1) + I(U_2\le t &lt; U_3)]\),
+\(\theta\) is a Bernoulli variable with equal probability, and \(U_1\le U_2\le U_3\)
+are the first three terms of a stationary Poisson process with rate 10.</p></dd>
+<dt>Scenario 2.3</dt><dd><p>Proportional hazard model with a continuous time dependent covariate:
+$$\lambda(t|Z(t)) = 0.1 e^{Z_1(t) + Z_2},$$ where \(Z_1(t) = kt + b\),
+\(k\) and \(b\) are independent uniform random variables over \([1, 2]\).</p></dd>
+<dt>Scenario 2.4</dt><dd><p>Non-proportional hazards model with a continuous time dependent covariate:
+$$\lambda(t|Z(t)) = 0.1 \cdot[1 + \sin\{Z_1(t) + Z_2\}],$$ where \(Z_1(t) = kt + b\),
+\(k\) and \(b\) follow independent uniform distributions over \([1, 2]\).</p></dd>
+<dt>Scenario 2.5</dt><dd><p>Non-proportional hazards model with a nonlinear time dependent covariate:
+$$\lambda(t|Z(t)) = 0.1 \cdot[1 + \sin\{Z_1(t) + Z_2\}],$$ where \(Z_1(t) = 2kt\cdot \{I(t &gt; 5) - 1\} + b\),
+\(k\) and \(b\) follow independent uniform distributions over \([1, 2]\).</p></dd>
+The censoring times are generated from an independent uniform distribution over [0, c],
+where c was tuned to yield censoring percentages of 25% and 50%.
+</dl>
     
     </div>
 
@@ -130,26 +200,23 @@ When time varying covariate is involved (scenario 2), only \(Z_1\) is assumed to
 
 <span class='fu'>trueHaz</span>(<span class='no'>dat</span>)
 
-<span class='fu'>trueSurv</span>(<span class='no'>dat</span>)
-
-<span class='fu'>simuTest</span>(<span class='no'>dat</span>)</pre>
+<span class='fu'>trueSurv</span>(<span class='no'>dat</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>n</th>
-      <td><p>is the number of subject</p></td>
+      <td><p>an integer value indicating the number of subjects.</p></td>
     </tr>
     <tr>
       <th>cen</th>
-      <td><p>is the censoring percentage; right now it can be either 0%, 25%, or 50%.</p></td>
+      <td><p>is a numeric value indicating the censoring percentage; three levels, 0%, 25%, 50%, are allowed.</p></td>
     </tr>
     <tr>
       <th>scenario</th>
-      <td><p>can be numeric or character string.
-This indicates the simulation scenario noted in the manuscript.
-See <b>Details</b> for all options.</p></td>
+      <td><p>can be either a numeric value or a character string.
+This indicates the simulation scenario noted above.</p></td>
     </tr>
     <tr>
       <th>summary</th>
@@ -163,26 +230,63 @@ See <b>Details</b> for all options.</p></td>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p><code>simu</code> returns a <code>data.frame</code> in the class of "roc.simu".
-This is needed for <code>trueHaz</code> and <code>trueSurv</code>.
+    <p><code>simu</code> returns a <code>data.frame</code>.
 The returned data.frame consists of columns:</p><dl class='dl-horizontal'>
+<dt>id</dt><dd><p>is the subject id.</p></dd>
 <dt>Y</dt><dd><p>is the observed follow-up time.</p></dd>
 <dt>death</dt><dd><p>is the death indicator; death = 0 if censored.</p></dd>
-<dt>z1</dt><dd><p>is the time-independent covariate.</p></dd>
-<dt>z2</dt><dd><p>is the secondary covariate. It is time-independent in Scenario 1 and time-dependent in Scenario 2 and 3.</p></dd>
-</dl>
-
-    
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>The following scenarios are included.</p><dl class='dl-horizontal'>
-<dt>Scenario 1</dt><dd><p>assumes time independent covariates with \(\Lambda(0) = 2t\):</p></dd>
-    <dt>Scenario 2</dt><dd><p>assumes time dependent covariate (\(Z_1\)) with \(\Lambda(0) = 2t\).
-The survival times are generated from the hazard \(\lambda(t, Z(t)) = \lambda_0(t)e^{Z_1(t) + Z_2}\),
-where \(Z_1(t)\) is the time-dependent covariate.</p></dd>
-    </dl>
+<dt>z1--z10</dt><dd><p>is the possible time-independent covariate.</p></dd>
+<dt>k, b, U</dt><dd><p>are the latent variables used to generate $Z_1(t)$ in Scenario 2.1 -- 2.5.</p></dd>
+</dl><p>The returned data.frame can be supply to <code>trueHaz</code> and <code>trueSurv</code> to generate the true cumulative hazard function and the survival function, respectively.</p>
     
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='fu'>set.seed</span>(<span class='fl'>1</span>)
+<span class='fu'>simu</span>(<span class='fl'>10</span>, <span class='fl'>0.25</span>, <span class='fl'>1.2</span>, <span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; Summary results:
+#&gt; Number of subjects: 10
+#&gt; Number of subjects experienced death: 9
+#&gt; Number of covariates: 10
+#&gt; Time independent covaraites: z1 z2 z3 z4 z5 z6 z7 z8 z9 z10
+#&gt; Number of unique observation times: 10
+#&gt; Median survival time: 0.2983867
+#&gt; </div><div class='output co'>#&gt; # A tibble: 55 x 13
+#&gt;       id   Time death    z1    z2    z3    z4    z5    z6    z7    z8    z9
+#&gt;    &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt;  1     1 0.0822     0 0.266 0.206 0.935 0.482 0.821 0.478 0.913 0.339 0.435
+#&gt;  2     1 0.123      0 0.266 0.206 0.935 0.482 0.821 0.478 0.913 0.339 0.435
+#&gt;  3     1 0.238      0 0.266 0.206 0.935 0.482 0.821 0.478 0.913 0.339 0.435
+#&gt;  4     1 0.239      0 0.266 0.206 0.935 0.482 0.821 0.478 0.913 0.339 0.435
+#&gt;  5     1 0.250      0 0.266 0.206 0.935 0.482 0.821 0.478 0.913 0.339 0.435
+#&gt;  6     1 0.347      1 0.266 0.206 0.935 0.482 0.821 0.478 0.913 0.339 0.435
+#&gt;  7     2 0.0822     0 0.372 0.177 0.212 0.600 0.647 0.861 0.294 0.839 0.713
+#&gt;  8     2 0.123      0 0.372 0.177 0.212 0.600 0.647 0.861 0.294 0.839 0.713
+#&gt;  9     2 0.238      0 0.372 0.177 0.212 0.600 0.647 0.861 0.294 0.839 0.713
+#&gt; 10     2 0.239      0 0.372 0.177 0.212 0.600 0.647 0.861 0.294 0.839 0.713
+#&gt; # ... with 45 more rows, and 1 more variable: z10 &lt;dbl&gt;</div><div class='input'>
+<span class='fu'>set.seed</span>(<span class='fl'>1</span>)
+<span class='fu'>simu</span>(<span class='fl'>10</span>, <span class='fl'>0.50</span>, <span class='fl'>2.2</span>, <span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; Summary results:
+#&gt; Number of subjects: 10
+#&gt; Number of subjects experienced death: 7
+#&gt; Number of covariates: 2
+#&gt; Time independent covaraites: z1.
+#&gt; Time dependent covaraites: z2.
+#&gt; Number of unique observation times: 10
+#&gt; Median survival time: 0.04646691
+#&gt; </div><div class='output co'>#&gt; # A tibble: 55 x 9
+#&gt;       id    Time death    z1    z2     e    u1    u2    u3
+#&gt;    &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt;  1     1 0.00183     0     0 0.206     1 0.104 0.109 0.212
+#&gt;  2     1 0.00536     0     0 0.206     1 0.104 0.109 0.212
+#&gt;  3     1 0.00604     0     0 0.206     1 0.104 0.109 0.212
+#&gt;  4     1 0.00771     0     0 0.206     1 0.104 0.109 0.212
+#&gt;  5     1 0.0335      0     0 0.206     1 0.104 0.109 0.212
+#&gt;  6     1 0.0465      0     0 0.206     1 0.104 0.109 0.212
+#&gt;  7     1 0.0675      0     0 0.206     1 0.104 0.109 0.212
+#&gt;  8     1 0.0757      0     0 0.206     1 0.104 0.109 0.212
+#&gt;  9     1 0.0940      0     0 0.206     1 0.104 0.109 0.212
+#&gt; 10     1 0.264       0     1 0.206     1 0.104 0.109 0.212
+#&gt; # ... with 45 more rows</div><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -190,9 +294,9 @@ where \(Z_1(t)\) is the time-dependent covariate.</p></dd>
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
-
-      <li><a href="#details">Details</a></li>
-          </ul>
+      
+      <li><a href="#examples">Examples</a></li>
+    </ul>
 
   </div>
 </div>

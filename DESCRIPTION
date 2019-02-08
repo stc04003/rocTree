@@ -1,7 +1,7 @@
 Package: rocTree
 Title: Receiver Operating Characteristic (ROC)-Guided Classification
         and Survival Tree
-Version: 0.99.8
+Version: 0.99.9
 Authors@R: c(person("Yifei", "Sun", email = "ys3072@cumc.columbia.edu", role = "aut"),
 	   person("Mei-Cheng", "Wang", email = "mcwang@jhu.edu", role = "aut"),
 	   person("Sy Han", "Chiou", email = "schiou@utdallas", role = c("aut", "cre")))

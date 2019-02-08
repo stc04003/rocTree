@@ -28,10 +28,7 @@ knitr::opts_chunk$set(
 
 ### Development
 
-This package is working in progress.
-
-### Online documentations
-[Online document](https://www.sychiou.com/rocTree/) includes...
+The package is under active development.
 
 ### Installation
 
@@ -41,3 +38,8 @@ You can install rocTree from github with:
 ## install.packages("devtools")
 devtools::install_github("stc04003/rocTree")
 ```
+
+### Online documentations
+[Online document](https://www.sychiou.com/rocTree/index.html) includes:
+
+* Package vignette on [simulating data used in examples](https://www.sychiou.com/reReg/articles/rocTree-sim.html).

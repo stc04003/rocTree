@@ -61,7 +61,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rocTree</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.99.7</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.99.9</span>
       </span>
     </div>
 
@@ -75,6 +75,18 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/rocTree-sim.html">Generating simulated data in `rocTree` package</a>
+    </li>
+  </ul>
 </li>
       </ul>
       
@@ -108,7 +120,8 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>rocForest</span>(<span class='no'>formula</span>, <span class='no'>data</span>, <span class='no'>id</span>, <span class='no'>subset</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>())</pre>
+    <pre class="usage"><span class='fu'>rocForest</span>(<span class='no'>formula</span>, <span class='no'>data</span>, <span class='no'>id</span>, <span class='no'>subset</span>, <span class='kw'>splitBy</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"CON"</span>, <span class='st'>"dCON"</span>),
+  <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>())</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -137,6 +150,10 @@ should be the same as the number of observations.</p></td>
 the fitting process.</p></td>
     </tr>
     <tr>
+      <th>splitBy</th>
+      <td><p>a character string specifying the splitting algorithm. See *Details*.</p></td>
+    </tr>
+    <tr>
       <th>control</th>
       <td><p>a list of control parameters. See 'details' for important special
 features of control parameters.</p></td>
@@ -145,9 +162,65 @@ features of control parameters.</p></td>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An object of S3 class "<code>rocForest</code>" representing the fit, with the following components:</p>
+    <p>An object of S3 class "<code>rocForest</code>" representing the fit,
+with the following components:</p>
     
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='fu'>library</span>(<span class='no'>survival</span>)
+<span class='fu'>set.seed</span>(<span class='fl'>1</span>)
+<span class='no'>dat</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='simu.html'>simu</a></span>(<span class='fl'>100</span>, <span class='fl'>0</span>, <span class='fl'>1.3</span>)
+<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>rocForest</span>(<span class='fu'><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>dat</span>,
+        <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>minsp</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>minsp2</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>50</span>))
+<span class='no'>fit</span></div><div class='output co'>#&gt; rocForest result
+#&gt; 
+#&gt; Call:
+#&gt;  rocForest(formula = Surv(Time, death) ~ z1 + z2, data = dat,      id = id, control = list(minsp = 3, minsp2 = 1, B = 50)) 
+#&gt; 
+#&gt; Sample size:                                  100 
+#&gt; Number of independent variables:              2 
+#&gt; Number of trees:                              50 
+#&gt; Split rule:                                   CON 
+#&gt; Number of variables tried at each split:      2 
+#&gt; Minimum number of failure in a node:          3 
+#&gt; Minimum number of failure in a teminal node:  1 </div><div class='input'>
+<span class='co'>## Print individual trees</span>
+<span class='fu'>print</span>(<span class='no'>fit</span>, <span class='fl'>1</span>)</div><div class='output co'>#&gt;  ROC-guided survival forest: tree # 1 
+#&gt; 
+#&gt;  node), split
+#&gt;    * denotes terminal node
+#&gt;   
+#&gt; Root                          
+#&gt;  ¦--2) z1 &lt;= 0.27473          
+#&gt;  ¦   ¦--4) z1 &lt;= 0.17582      
+#&gt;  ¦   ¦   ¦--8) z2 &lt;= 0.68132  
+#&gt;  ¦   ¦   °--9) z2 &gt; 0.68132   
+#&gt;  ¦   °--5) z1 &gt; 0.17582       
+#&gt;  ¦       ¦--10) z2 &lt;= 0.70330 
+#&gt;  ¦       °--11) z2 &gt; 0.70330* 
+#&gt;  °--3) z1 &gt; 0.27473           
+#&gt;      ¦--6) z1 &lt;= 0.90110      
+#&gt;      °--7) z1 &gt; 0.90110       
+#&gt;          ¦--14) z1 &lt;= 0.94505*
+#&gt;          °--15) z1 &gt; 0.94505  
+#&gt; </div><div class='input'><span class='fu'>print</span>(<span class='no'>fit</span>, <span class='fl'>2</span>)</div><div class='output co'>#&gt;  ROC-guided survival forest: tree # 2 
+#&gt; 
+#&gt;  node), split
+#&gt;    * denotes terminal node
+#&gt;   
+#&gt; Root                         
+#&gt;  ¦--2) z1 &lt;= 0.32000         
+#&gt;  ¦   ¦--4) z2 &lt;= 0.46000     
+#&gt;  ¦   ¦   ¦--8) z1 &lt;= 0.15000*
+#&gt;  ¦   ¦   °--9) z1 &gt; 0.15000  
+#&gt;  ¦   °--5) z2 &gt; 0.46000      
+#&gt;  ¦       ¦--10) z1 &lt;= 0.18000
+#&gt;  ¦       °--11) z1 &gt; 0.18000*
+#&gt;  °--3) z1 &gt; 0.32000          
+#&gt;      ¦--6) z2 &lt;= 0.020000    
+#&gt;      °--7) z2 &gt; 0.020000     
+#&gt; </div><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -155,7 +228,9 @@ features of control parameters.</p></td>
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
-          </ul>
+      
+      <li><a href="#examples">Examples</a></li>
+    </ul>
 
   </div>
 </div>

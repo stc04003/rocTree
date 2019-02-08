@@ -4,7 +4,6 @@
 \alias{simu}
 \alias{trueHaz}
 \alias{trueSurv}
-\alias{simuTest}
 \title{Function to generate simulated data used in the manuscript.}
 \usage{
 simu(n, cen, scenario, summary = FALSE)
@@ -12,82 +11,78 @@ simu(n, cen, scenario, summary = FALSE)
 trueHaz(dat)
 
 trueSurv(dat)
-
-simuTest(dat)
 }
 \arguments{
-\item{n}{is the number of subject}
+\item{n}{an integer value indicating the number of subjects.}
 
-\item{cen}{is the censoring percentage; right now it can be either 0\%, 25\%, or 50\%.}
+\item{cen}{is a numeric value indicating the censoring percentage; three levels, 0\%, 25\%, 50\%, are allowed.}
 
-\item{scenario}{can be numeric or character string.
-This indicates the simulation scenario noted in the manuscript.
-See \bold{Details} for all options.}
+\item{scenario}{can be either a numeric value or a character string.
+This indicates the simulation scenario noted above.}
 
 \item{summary}{a logical value indicating whether a brief data summary will be printed.}
 
 \item{dat}{is a data.frame prepared by \code{simu}.}
 }
 \value{
-\code{simu} returns a \code{data.frame} in the class of "roc.simu".
-This is needed for \code{trueHaz} and \code{trueSurv}.
+\code{simu} returns a \code{data.frame}.
 The returned data.frame consists of columns:
 \describe{
+\item{id}{is the subject id.}
 \item{Y}{is the observed follow-up time.}
 \item{death}{is the death indicator; death = 0 if censored.}
-\item{z1}{is the time-independent covariate.}
-\item{z2}{is the secondary covariate. It is time-independent in Scenario 1 and time-dependent in Scenario 2 and 3.}
+\item{z1--z10}{is the possible time-independent covariate.}
+\item{k, b, U}{are the latent variables used to generate $Z_1(t)$ in Scenario 2.1 -- 2.5.}
 }
+The returned data.frame can be supply to \code{trueHaz} and \code{trueSurv} to generate the true cumulative hazard function and the survival function, respectively.
 }
 \description{
-This function is used to generate simulated data in the manuscript.
-The underlying model is assumed to be
-\deqn{\lambda(t, Z) = \lambda_0(t) e^{(\beta_1 * Z_1 + \beta_2 * Z_2)},}
-where \eqn{\lambda_0(t)} is the baseline hazard function,
-(\eqn{b_1, b_2}) is the regression coefficient, and
-\eqn{Z_1} and \eqn{Z_2} are the covariates.
-When time varying covariate is involved (scenario 2), only \eqn{Z_1} is assumed to dependent on time.
-
-This function is used to generate the true cumulative hazard function for
-ONE ID (the 1st ID) used in the simulation.
-This function is usually called for the testing set.
-
-This function is used to generate the true survival function for ONE ID used in the simulation.
-
-This function is used to generate testing sets for each scenario.
-}
-\details{
-The following scenarios form the paper are included.
+This function is used to generate simulated data under various settings.
+Let \eqn{Z} be a \eqn{p}-dimensional vector of possible time-dependent covariates and
+\eqn{\beta} be the vector of regression coefficient.
+The survival times (\eqn{T}) are generated from the hazard function sepecified as follow:
 \describe{
-\item{Scenario 1}{assumes time independent covariates with \eqn{\Lambda(0) = 2t}:}
-\describe{
-\item{1.1}{Proportional hazards model:
-\deqn{\lambda(t, Z) = \lambda_0(t) e^{(-0.5 Z_1 + 0.5 Z_2 - 0.5 Z_3 ... + 0.5 Z_{10})}.}}
-\item{1.2}{Proportional hazards model with noise variable:
-\deqn{\lambda(t, Z) = \lambda_0(t) e^{(2Z_1 + 2Z_2 + 0Z_3 + ... + 0Z_{10})}.}}
-\item{1.3}{Proportional hazards model with nonlinear covariate effects:
-\deqn{\lambda(t, Z) = \lambda_0(t) e^{[2\sin(2\pi Z_1) + 2|Z_2 - 0.5|]}.}}
-\item{1.4}{Accelerated failure time model:
+\item{Scenario 1.1}{Proportional hazards model:
+\deqn{\lambda(t|Z) = \lambda_0(t) e^{-0.5 Z_1 + 0.5 Z_2 - 0.5 Z_3 ... + 0.5 Z_{10}},}}
+where \eqn{\lambda_0(t) = 2t}.
+\item{Scenario 1.2}{Proportional hazards model with noise variable:
+\deqn{\lambda(t|Z) = \lambda_0(t) e^{2Z_1 + 2Z_2 + 0Z_3 + ... + 0Z_{10}},}}
+where \eqn{\lambda_0(t) = 2t}.
+\item{Scenario 1.3}{Proportional hazards model with nonlinear covariate effects:
+\deqn{\lambda(t|Z) = \lambda_0(t) e^{[2\sin(2\pi Z_1) + 2|Z_2 - 0.5|]},}}
+where \eqn{\lambda_0(t) = 2t}.
+\item{Scenario 1.4}{Accelerated failure time model:
 \deqn{\log(T) = -2 + 2Z_1 + 2Z_2 + \epsilon,} where \eqn{\epsilon} follows \eqn{N(0, 0.5^2).}}
-\item{1.5}{Generalized gamma family:
-\deqn{T = e^{\sigma\omega},} with \eqn{\omega = \log(Q^2 g) / Q}, \eqn{g} follows Gamma(\eqn{Q^{-2}, 1}),
+\item{Scenario 1.5}{Generalized gamma family:
+\deqn{T = e^{\sigma\omega},} where \eqn{\omega = \log(Q^2 g) / Q}, \eqn{g} follows Gamma(\eqn{Q^{-2}, 1}),
 \eqn{\sigma = 2Z_1, Q = 2Z_2.}}
-}
-\item{Scenario 2}{assumes a time dependent covariate, \eqn{Z_1(t)}:}
-\describe{
-\item{2.1}{Dichotomous time dependent covariate with at most one change in value:
- \deqn{\lambda(t, Z(t)) = \lambda_0(t)e^{2Z_1(t) + 2Z_2},}
+\item{Scenario 2.1}{Dichotomous time dependent covariate with at most one change in value:
+ \deqn{\lambda(t|Z(t)) = \lambda_0(t)e^{2Z_1(t) + 2Z_2},}
 where \eqn{Z_1(t)} is the time-dependent covariate: \eqn{Z_1(t) = \theta I(t \ge U_0) + (1 - \theta) I(t < U_0)},
-and \eqn{\theta} is a Bernoulli variable with equal probability.}
-\item{2.2}{Dichotomous time dependent covariate with multiple changes:
- \deqn{\lambda(t, Z(t)) = e^{2Z_1(t) + 2Z_2},}
+,\eqn{\theta} is a Bernoulli variable with equal probability, and \eqn{U_0} follows a uniform distribution over \eqn{[0, 1]}.}
+\item{Scenario 2.2}{Dichotomous time dependent covariate with multiple changes:
+ \deqn{\lambda(t|Z(t)) = e^{2Z_1(t) + 2Z_2},}
 where \eqn{Z_1(t) = \theta[I(U_1\le t < U_2) + I(U_3 \le t)] + (1 - \theta)[I(t < U_1) + I(U_2\le t < U_3)]},
 \eqn{\theta} is a Bernoulli variable with equal probability, and \eqn{U_1\le U_2\le U_3}
 are the first three terms of a stationary Poisson process with rate 10.}
-\item{2.3}{Continuous time dependent covariate:
-\deqn{\lambda(t, Z(t)) = 0.1 e^{Z_1(t) + Z_2},} where \eqn{Z_1(t) = kt + b},
-\eqn{k} and \eqn{b} follow independent uniform distributions over \eqn{(1, 2)}.
+\item{Scenario 2.3}{Proportional hazard model with a continuous time dependent covariate:
+\deqn{\lambda(t|Z(t)) = 0.1 e^{Z_1(t) + Z_2},} where \eqn{Z_1(t) = kt + b},
+\eqn{k} and \eqn{b} are independent uniform random variables over \eqn{[1, 2]}.}
+\item{Scenario 2.4}{Non-proportional hazards model with a continuous time dependent covariate:
+\deqn{\lambda(t|Z(t)) = 0.1 \cdot[1 + \sin\{Z_1(t) + Z_2\}],} where \eqn{Z_1(t) = kt + b},
+\eqn{k} and \eqn{b} follow independent uniform distributions over \eqn{[1, 2]}.}
+\item{Scenario 2.5}{Non-proportional hazards model with a nonlinear time dependent covariate:
+\deqn{\lambda(t|Z(t)) = 0.1 \cdot[1 + \sin\{Z_1(t) + Z_2\}],} where \eqn{Z_1(t) = 2kt\cdot \{I(t > 5) - 1\} + b},
+\eqn{k} and \eqn{b} follow independent uniform distributions over \eqn{[1, 2]}.}
+The censoring times are generated from an independent uniform distribution over \eqn{[0, c]},
+where \eqn{c} was tuned to yield censoring percentages of 25% and 50%.
 }
 }
-}
+\examples{
+set.seed(1)
+simu(10, 0.25, 1.2, TRUE)
+
+set.seed(1)
+simu(10, 0.50, 2.2, TRUE)
+
 }
