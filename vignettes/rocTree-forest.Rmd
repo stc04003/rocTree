@@ -1,0 +1,40 @@
+---
+title: "Fitting ROC-guided survival forest in `rocTree` package"
+author: Sy Han (Steven) Chiou
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+bibliography: ../inst/bib/tree.bib
+vignette: >
+  %\VignetteIndexEntry{Fitting semiparametric regression model to recurrent event data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}{inputenc}
+---
+
+```{r default, include = FALSE}
+knitr::opts_chunk$set(prompt = TRUE, comment = "", collapse = TRUE)
+```	
+In this vignette, we demonstrate how to use the `rocForest` function in __`rocTree`__ package
+to fit the proposed Receiver Operating Characteristic (ROC) guided survival tree.
+
+## Simulated data
+
+We will demonstrate the usage of `rocForest` function with a simulated data prepared by the [`simu`](https://www.sychiou.com/rocTree/articles/rocTree-sim.html) function.
+```{R load}
+library(rocTree)
+set.seed(2019)
+dat <- simu(n = 100, cen = 0.25, sce = 2.1, summary = TRUE)
+```
+
+## The `rocForest` function
+
+
+The complete list of arguments in `rocForest` are as follow:
+```{R rocForest-arg}
+args(rocForest)
+```
+
+The arguments are as follows
