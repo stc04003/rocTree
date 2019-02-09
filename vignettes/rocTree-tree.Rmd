@@ -107,7 +107,7 @@ The `plot` feature also allows the following useful options adopted from the [`G
 
 The following codes illustrate some of the different options.
 ```{r plot2, fig.align = "center", fig.width = 6, fig.show="hold"}
-plot(fit, control = list(rankdir = "LR"))
+plot(fit, control = list(rankdir = "LR", shape = "rect"))
 plot(fit, control = list(shape = "egg", nodeOnly = TRUE))
 ```
 
