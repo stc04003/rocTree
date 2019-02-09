@@ -15,15 +15,17 @@ and the terms on the right. The response must be a survival object returned by t
 \item{data}{an optional data frame in which to interpret the variables occurring
 in the 'formula'.}
 
-\item{id}{an optional vector used to identify time dependent covariate.
-If missing, then each individual row of 'data' is presumed to represent a distinct
-subject and each covariate is treated as a baseline covariate. The length of 'id'
-should be the same as the number of observations.}
+\item{id}{an optional vector used to identify the longitudinal observations of subject's id.
+The length of 'id' should be the same as the total number of observations.
+If 'id' is missing, each row of `data` represents a distinct observation from a subject and
+all covariates are treated as a baseline covariate.}
 
 \item{subset}{an optional vector specifying a subset of observations to be used in
 the fitting process.}
 
-\item{splitBy}{a character string specifying the splitting algorithm. See *Details*.}
+\item{splitBy}{a character string specifying the splitting algorithm. The available options are `CON` and `dCON`
+corresponding to the splitting algorithm based on the total concordance measure or the difference
+in concordance measure, respectively.}
 
 \item{control}{a list of control parameters. See 'details' for important special
 features of control parameters.}
@@ -33,8 +35,7 @@ An object of S3 class "\code{rocTree}" representing the fit, with the
 following components:
 \describe{
 \item{Frame}{is a data frame describe the resulting tree.}
-\item{r2Final}{estimated hazards at all terminal nodes.}
-\item{tt}{time values to estimate hazard. Default length is 500. }
+\item{dfFinal}{estimated hazards at all terminal nodes.}
 }
 }
 \description{
@@ -43,20 +44,22 @@ Fits a "\code{rocTree}" model.
 \details{
 The argument "control" defaults to a list with the following values:
 \describe{
-  \item{\code{tau}}{maximum follow-up time; default value is 0.4.}
+  \item{\code{tau}}{maximum follow-up time; default value is the 90th percentile of the unique observed survival times.}
   \item{\code{M}}{maximum node number allowed to be in the tree; the default value is 1000.}
   \item{\code{hN}}{smoothing parameter; the default value is "tau / 20".}
-  \item{\code{minsp}, \code{minsp2}}{The interval (\code{minsp2}, \code{minsp}) denotes the
-range for the number of the minimum risk observations required to split; the default value is (5, 20).}
-  \item{\code{disc}}{a logical vector specifying whether the input covariate are discrete (\code{disc} = 0).
+  \item{\code{minsp}}{the minimum number of failure required in a node after a split; the default value is 20.}
+  \item{\code{minsp2}}{the minimum number of failure required in a terminal node after a split; the default value is 5.}
+  \item{\code{disc}}{a logical vector specifying whether the input covariate are discrete (\code{disc} = 1).
 The length of "disc" should be the same as the number of covariates.}
-  \item{\code{CV}}{a logical vector specifying whether a cross-validation is performed; the default value is FALSE.}
-  \item{\code{nflds}}{number of folds; the default value is 10. This argument is only needed if \code{CV} = TRUE.}
+  \item{\code{prune}}{a logical vector specifying whether to prune the survival tree. If `TRUE`,
+a cross-validation procedure will be performed to determine the optimal subtree; the default value is FALSE.}
+  \item{\code{nflds}}{the number of folds used in the cross-validation.
+This argument is only needed if \code{prune} = TRUE. The default value is 10.}
   \item{\code{Trace}}{a logical vector specifying whether to display the splitting path; the default value is FALSE.}
-  \item{\code{parallel}}{a logical vector specifying whether parallel computing is applied when \code{CV} = TRUE;
-the default value is FALSE.}
-  \item{\code{parCluster}}{an integer value specifying the number of CPU cores to be used when \code{CV} = TRUE and
-\code{parallel} = TRUE. The default value is half of the CPU cores detected.}
+  \item{\code{parallel}}{a logical vector specifying whether parallel computing will be applied in cross-validation
+when \code{prune} = TRUE; the default value is FALSE.}
+  \item{\code{parCluster}}{an integer value specifying the number of CPU cores to be used when \code{prune} = TRUE and
+\code{parallel} = TRUE. The default value is half of the number of CPU cores detected. }
 }
 }
 \examples{
@@ -64,7 +67,7 @@ library(survival)
 set.seed(1)
 dat <- simu(100, 0, 1.3)
 fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat,
-       control = list(CV = TRUE, nflds = 5))
+       control = list(prune = TRUE, nflds = 5))
 fit
 }
 \references{

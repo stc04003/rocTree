@@ -87,7 +87,7 @@
       <a href="../articles/rocTree-sim.html">Generating simulated data in `rocTree` package</a>
     </li>
     <li>
-      <a href="../articles/rocTree-tree.html">Fitting time-invariant survival tree in `rocTree` package</a>
+      <a href="../articles/rocTree-tree.html">Fitting ROC-guided survival tree in `rocTree` package</a>
     </li>
   </ul>
 </li>
@@ -193,35 +193,53 @@ with the following components:</p>
 #&gt;  node), split
 #&gt;    * denotes terminal node
 #&gt;   
-#&gt; Root                          
-#&gt;  ¦--2) z1 &lt;= 0.27473          
-#&gt;  ¦   ¦--4) z1 &lt;= 0.17582      
-#&gt;  ¦   ¦   ¦--8) z2 &lt;= 0.68132  
-#&gt;  ¦   ¦   °--9) z2 &gt; 0.68132   
-#&gt;  ¦   °--5) z1 &gt; 0.17582       
-#&gt;  ¦       ¦--10) z2 &lt;= 0.70330 
-#&gt;  ¦       °--11) z2 &gt; 0.70330* 
-#&gt;  °--3) z1 &gt; 0.27473           
-#&gt;      ¦--6) z1 &lt;= 0.90110      
-#&gt;      °--7) z1 &gt; 0.90110       
-#&gt;          ¦--14) z1 &lt;= 0.94505*
-#&gt;          °--15) z1 &gt; 0.94505  
+#&gt; Root                              
+#&gt;  ¦--2) z1 &lt;= 0.27473              
+#&gt;  ¦   ¦--4) z1 &lt;= 0.14286          
+#&gt;  ¦   ¦   ¦--8) z2 &lt;= 0.51648      
+#&gt;  ¦   ¦   °--9) z2 &gt; 0.51648       
+#&gt;  ¦   °--5) z1 &gt; 0.14286           
+#&gt;  ¦       ¦--10) z1 &lt;= 0.17582     
+#&gt;  ¦       °--11) z1 &gt; 0.17582      
+#&gt;  ¦           ¦--22) z1 &lt;= 0.24176*
+#&gt;  ¦           °--23) z1 &gt; 0.24176* 
+#&gt;  °--3) z1 &gt; 0.27473               
+#&gt;      ¦--6) z2 &lt;= 0.46154          
+#&gt;      ¦   ¦--12) z2 &lt;= 0.19780     
+#&gt;      ¦   °--13) z2 &gt; 0.19780      
+#&gt;      ¦       ¦--26) z2 &lt;= 0.25275*
+#&gt;      ¦       °--27) z2 &gt; 0.25275* 
+#&gt;      °--7) z2 &gt; 0.46154           
+#&gt;          ¦--14) z2 &lt;= 0.97802     
+#&gt;          ¦   ¦--28) z1 &lt;= 0.74725*
+#&gt;          ¦   °--29) z1 &gt; 0.74725* 
+#&gt;          °--15) z2 &gt; 0.97802*     
 #&gt; </div><div class='input'><span class='fu'>print</span>(<span class='no'>fit</span>, <span class='fl'>2</span>)</div><div class='output co'>#&gt;  ROC-guided survival forest: tree # 2 
 #&gt; 
 #&gt;  node), split
 #&gt;    * denotes terminal node
 #&gt;   
-#&gt; Root                         
-#&gt;  ¦--2) z1 &lt;= 0.32000         
-#&gt;  ¦   ¦--4) z2 &lt;= 0.46000     
-#&gt;  ¦   ¦   ¦--8) z1 &lt;= 0.15000*
-#&gt;  ¦   ¦   °--9) z1 &gt; 0.15000  
-#&gt;  ¦   °--5) z2 &gt; 0.46000      
-#&gt;  ¦       ¦--10) z1 &lt;= 0.18000
-#&gt;  ¦       °--11) z1 &gt; 0.18000*
-#&gt;  °--3) z1 &gt; 0.32000          
-#&gt;      ¦--6) z2 &lt;= 0.020000    
-#&gt;      °--7) z2 &gt; 0.020000     
+#&gt; Root                              
+#&gt;  ¦--2) z1 &lt;= 0.33000              
+#&gt;  ¦   ¦--4) z1 &lt;= 0.11000          
+#&gt;  ¦   ¦   ¦--8) z1 &lt;= 0.090000     
+#&gt;  ¦   ¦   °--9) z1 &gt; 0.090000*     
+#&gt;  ¦   °--5) z1 &gt; 0.11000           
+#&gt;  ¦       ¦--10) z1 &lt;= 0.18000*    
+#&gt;  ¦       °--11) z1 &gt; 0.18000      
+#&gt;  °--3) z1 &gt; 0.33000               
+#&gt;      ¦--6) z1 &lt;= 0.83000          
+#&gt;      ¦   ¦--12) z1 &lt;= 0.56000     
+#&gt;      ¦   °--13) z1 &gt; 0.56000      
+#&gt;      ¦       ¦--26) z2 &lt;= 0.59000*
+#&gt;      ¦       °--27) z2 &gt; 0.59000  
+#&gt;      °--7) z1 &gt; 0.83000           
+#&gt;          ¦--14) z2 &lt;= 0.31000     
+#&gt;          ¦   ¦--28) z1 &lt;= 0.98000*
+#&gt;          ¦   °--29) z1 &gt; 0.98000* 
+#&gt;          °--15) z2 &gt; 0.31000      
+#&gt;              ¦--30) z2 &lt;= 0.94000*
+#&gt;              °--31) z2 &gt; 0.94000* 
 #&gt; </div><div class='input'>
 </div></pre>
   </div>

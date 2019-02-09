@@ -87,7 +87,7 @@
       <a href="../articles/rocTree-sim.html">Generating simulated data in `rocTree` package</a>
     </li>
     <li>
-      <a href="../articles/rocTree-tree.html">Fitting time-invariant survival tree in `rocTree` package</a>
+      <a href="../articles/rocTree-tree.html">Fitting ROC-guided survival tree in `rocTree` package</a>
     </li>
   </ul>
 </li>
@@ -142,10 +142,10 @@ in the 'formula'.</p></td>
     </tr>
     <tr>
       <th>id</th>
-      <td><p>an optional vector used to identify time dependent covariate.
-If missing, then each individual row of 'data' is presumed to represent a distinct
-subject and each covariate is treated as a baseline covariate. The length of 'id'
-should be the same as the number of observations.</p></td>
+      <td><p>an optional vector used to identify the longitudinal observations of subject's id.
+The length of 'id' should be the same as the total number of observations.
+If 'id' is missing, each row of `data` represents a distinct observation from a subject and
+all covariates are treated as a baseline covariate.</p></td>
     </tr>
     <tr>
       <th>subset</th>
@@ -154,7 +154,9 @@ the fitting process.</p></td>
     </tr>
     <tr>
       <th>splitBy</th>
-      <td><p>a character string specifying the splitting algorithm. See *Details*.</p></td>
+      <td><p>a character string specifying the splitting algorithm. The available options are `CON` and `dCON`
+corresponding to the splitting algorithm based on the total concordance measure or the difference
+in concordance measure, respectively.</p></td>
     </tr>
     <tr>
       <th>control</th>
@@ -168,28 +170,29 @@ features of control parameters.</p></td>
     <p>An object of S3 class "<code>rocTree</code>" representing the fit, with the
 following components:</p><dl class='dl-horizontal'>
 <dt>Frame</dt><dd><p>is a data frame describe the resulting tree.</p></dd>
-<dt>r2Final</dt><dd><p>estimated hazards at all terminal nodes.</p></dd>
-<dt>tt</dt><dd><p>time values to estimate hazard. Default length is 500.</p></dd>
+<dt>dfFinal</dt><dd><p>estimated hazards at all terminal nodes.</p></dd>
 </dl>
 
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The argument "control" defaults to a list with the following values:</p><dl class='dl-horizontal'>
-  <dt><code>tau</code></dt><dd><p>maximum follow-up time; default value is 0.4.</p></dd>
+  <dt><code>tau</code></dt><dd><p>maximum follow-up time; default value is the 90th percentile of the unique observed survival times.</p></dd>
   <dt><code>M</code></dt><dd><p>maximum node number allowed to be in the tree; the default value is 1000.</p></dd>
   <dt><code>hN</code></dt><dd><p>smoothing parameter; the default value is "tau / 20".</p></dd>
-  <dt><code>minsp</code>, <code>minsp2</code></dt><dd><p>The interval (<code>minsp2</code>, <code>minsp</code>) denotes the
-range for the number of the minimum risk observations required to split; the default value is (5, 20).</p></dd>
-  <dt><code>disc</code></dt><dd><p>a logical vector specifying whether the input covariate are discrete (<code>disc</code> = 0).
+  <dt><code>minsp</code></dt><dd><p>the minimum number of failure required in a node after a split; the default value is 20.</p></dd>
+  <dt><code>minsp2</code></dt><dd><p>the minimum number of failure required in a terminal node after a split; the default value is 5.</p></dd>
+  <dt><code>disc</code></dt><dd><p>a logical vector specifying whether the input covariate are discrete (<code>disc</code> = 1).
 The length of "disc" should be the same as the number of covariates.</p></dd>
-  <dt><code>CV</code></dt><dd><p>a logical vector specifying whether a cross-validation is performed; the default value is FALSE.</p></dd>
-  <dt><code>nflds</code></dt><dd><p>number of folds; the default value is 10. This argument is only needed if <code>CV</code> = TRUE.</p></dd>
+  <dt><code>prune</code></dt><dd><p>a logical vector specifying whether to prune the survival tree. If `TRUE`,
+a cross-validation procedure will be performed to determine the optimal subtree; the default value is FALSE.</p></dd>
+  <dt><code>nflds</code></dt><dd><p>the number of folds used in the cross-validation.
+This argument is only needed if <code>prune</code> = TRUE. The default value is 10.</p></dd>
   <dt><code>Trace</code></dt><dd><p>a logical vector specifying whether to display the splitting path; the default value is FALSE.</p></dd>
-  <dt><code>parallel</code></dt><dd><p>a logical vector specifying whether parallel computing is applied when <code>CV</code> = TRUE;
-the default value is FALSE.</p></dd>
-  <dt><code>parCluster</code></dt><dd><p>an integer value specifying the number of CPU cores to be used when <code>CV</code> = TRUE and
-<code>parallel</code> = TRUE. The default value is half of the CPU cores detected.</p></dd>
+  <dt><code>parallel</code></dt><dd><p>a logical vector specifying whether parallel computing will be applied in cross-validation
+when <code>prune</code> = TRUE; the default value is FALSE.</p></dd>
+  <dt><code>parCluster</code></dt><dd><p>an integer value specifying the number of CPU cores to be used when <code>prune</code> = TRUE and
+<code>parallel</code> = TRUE. The default value is half of the number of CPU cores detected.</p></dd>
 </dl>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
@@ -206,15 +209,17 @@ the default value is FALSE.</p></dd>
 <span class='fu'>set.seed</span>(<span class='fl'>1</span>)
 <span class='no'>dat</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='simu.html'>simu</a></span>(<span class='fl'>100</span>, <span class='fl'>0</span>, <span class='fl'>1.3</span>)
 <span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>rocTree</span>(<span class='fu'><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>dat</span>,
-       <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>CV</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>nflds</span> <span class='kw'>=</span> <span class='fl'>5</span>))
+       <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>prune</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>nflds</span> <span class='kw'>=</span> <span class='fl'>5</span>))
 <span class='no'>fit</span></div><div class='output co'>#&gt;  ROC-guided survival tree
 #&gt; 
 #&gt;  node), split
 #&gt;    * denotes terminal node
 #&gt;   
-#&gt; Root                 
-#&gt;  ¦--2) z1 &lt;= 0.32000*
-#&gt;  °--3) z1 &gt; 0.32000* 
+#&gt; Root                     
+#&gt;  ¦--2) z1 &lt;= 0.32000     
+#&gt;  ¦   ¦--4) z1 &lt;= 0.13000*
+#&gt;  ¦   °--5) z1 &gt; 0.13000* 
+#&gt;  °--3) z1 &gt; 0.32000*     
 #&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

@@ -85,6 +85,8 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...
     return(out)
 }
 
+is.predict.rocTree <- function(x) inherits(x, "predict.rocTree")
+
 #' findInterval with 0 replaced with 1
 #' @keywords internal
 #' @noRd

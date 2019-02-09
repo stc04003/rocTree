@@ -1,5 +1,5 @@
 ---
-title: "Fitting time-invariant survival tree in `rocTree` package"
+title: "Fitting ROC-guided survival tree in `rocTree` package"
 author: Sy Han (Steven) Chiou
 date: "`r Sys.Date()`"
 output:
@@ -19,11 +19,11 @@ knitr::opts_chunk$set(prompt = TRUE, comment = "", collapse = TRUE)
 ```	
 
 In this vignette, we demonstrate how to use the `rocTree` function in __`rocTree`__ package
-to fit time-invariant survival tree.
+to fit the proposed Receiver Operating Characteristic (ROC) guided survival tree.
 
-## Load data
+## Simulated data
 
-We will demonstrate the usage of `rocTree` function with a simulated data prepared by the `simu` function.
+We will demonstrate the usage of `rocTree` function with a simulated data prepared by the [`simu`](https://www.sychiou.com/rocTree/articles/rocTree-sim.html) function.
 ```{R load}
 library(rocTree)
 set.seed(2019)
@@ -32,22 +32,122 @@ dat <- simu(n = 100, cen = 0.25, sce = 2.1, summary = TRUE)
 
 ## The `rocTree` function 
 
-The complete list of arguments for the `rocTree` function are as follow:
+The complete list of arguments in `rocTree` are as follow:
 ```{R rocTree-arg}
 args(rocTree)
 ```
 
-## Fitting time-invariant survival tree
+The arguments are as follows
 
+* `formula` is a formula object, with the response on the left of a `~` operator, and the predictors on the right. The response must be a survival object returned by the function `Surv` from the `survival` package. 
+* `data` is an optional data frame to interpret the variables occurring in the `formula`.
+* `id` an optional vector used to identify the longitudinal observations of subject's id. The length of `id` should be the same as the total number of observations. If `id` is missing, then each row of `data` represents a distinct observation from subjects and all covariates are treated as a baseline covariate. 
+* `subset` an optional vector specifying a subset of observations to be used in the fitting process.
+* `splitBy` a character string specifying the splitting algorithm. The available options are `CON` and `dCON` corresponding to the splitting algorithm based on the total concordance measure or the difference in concordance measure, respectively.
+* `control` a list of control parameters. 
+
+## The `control` options
+
+The argument `control` defaults to a list with the following values:
+
+* `tau` is the maximum follow-up time; default value is the 90th percentile of the unique observed survival times. 
+* `M` is the maximum node number allowed to be in the tree; the default value is `1000`.
+* `hN` is the smoothing parameter used in the Kernel; the default value is `tau / 20`.
+* `minsp` is the minimum number of failure required in a node after a split; the default value is `20`. 
+* `minsp2` is the minimum number of failure required in a terminal node after a split; the default value is `5`.
+* `disc` is a logical vector specifying whether the covariates in `formula` are discrete (`1`). The length of `disc` should be the same as the number of covariates in `formula`.
+* `prune` a logical vector specifying whether to prune the survival tree. If `TRUE`, a cross-validation procedure will be performed to determine the optimal subtree; the default value is `TRUE`.
+* `nflds` is the number of folds used in the cross-validation. This argument is only needed if `prune = TRUE`. The default value is `10`.
+* `Trace` is a logical vector specifying whether to display the splitting path; the default value is `FALSE`.
+* `parallel` is a logical vector specifying whether parallel computing will be applied in cross-validation; the default value is `FALSE`. 
+* `parCluster` is an integer value specifying the number of CPU cores to be used when `prune = TRUE` and `parallel = TRUE`. The default value is half of the number of CPU cores detected. 
+
+## Fitting survival tree
+
+We first load the `survival` package to enable `Surv`.
+The fully grown (unpruned) time-invariant survival tree can be constructed as follow:
 ```{R tree}
 library(survival)
 fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat)
+```
+The function `rocTree` returns an object of S3 class -- `rocTree` with the following major components:
+
+* `Frame` is a data frame describe the resulting tree. The columns are 
+  * `nd` node number.
+  * `terminal` describe the node characteristic; `0` if a node is internal, `1` if a node is splitable, and `2` if a node is a terminal node.
+  * `u` is the proportion being split in $\tau_L$.
+  * `u2` is the minimum proporiton in $\tau_L$ across time.
+  * `p` indicate which covariate was split at the node. 
+  * `cut` is the covariate value being split at the node.
+* `dfFinal` is a data.frame consists of unsmoothed hazard estimates at the observed survival times for the terminal nodes.
+
+The time-invariant survival tree can be printed directly or with the generic function `print`.
+```{r print}
 fit
 ```
+The survival tree is printed in the structure similar to that in the `data.tree` package. Setting `dt = FALSE` in the generic function prints the tree in a structure similar to that of the `rpart` package.
+```{r print2}
+print(fit, dt = FALSE)
+```
 
+## Plotting survival tree
+
+The survival tree can also be plotted with the `GraphViz`/`DiagrammeR` engine via the generic function `plot`.
+```{r plot, fig.align = "center", fig.width = 6}
+plot(fit)
+```
+The `plot` feature also allows the following useful options adopted from the [`Graphviz`/`DiagrammeR`](http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html) environment to be passed to `option`:
+
+* `rankdir` is a character string specifying the direction of the tree flow. The available options are top-to-bottom (`TB`), bottom-to-top (`BT`), left-to-right (`LR`), and right-to-left (`RL`); the default value is `TB`.
+* `shape` is a character string specifying the shape style. Some of the available options are `ellipse`, `oval`, `rectangle`, `square`, `egg`, `plaintext`, `diamond`, and `triangle`. The default value is `ellipse`.
+* `nodeOnly` is a logical value indicating whether to display only the node number; the default value is `TRUE`.
+* `savePlot` is a logical value indicating whether the plot will be saved (exported); the default value is `FALSE`.
+* `file_name` is a character string specifying the name of the plot when `savePlot = TRUE`. The file name should include its extension. The default value is `pic.pdf`.
+* `file_type` is a character string specifying the type of file to be exported. Options for graph files are: `png`, `pdf`, `svg`, and `ps`. The default value is `pdf`.  
+
+The following codes illustrate some of the different options.
+```{r plot2, fig.align = "center", fig.width = 6, fig.show="hold"}
+plot(fit, control = list(rankdir = "LR"))
+plot(fit, control = list(shape = "egg", nodeOnly = TRUE))
+```
+
+## Pruning survival tree
+
+Pruning reduces the complexity of the final classifier, and hence improves predictive accuracy by the reduction of overfitting.
+Setting `prune = TRUE` in the `control` list will prune the survival tree. In the following example, we used five-fold cross-validation 
+to choose the tuning parameter in the concordance-complexity measure:
 ```{R tree2, tidy = TRUE}
 set.seed(2019)
 fit2 <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, 
-                control = list(CV = TRUE, nfld = 5))
+                control = list(prune = TRUE, nfld = 5))
 fit2
+```
+The resulting tree is much smaller than the un-pruned tree in `fit`. 
+
+## Hazard estimates
+
+The time-invariant partition considered allows a sparse model and an easy interpretation
+of the decision rule. At each fixed time $t$, the tree partitions the survivor population and predicts the instantaneous failure risk.
+Thus the interpretation at a fixed time point is along the same line as classification and regression trees. 
+Since the risk within each terminal node changes with time, it is essential to look at the hazard curves of each terminal
+The smoothed hazard estimates at terminal nodes can be easily plotted with the function `plotTreeHaz`, as demonstrated below.
+In the following example, subjects in node 2 ($Z_1(t) \le 0.56$) yield the highest hazard for $t < 0.7$.
+```{R haz, fig.align = "center"}
+plotTreeHaz(fit2)
+```
+
+## Prediction
+
+Suppose we have a new data that is generated as below:
+```{R newDat}
+newdat <- dplyr::tibble(Time = sort(unique(dat$Time)), 
+                        z1 = 1 * (Time < median(Time)), 
+                        z2 = runif(1))
+newdat
+```
+The predicted survival curve can be plotted with the following codes.
+```{R pred}
+pred <- predict(fit2, newdat)
+pred
+plot(pred)
 ```

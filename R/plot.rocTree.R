@@ -25,7 +25,7 @@
 #' dat <- simu(100, 0, 1.3)
 #' library(survival)
 #' system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id,
-#' data = dat, control = list(CV = TRUE, nflds = 10)))
+#' data = dat, control = list(prune = TRUE, nflds = 10)))
 #' plot(fit)
 #' plot(fit, control = list(rankdir = "LR", nodeOnly = TRUE))
 #' plot(fit, output = "visNetwork", control = list(nodeOnly = TRUE, shape = "box"))
@@ -70,7 +70,7 @@ plot.rocTree <- function(x, output = c("graph", "visNetwork"),
     plot.Node(root, output = output, control = ctrl)
 }
 
-plot.rocTree.control <- function(rankdir = c("TB", "BT", "LR", "RL", "TD"),
+plot.rocTree.control <- function(rankdir = c("TB", "BT", "LR", "RL"),
                                  shape = "ellipse",
                                  nodeOnly = FALSE,
                                  savePlot = FALSE, 
@@ -100,14 +100,15 @@ plot.rocTree.control <- function(rankdir = c("TB", "BT", "LR", "RL", "TD"),
 #' dat <- simu(100, 0, 1.3)
 #' library(survival)
 #' system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id,
-#' data = dat, control = list(CV = TRUE, nflds = 10)))
+#' data = dat, control = list(prune = TRUE, nflds = 10)))
 #' plotTreeHaz(fit)
 plotTreeHaz <- function(x, control = list()) {
     if (!is.null(control$tau)) x$parm@tau <- control$tau
     if (!is.null(control$ghN)) x$parm@ghN <- control$ghN 
     if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object")
     x <- c(x, rocTree.haz(x$dfFinal, x$Y0, x$parm))
-    tmp <- data.frame(x = x$tt, y = unlist(x$r2Final), Node = rep(x$ndFinal, each = length(x$tt)), row.names = NULL)
+    tmp <- data.frame(x = x$tt, y = unlist(x$r2Final),
+                      Node = rep(x$ndFinal, each = length(x$tt)), row.names = NULL)
     tmp$Node <- factor(tmp$Node)
     gg <- ggplot(tmp, aes(x = x, y = y, group = Node)) +
         geom_line(aes(linetype = Node, color = Node), lwd = I(1.1)) +
@@ -127,4 +128,22 @@ plot.Node <- function(x, ..., output = "graph", control) {
     } else {
         render_graph(graph, output = output)
     }
+}
+
+#' Plotting the predicted survival function from an rocTree object
+#'
+#' Plot the predicted survival function from rocTree objects.
+#'
+#' @importFrom ggplot2 ggplot geom_step
+#'
+#' @noRd
+#' @export
+plot.predict.rocTree <- function(x, ..., control = list()) {
+    if (!is.null(control$tau)) x$parm@tau <- control$tau
+    if (!is.null(control$ghN)) x$parm@ghN <- control$ghN 
+    if (!is.predict.rocTree(x)) stop("Response must be a \"predict.rocTree\" object")
+    tmp <- data.frame(x = x$pred$Time, y = x$pred$Surv)
+    gg <- ggplot(tmp, aes(x = x, y = y)) + geom_step(lwd = I(1.1)) +
+        xlab("Time") + ylab("Hazard")
+    gg
 }

@@ -4,10 +4,10 @@
 setClass("splitClass",
          representation(tau = "numeric", M = "numeric", hN = "numeric", h = "numeric",
                         minsp = "numeric", minsp2 = "numeric", disc = "numeric", nflds = "numeric",
-                        CV = "logical", Trace = "logical", parallel = "logical", parCluster = "numeric",
+                        prune = "logical", Trace = "logical", parallel = "logical", parCluster = "numeric",
                         B = "numeric", ghN = "numeric", fsz = "numeric", splitBy = "character"),
-         prototype(tau = 0.4, M = 1000, hN = 0, h = 0, minsp = 20, minsp2 = 5, disc = -1, nflds = 10,
-                   CV = FALSE, Trace = FALSE, parallel = FALSE,
+         prototype(tau = 0, M = 1000, hN = 0, h = 0, minsp = 20, minsp2 = 5, disc = -1, nflds = 10,
+                   prune = FALSE, Trace = FALSE, parallel = FALSE,
                    parCluster = parallel::detectCores() / 2,
                    B = 500, ghN = 0.2, fsz = 0, splitBy = "CON"),
          contains = "VIRTUAL")
@@ -19,9 +19,9 @@ setGeneric("grow", function(Y, E, X.list, parm) standardGeneric("grow"))
 setMethod("grow", signature(parm = "CON"), growSeq)
 setMethod("grow", signature(parm = "dCON"), growRP)
 
-## setGeneric("CV", function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, parm) standardGeneric("CV"))
-## setMethod("CV", signature(parm = "CON"), CVSeq)
-## setMethod("CV", signature(parm = "dCON"), CVRP)
+## setGeneric("prune", function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, parm) standardGeneric("prune"))
+## setMethod("prune", signature(parm = "CON"), pruneSeq)
+## setMethod("prune", signature(parm = "dCON"), pruneRP)
 
 #' ROC-guided Regression Trees
 #'
@@ -29,20 +29,22 @@ setMethod("grow", signature(parm = "dCON"), growRP)
 #'
 #' The argument "control" defaults to a list with the following values:
 #' \describe{
-#'   \item{\code{tau}}{maximum follow-up time; default value is 0.4.}
+#'   \item{\code{tau}}{maximum follow-up time; default value is the 90th percentile of the unique observed survival times.}
 #'   \item{\code{M}}{maximum node number allowed to be in the tree; the default value is 1000.}
 #'   \item{\code{hN}}{smoothing parameter; the default value is "tau / 20".}
-#'   \item{\code{minsp}, \code{minsp2}}{The interval (\code{minsp2}, \code{minsp}) denotes the
-#' range for the number of the minimum risk observations required to split; the default value is (5, 20).}
-#'   \item{\code{disc}}{a logical vector specifying whether the input covariate are discrete (\code{disc} = 0).
+#'   \item{\code{minsp}}{the minimum number of failure required in a node after a split; the default value is 20.}
+#'   \item{\code{minsp2}}{the minimum number of failure required in a terminal node after a split; the default value is 5.}
+#'   \item{\code{disc}}{a logical vector specifying whether the input covariate are discrete (\code{disc} = 1).
 #' The length of "disc" should be the same as the number of covariates.}
-#'   \item{\code{CV}}{a logical vector specifying whether a cross-validation is performed; the default value is FALSE.}
-#'   \item{\code{nflds}}{number of folds; the default value is 10. This argument is only needed if \code{CV} = TRUE.}
+#'   \item{\code{prune}}{a logical vector specifying whether to prune the survival tree. If `TRUE`,
+#' a cross-validation procedure will be performed to determine the optimal subtree; the default value is FALSE.}
+#'   \item{\code{nflds}}{the number of folds used in the cross-validation.
+#' This argument is only needed if \code{prune} = TRUE. The default value is 10.}
 #'   \item{\code{Trace}}{a logical vector specifying whether to display the splitting path; the default value is FALSE.}
-#'   \item{\code{parallel}}{a logical vector specifying whether parallel computing is applied when \code{CV} = TRUE;
-#' the default value is FALSE.}
-#'   \item{\code{parCluster}}{an integer value specifying the number of CPU cores to be used when \code{CV} = TRUE and
-#' \code{parallel} = TRUE. The default value is half of the CPU cores detected.}
+#'   \item{\code{parallel}}{a logical vector specifying whether parallel computing will be applied in cross-validation
+#' when \code{prune} = TRUE; the default value is FALSE.}
+#'   \item{\code{parCluster}}{an integer value specifying the number of CPU cores to be used when \code{prune} = TRUE and
+#' \code{parallel} = TRUE. The default value is half of the number of CPU cores detected. }
 #' }
 #' 
 #' @param formula a formula object, with the response on the left of a '~' operator,
@@ -50,13 +52,15 @@ setMethod("grow", signature(parm = "dCON"), growRP)
 #' 'Surv' function.
 #' @param data an optional data frame in which to interpret the variables occurring
 #' in the 'formula'.
-#' @param id an optional vector used to identify time dependent covariate.
-#' If missing, then each individual row of 'data' is presumed to represent a distinct
-#' subject and each covariate is treated as a baseline covariate. The length of 'id'
-#' should be the same as the number of observations.
+#' @param id an optional vector used to identify the longitudinal observations of subject's id.
+#' The length of 'id' should be the same as the total number of observations.
+#' If 'id' is missing, each row of `data` represents a distinct observation from a subject and
+#' all covariates are treated as a baseline covariate. 
 #' @param subset an optional vector specifying a subset of observations to be used in
 #' the fitting process.
-#' @param splitBy a character string specifying the splitting algorithm. See *Details*.
+#' @param splitBy a character string specifying the splitting algorithm. The available options are `CON` and `dCON`
+#' corresponding to the splitting algorithm based on the total concordance measure or the difference
+#' in concordance measure, respectively. 
 #' @param control a list of control parameters. See 'details' for important special
 #' features of control parameters.
 #' @export
@@ -65,8 +69,7 @@ setMethod("grow", signature(parm = "dCON"), growRP)
 #' following components:
 #' \describe{
 #' \item{Frame}{is a data frame describe the resulting tree.}
-#' \item{r2Final}{estimated hazards at all terminal nodes.}
-#' \item{tt}{time values to estimate hazard. Default length is 500. }
+#' \item{dfFinal}{estimated hazards at all terminal nodes.}
 #' }
 #' @references Sun Y. and Wang, M.C. (2018+). ROC-guided classification and survival trees. \emph{Technical report}.
 #' @keywords rocTree
@@ -76,7 +79,7 @@ setMethod("grow", signature(parm = "dCON"), growRP)
 #' set.seed(1)
 #' dat <- simu(100, 0, 1.3)
 #' fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat,
-#'        control = list(CV = TRUE, nflds = 5))
+#'        control = list(prune = TRUE, nflds = 5))
 #' fit
 rocTree <- function(formula, data, id, subset, splitBy = c("CON", "dCON"), control = list()) {
     splitBy <- match.arg(splitBy)
@@ -97,6 +100,7 @@ rocTree <- function(formula, data, id, subset, splitBy = c("CON", "dCON"), contr
     Y0 <- unlist(lapply(split(Y, id), max))
     ## sort m by Y0
     ## do.call(rbind, split(m, id)[unique(id)[order(Y0)]])
+    if (parm@tau <= 0) parm@tau <- as.numeric(quantile(Y0, .9))
     if (parm@h <= 0) parm@h <- parm@tau / 20
     if (parm@hN <= 0) parm@hN <- parm@tau / 20    
     if (parm@fsz <= 0) parm@fsz <- round(length(Y0) / 2)
@@ -127,8 +131,8 @@ rocTree <- function(formula, data, id, subset, splitBy = c("CON", "dCON"), contr
     E0 <- unlist(lapply(split(Status, id), max), use.names = FALSE)
     ## Grow
     out <- grow(Y0, E0, xlist, parm)
-    ## CV
-    if (parm@CV & length(out$beta.seq) > 2) 
+    ## prune
+    if (parm@prune & length(out$beta.seq) > 2) 
         out$con2.seq <- rocTree.cv(out$beta.seq, Y, Status, id, X, parm)
     out <- c(out, rocTree.final(out, Y0, E0, xlist, parm))
     ## out <- c(out, rocTree.haz(out$dfFinal, Y0, ctrl))
@@ -168,8 +172,8 @@ rocTree <- function(formula, data, id, subset, splitBy = c("CON", "dCON"), contr
 rocTree.control <- function(l) {
     if (missing(l)) l <- NULL
     ## default list
-    dl <- list(tau = 0.4, M = 1000, hN = NULL, h = NULL,
-               minsp = 20, minsp2 = 5, disc = 0, nflds = 10, CV = FALSE, Trace = FALSE,
+    dl <- list(tau = NULL, M = 1000, hN = NULL, h = NULL,
+               minsp = 20, minsp2 = 5, disc = 0, nflds = 10, prune = FALSE, Trace = FALSE,
                parallel = FALSE, parCluster = detectCores() / 2, B = 500, ghN = .2,
                fsz = function(n) round(n/2))
     naml <- names(l)

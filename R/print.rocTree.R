@@ -13,9 +13,9 @@
 #' dat <- simu(100, 0, 1.3)
 #' library(survival)
 #' system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id,
-#' data = dat, control = list(CV = TRUE, nflds = 10)))
+#' data = dat, control = list(prune = TRUE, nflds = 10)))
 #' fit
-#' print(fit, tree = FALSE)
+#' print(fit, dt = FALSE)
 print.rocTree <- function(x, digits = 5, dt = TRUE, ...) {
     if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object.")
     ## digits = getOption("digits")

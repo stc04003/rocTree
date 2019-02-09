@@ -57,7 +57,7 @@
       <a href="articles/rocTree-sim.html">Generating simulated data in `rocTree` package</a>
     </li>
     <li>
-      <a href="articles/rocTree-tree.html">Fitting time-invariant survival tree in `rocTree` package</a>
+      <a href="articles/rocTree-tree.html">Fitting ROC-guided survival tree in `rocTree` package</a>
     </li>
   </ul>
 </li>
@@ -105,7 +105,12 @@
 <a href="#installation" class="anchor"></a>Installation</h3>
 <p>You can install <code>rocTree</code> from <strong>GitHub</strong> with:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## install.packages("devtools")
-devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"stc04003/rocTree"</span>)</code></pre></div>
+devtools::<span class="kw">install_github</span>(<span class="st">"stc04003/rocTree"</span>)</code></pre></div>
+</div>
+<div id="description" class="section level3">
+<h3 class="hasAnchor">
+<a href="#description" class="anchor"></a>Description</h3>
+<p>The <code>rocTree</code> provides implementations to a unified framework for tree-structured analysis with censored survival outcomes. Different from many existing tree building algorithms, the <code>rocTree</code> incorporate time-dependent covariates by constructing a time-invariant partition scheme on the survivor population. The partition-based risk prediction function is constructed using an algorithm guided by the Receiver Operating Characteristic (ROC) curve. Specifically, the generalized time-dependent ROC curves for survival trees show that the target hazard function yields the highest ROC curve. The optimality of the target hazard function motivates us to use a weighted average of the time-dependent area under the curve (AUC) on a set of time points to evaluate the prediction performance of survival trees and to guide splitting and pruning. Moreover, the <code>rocTree</code> package also offers a novel risk prediction forest algorithm, where the ensemble is on unbiased martingale estimating equations.</p>
 </div>
 <div id="online-documentations" class="section level3">
 <h3 class="hasAnchor">
@@ -153,7 +158,7 @@ devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocument
 <li><a href="commits/master"><img src="https://img.shields.io/badge/Package%20version-0.99.9-orange.svg?style=flat-square" alt="packageversion"></a></li>
 <li><a href="https://travis-ci.org/stc04003/rocTree"><img src="https://travis-ci.org/stc04003/rocTree.svg?branch=master" alt="Travis-CI Build Status"></a></li>
 <li><a href="https://ci.appveyor.com/project/stc04003/rocTree"><img src="https://ci.appveyor.com/api/projects/status/github/stc04003/rocTree?branch=master&amp;svg=true" alt="AppVeyor Build Status"></a></li>
-<li><a href="/commits/master"><img src="https://img.shields.io/badge/last%20change-2019--02--07-yellowgreen.svg" alt="Last-changedate"></a></li>
+<li><a href="/commits/master"><img src="https://img.shields.io/badge/last%20change-2019--02--09-yellowgreen.svg" alt="Last-changedate"></a></li>
 </ul>
 </div>
 </div>

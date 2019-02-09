@@ -5,11 +5,11 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fitting time-invariant survival tree in <code>rocTree</code> package • rocTree</title>
+<title>Fitting ROC-guided survival tree in <code>rocTree</code> package • rocTree</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Fitting time-invariant survival tree in &lt;code&gt;rocTree&lt;/code&gt; package">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Fitting ROC-guided survival tree in &lt;code&gt;rocTree&lt;/code&gt; package">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
@@ -55,7 +55,7 @@
       <a href="../articles/rocTree-sim.html">Generating simulated data in `rocTree` package</a>
     </li>
     <li>
-      <a href="../articles/rocTree-tree.html">Fitting time-invariant survival tree in `rocTree` package</a>
+      <a href="../articles/rocTree-tree.html">Fitting ROC-guided survival tree in `rocTree` package</a>
     </li>
   </ul>
 </li>
@@ -76,13 +76,14 @@
 <!--/.navbar -->
 
       
-      </header><div class="row">
+      </header><script src="rocTree-tree_files/htmlwidgets-1.3/htmlwidgets.js"></script><script src="rocTree-tree_files/viz-0.3/viz.js"></script><link href="rocTree-tree_files/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
+<script src="rocTree-tree_files/grViz-binding-1.0.0/grViz.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1>Fitting time-invariant survival tree in <code>rocTree</code> package</h1>
+      <h1>Fitting ROC-guided survival tree in <code>rocTree</code> package</h1>
                         <h4 class="author">Sy Han (Steven) Chiou</h4>
             
-            <h4 class="date">2019-02-07</h4>
+            <h4 class="date">2019-02-09</h4>
       
       <small class="dont-index">Source: <a href="http://github.com/stc04003/rocTree/blob/master/vignettes/rocTree-tree.Rmd"><code>vignettes/rocTree-tree.Rmd</code></a></small>
       <div class="hidden name"><code>rocTree-tree.Rmd</code></div>
@@ -91,10 +92,249 @@
 
     
     
-<p>In this vignette, we demonstrate how to use the <code>rocTree</code> function in <strong><code>rocTree</code></strong> package to fit time-invariant survival tree.</p>
+<p>In this vignette, we demonstrate how to use the <code>rocTree</code> function in <strong><code>rocTree</code></strong> package to fit the proposed Receiver Operating Characteristic (ROC) guided survival tree.</p>
+<div id="simulated-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#simulated-data" class="anchor"></a>Simulated data</h2>
+<p>We will demonstrate the usage of <code>rocTree</code> function with a simulated data prepared by the <a href="https://www.sychiou.com/rocTree/articles/rocTree-sim.html"><code>simu</code></a> function.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw">library</span>(rocTree)
+&gt;<span class="st"> </span><span class="kw">set.seed</span>(<span class="dv">2019</span>)
+&gt;<span class="st"> </span>dat &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simu.html">simu</a></span>(<span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">cen =</span> <span class="fl">0.25</span>, <span class="dt">sce =</span> <span class="fl">2.1</span>, <span class="dt">summary =</span> <span class="ot">TRUE</span>)
+Summary results:
+Number of subjects:<span class="st"> </span><span class="dv">100</span>
+Number of subjects experienced death:<span class="st"> </span><span class="dv">77</span>
+Number of covariates:<span class="st"> </span><span class="dv">2</span>
+Time independent covaraites:<span class="st"> </span>z1.
+Time dependent covaraites:<span class="st"> </span>z2.
+Number of unique observation times:<span class="st"> </span><span class="dv">100</span>
+Median survival time:<span class="st"> </span><span class="fl">0.3213932</span></code></pre></div>
+</div>
+<div id="the-roctree-function" class="section level2">
+<h2 class="hasAnchor">
+<a href="#the-roctree-function" class="anchor"></a>The <code>rocTree</code> function</h2>
+<p>The complete list of arguments in <code>rocTree</code> are as follow:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw">args</span>(rocTree)
+function (formula, data, id, subset, <span class="dt">splitBy =</span> <span class="kw">c</span>(<span class="st">"CON"</span>, <span class="st">"dCON"</span>), 
+    <span class="dt">control =</span> <span class="kw">list</span>()) 
+<span class="ot">NULL</span></code></pre></div>
+<p>The arguments are as follows</p>
+<ul>
+<li>
+<code>formula</code> is a formula object, with the response on the left of a <code>~</code> operator, and the predictors on the right. The response must be a survival object returned by the function <code>Surv</code> from the <code>survival</code> package.</li>
+<li>
+<code>data</code> is an optional data frame to interpret the variables occurring in the <code>formula</code>.</li>
+<li>
+<code>id</code> an optional vector used to identify the longitudinal observations of subject’s id. The length of <code>id</code> should be the same as the total number of observations. If <code>id</code> is missing, then each row of <code>data</code> represents a distinct observation from subjects and all covariates are treated as a baseline covariate.</li>
+<li>
+<code>subset</code> an optional vector specifying a subset of observations to be used in the fitting process.</li>
+<li>
+<code>splitBy</code> a character string specifying the splitting algorithm. The available options are <code>CON</code> and <code>dCON</code> corresponding to the splitting algorithm based on the total concordance measure or the difference in concordance measure, respectively.</li>
+<li>
+<code>control</code> a list of control parameters.</li>
+</ul>
+</div>
+<div id="the-control-options" class="section level2">
+<h2 class="hasAnchor">
+<a href="#the-control-options" class="anchor"></a>The <code>control</code> options</h2>
+<p>The argument <code>control</code> defaults to a list with the following values:</p>
+<ul>
+<li>
+<code>tau</code> is the maximum follow-up time; default value is the 90th percentile of the unique observed survival times.</li>
+<li>
+<code>M</code> is the maximum node number allowed to be in the tree; the default value is <code>1000</code>.</li>
+<li>
+<code>hN</code> is the smoothing parameter used in the Kernel; the default value is <code>tau / 20</code>.</li>
+<li>
+<code>minsp</code> is the minimum number of failure required in a node after a split; the default value is <code>20</code>.</li>
+<li>
+<code>minsp2</code> is the minimum number of failure required in a terminal node after a split; the default value is <code>5</code>.</li>
+<li>
+<code>disc</code> is a logical vector specifying whether the covariates in <code>formula</code> are discrete (<code>1</code>). The length of <code>disc</code> should be the same as the number of covariates in <code>formula</code>.</li>
+<li>
+<code>prune</code> a logical vector specifying whether to prune the survival tree. If <code>TRUE</code>, a cross-validation procedure will be performed to determine the optimal subtree; the default value is <code>TRUE</code>.</li>
+<li>
+<code>nflds</code> is the number of folds used in the cross-validation. This argument is only needed if <code>prune = TRUE</code>. The default value is <code>10</code>.</li>
+<li>
+<code>Trace</code> is a logical vector specifying whether to display the splitting path; the default value is <code>FALSE</code>.</li>
+<li>
+<code>parallel</code> is a logical vector specifying whether parallel computing will be applied in cross-validation; the default value is <code>FALSE</code>.</li>
+<li>
+<code>parCluster</code> is an integer value specifying the number of CPU cores to be used when <code>prune = TRUE</code> and <code>parallel = TRUE</code>. The default value is half of the number of CPU cores detected.</li>
+</ul>
+</div>
+<div id="fitting-survival-tree" class="section level2">
+<h2 class="hasAnchor">
+<a href="#fitting-survival-tree" class="anchor"></a>Fitting survival tree</h2>
+<p>We first load the <code>survival</code> package to enable <code>Surv</code>. The fully grown (unpruned) time-invariant survival tree can be constructed as follow:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw">library</span>(survival)
+&gt;<span class="st"> </span>fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rocTree.html">rocTree</a></span>(<span class="kw">Surv</span>(Time, death) ~<span class="st"> </span>z1 +<span class="st"> </span>z2, <span class="dt">id =</span> id, <span class="dt">data =</span> dat)</code></pre></div>
+<p>The function <code>rocTree</code> returns an object of S3 class – <code>rocTree</code> with the following major components:</p>
+<ul>
+<li>
+<code>Frame</code> is a data frame describe the resulting tree. The columns are</li>
+<li>
+<code>nd</code> node number.</li>
+<li>
+<code>terminal</code> describe the node characteristic; <code>0</code> if a node is internal, <code>1</code> if a node is splitable, and <code>2</code> if a node is a terminal node.</li>
+<li>
+<code>u</code> is the proportion being split in <span class="math inline">\(\tau_L\)</span>.</li>
+<li>
+<code>u2</code> is the minimum proporiton in <span class="math inline">\(\tau_L\)</span> across time.</li>
+<li>
+<code>p</code> indicate which covariate was split at the node.</li>
+<li>
+<code>cut</code> is the covariate value being split at the node.</li>
+<li>
+<code>dfFinal</code> is a data.frame consists of unsmoothed hazard estimates at the observed survival times for the terminal nodes.</li>
+</ul>
+<p>The time-invariant survival tree can be printed directly or with the generic function <code>print</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span>fit
+ ROC-guided survival tree
+
+ node<span class="er">)</span>, split
+   *<span class="st"> </span>denotes terminal node
+  
+Root                          
+ ¦--<span class="dv">2</span><span class="er">)</span> z1 &lt;=<span class="st"> </span><span class="fl">0.56000</span>          
+ ¦   ¦--<span class="dv">4</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.66000</span>*<span class="st">     </span>
+<span class="st"> </span>¦   °--<span class="dv">5</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.66000</span>       
+ ¦       ¦--<span class="dv">10</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.84000</span>*
+<span class="st"> </span>¦       °--<span class="dv">11</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.84000</span>*<span class="st"> </span>
+<span class="st"> </span>°--<span class="dv">3</span><span class="er">)</span> z1 &gt;<span class="st"> </span><span class="fl">0.56000</span>           
+     ¦--<span class="dv">6</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.80000</span>      
+     ¦   ¦--<span class="dv">12</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.39000</span>*
+<span class="st">     </span>¦   °--<span class="dv">13</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.39000</span>*<span class="st"> </span>
+<span class="st">     </span>°--<span class="dv">7</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.80000</span>*<span class="st">      </span></code></pre></div>
+<p>The survival tree is printed in the structure similar to that in the <code>data.tree</code> package. Setting <code>dt = FALSE</code> in the generic function prints the tree in a structure similar to that of the <code>rpart</code> package.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw">print</span>(fit, <span class="dt">dt =</span> <span class="ot">FALSE</span>)
+ ROC-guided survival tree
+
+ node<span class="er">)</span>, split
+   *<span class="st"> </span>denotes terminal node
+ 
+ <span class="dv">1</span><span class="er">)</span> root  
+   <span class="dv">2</span><span class="er">)</span> z1 &lt;=<span class="st"> </span><span class="fl">0.56000</span>  
+     <span class="dv">4</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.66000</span> *
+<span class="st">     </span><span class="dv">5</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.66000</span>  
+      <span class="dv">10</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.84000</span> *
+<span class="st">      </span><span class="dv">11</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.84000</span> *
+<span class="st">   </span><span class="dv">3</span><span class="er">)</span> z1 &gt;<span class="st"> </span><span class="fl">0.56000</span>  
+     <span class="dv">6</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.80000</span>  
+      <span class="dv">12</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.39000</span> *
+<span class="st">      </span><span class="dv">13</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.39000</span> *
+<span class="st">     </span><span class="dv">7</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.80000</span> *</code></pre></div>
+</div>
+<div id="plotting-survival-tree" class="section level2">
+<h2 class="hasAnchor">
+<a href="#plotting-survival-tree" class="anchor"></a>Plotting survival tree</h2>
+<p>The survival tree can also be plotted with the <code>GraphViz</code>/<code>DiagrammeR</code> engine via the generic function <code>plot</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw">plot</span>(fit)</code></pre></div>
+<p></p>
+<div id="htmlwidget-0b6c9c34537e039b2ace" style="width:576px;height:432.632880098888px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0b6c9c34537e039b2ace">{"x":{"diagram":"digraph {\n\ngraph [rankdir = \"TB\"]\n\n\n\n  \"1\" [label = \"Root\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"2\" [label = \"2) z1 <= 0.5600\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"3\" [label = \"4) z2 <= 0.6600*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"4\" [label = \"5) z2 > 0.6600\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"5\" [label = \"10) z2 <= 0.8400*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"6\" [label = \"11) z2 > 0.8400*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"7\" [label = \"3) z1 > 0.5600\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"8\" [label = \"6) z2 <= 0.8000\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"9\" [label = \"12) z2 <= 0.3900*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"10\" [label = \"13) z2 > 0.3900*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"11\" [label = \"7) z2 > 0.8000*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"1\"->\"2\" \n  \"1\"->\"7\" \n  \"2\"->\"3\" \n  \"2\"->\"4\" \n  \"7\"->\"8\" \n  \"7\"->\"11\" \n  \"4\"->\"5\" \n  \"4\"->\"6\" \n  \"8\"->\"9\" \n  \"8\"->\"10\" \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script> The <code>plot</code> feature also allows the following useful options adopted from the <a href="http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html"><code>Graphviz</code>/<code>DiagrammeR</code></a> environment to be passed to <code>option</code>:
+<ul>
+<li>
+<code>rankdir</code> is a character string specifying the direction of the tree flow. The available options are top-to-bottom (<code>TB</code>), bottom-to-top (<code>BT</code>), left-to-right (<code>LR</code>), and right-to-left (<code>RL</code>); the default value is <code>TB</code>.</li>
+<li>
+<code>shape</code> is a character string specifying the shape style. Some of the available options are <code>ellipse</code>, <code>oval</code>, <code>rectangle</code>, <code>square</code>, <code>egg</code>, <code>plaintext</code>, <code>diamond</code>, and <code>triangle</code>. The default value is <code>ellipse</code>.</li>
+<li>
+<code>nodeOnly</code> is a logical value indicating whether to display only the node number; the default value is <code>TRUE</code>.</li>
+<li>
+<code>savePlot</code> is a logical value indicating whether the plot will be saved (exported); the default value is <code>FALSE</code>.</li>
+<li>
+<code>file_name</code> is a character string specifying the name of the plot when <code>savePlot = TRUE</code>. The file name should include its extension. The default value is <code>pic.pdf</code>.</li>
+<li>
+<code>file_type</code> is a character string specifying the type of file to be exported. Options for graph files are: <code>png</code>, <code>pdf</code>, <code>svg</code>, and <code>ps</code>. The default value is <code>pdf</code>.</li>
+</ul>
+<p>The following codes illustrate some of the different options.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw">plot</span>(fit, <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">rankdir =</span> <span class="st">"LR"</span>))</code></pre></div>
+<div id="htmlwidget-296f5f70c7be33b49893" style="width:576px;height:432.632880098888px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-296f5f70c7be33b49893">{"x":{"diagram":"digraph {\n\ngraph [rankdir = \"LR\"]\n\n\n\n  \"1\" [label = \"Root\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"2\" [label = \"2) z1 <= 0.5600\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"3\" [label = \"4) z2 <= 0.6600*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"4\" [label = \"5) z2 > 0.6600\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"5\" [label = \"10) z2 <= 0.8400*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"6\" [label = \"11) z2 > 0.8400*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"7\" [label = \"3) z1 > 0.5600\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"8\" [label = \"6) z2 <= 0.8000\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"9\" [label = \"12) z2 <= 0.3900*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"10\" [label = \"13) z2 > 0.3900*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"11\" [label = \"7) z2 > 0.8000*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"1\"->\"2\" \n  \"1\"->\"7\" \n  \"2\"->\"3\" \n  \"2\"->\"4\" \n  \"7\"->\"8\" \n  \"7\"->\"11\" \n  \"4\"->\"5\" \n  \"4\"->\"6\" \n  \"8\"->\"9\" \n  \"8\"->\"10\" \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw">plot</span>(fit, <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">shape =</span> <span class="st">"egg"</span>, <span class="dt">nodeOnly =</span> <span class="ot">TRUE</span>))</code></pre></div>
+<div id="htmlwidget-7f9e7f01ea122cd3d0eb" style="width:576px;height:432.632880098888px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7f9e7f01ea122cd3d0eb">{"x":{"diagram":"digraph {\n\ngraph [rankdir = \"TB\"]\n\n\n\n  \"1\" [label = \"Root\", fontname = \"helvetica\", shape = \"egg\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"2\" [label = \"Node 2\", fontname = \"helvetica\", shape = \"egg\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"3\" [label = \"Node 4\", fontname = \"helvetica\", shape = \"egg\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"4\" [label = \"Node 5\", fontname = \"helvetica\", shape = \"egg\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"5\" [label = \"Node 10\", fontname = \"helvetica\", shape = \"egg\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"6\" [label = \"Node 11\", fontname = \"helvetica\", shape = \"egg\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"7\" [label = \"Node 3\", fontname = \"helvetica\", shape = \"egg\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"8\" [label = \"Node 6\", fontname = \"helvetica\", shape = \"egg\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"9\" [label = \"Node 12\", fontname = \"helvetica\", shape = \"egg\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"10\" [label = \"Node 13\", fontname = \"helvetica\", shape = \"egg\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"11\" [label = \"Node 7\", fontname = \"helvetica\", shape = \"egg\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"1\"->\"2\" \n  \"1\"->\"7\" \n  \"2\"->\"3\" \n  \"2\"->\"4\" \n  \"7\"->\"8\" \n  \"7\"->\"11\" \n  \"4\"->\"5\" \n  \"4\"->\"6\" \n  \"8\"->\"9\" \n  \"8\"->\"10\" \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="pruning-survival-tree" class="section level2">
+<h2 class="hasAnchor">
+<a href="#pruning-survival-tree" class="anchor"></a>Pruning survival tree</h2>
+<p>Pruning reduces the complexity of the final classifier, and hence improves predictive accuracy by the reduction of overfitting. Setting <code>prune = TRUE</code> in the <code>control</code> list will prune the survival tree. In the following example, we used five-fold cross-validation to choose the tuning parameter in the concordance-complexity measure:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw">set.seed</span>(<span class="dv">2019</span>)
+&gt;<span class="st"> </span>fit2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rocTree.html">rocTree</a></span>(<span class="kw">Surv</span>(Time, death) ~<span class="st"> </span>z1 +<span class="st"> </span>z2, <span class="dt">id =</span> id, <span class="dt">data =</span> dat, 
++<span class="st">                 </span><span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">prune =</span> <span class="ot">TRUE</span>, <span class="dt">nfld =</span> <span class="dv">5</span>))
+&gt;<span class="st"> </span>fit2
+ ROC-guided survival tree
+
+ node<span class="er">)</span>, split
+   *<span class="st"> </span>denotes terminal node
+  
+Root                     
+ ¦--<span class="dv">2</span><span class="er">)</span> z1 &lt;=<span class="st"> </span><span class="fl">0.56000</span>*<span class="st">    </span>
+<span class="st"> </span>°--<span class="dv">3</span><span class="er">)</span> z1 &gt;<span class="st"> </span><span class="fl">0.56000</span>      
+     ¦--<span class="dv">6</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.80000</span>*
+<span class="st">     </span>°--<span class="dv">7</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.80000</span>*<span class="st"> </span></code></pre></div>
+<p>The resulting tree is much smaller than the un-pruned tree in <code>fit</code>.</p>
+</div>
+<div id="hazard-estimates" class="section level2">
+<h2 class="hasAnchor">
+<a href="#hazard-estimates" class="anchor"></a>Hazard estimates</h2>
+<p>The time-invariant partition considered allows a sparse model and an easy interpretation of the decision rule. At each fixed time <span class="math inline">\(t\)</span>, the tree partitions the survivor population and predicts the instantaneous failure risk. Thus the interpretation at a fixed time point is along the same line as classification and regression trees. Since the risk within each terminal node changes with time, it is essential to look at the hazard curves of each terminal The smoothed hazard estimates at terminal nodes can be easily plotted with the function <code>plotTreeHaz</code>, as demonstrated below. In the following example, subjects in node 2 (<span class="math inline">\(Z_1(t) \le 0.56\)</span>) yield the highest hazard for <span class="math inline">\(t &lt; 0.7\)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw"><a href="../reference/plotTreeHaz.html">plotTreeHaz</a></span>(fit2)</code></pre></div>
+<p><img src="rocTree-tree_files/figure-html/haz-1.png" width="700" style="display: block; margin: auto;"></p>
+</div>
+<div id="prediction" class="section level2">
+<h2 class="hasAnchor">
+<a href="#prediction" class="anchor"></a>Prediction</h2>
+<p>Suppose we have a new data that is generated as below:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span>newdat &lt;-<span class="st"> </span>dplyr::<span class="kw">tibble</span>(<span class="dt">Time =</span> <span class="kw">sort</span>(<span class="kw">unique</span>(dat$Time)), 
++<span class="st">                         </span><span class="dt">z1 =</span> <span class="dv">1</span> *<span class="st"> </span>(Time &lt;<span class="st"> </span><span class="kw">median</span>(Time)), 
++<span class="st">                         </span><span class="dt">z2 =</span> <span class="kw">runif</span>(<span class="dv">1</span>))
+&gt;<span class="st"> </span>newdat
+<span class="co"># A tibble: 100 x 3</span>
+     Time    z1    z2
+    &lt;dbl&gt;<span class="st"> </span><span class="er">&lt;</span>dbl&gt;<span class="st"> </span><span class="er">&lt;</span>dbl&gt;
+<span class="st"> </span><span class="dv">1</span> <span class="fl">0.0168</span>     <span class="dv">1</span> <span class="fl">0.707</span>
+ <span class="dv">2</span> <span class="fl">0.0315</span>     <span class="dv">1</span> <span class="fl">0.707</span>
+ <span class="dv">3</span> <span class="fl">0.0417</span>     <span class="dv">1</span> <span class="fl">0.707</span>
+ <span class="dv">4</span> <span class="fl">0.0606</span>     <span class="dv">1</span> <span class="fl">0.707</span>
+ <span class="dv">5</span> <span class="fl">0.0711</span>     <span class="dv">1</span> <span class="fl">0.707</span>
+ <span class="dv">6</span> <span class="fl">0.0803</span>     <span class="dv">1</span> <span class="fl">0.707</span>
+ <span class="dv">7</span> <span class="fl">0.0872</span>     <span class="dv">1</span> <span class="fl">0.707</span>
+ <span class="dv">8</span> <span class="fl">0.0901</span>     <span class="dv">1</span> <span class="fl">0.707</span>
+ <span class="dv">9</span> <span class="fl">0.102</span>      <span class="dv">1</span> <span class="fl">0.707</span>
+<span class="dv">10</span> <span class="fl">0.105</span>      <span class="dv">1</span> <span class="fl">0.707</span>
+<span class="co"># ... with 90 more rows</span></code></pre></div>
+<p>The predicted survival curve can be plotted with the following codes.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span>pred &lt;-<span class="st"> </span><span class="kw">predict</span>(fit2, newdat)
+&gt;<span class="st"> </span>pred
+ Fitted survival probabilities:
+<span class="st">        </span>Time Surv
+<span class="dv">1</span> <span class="fl">0.01676500</span>    <span class="dv">1</span>
+<span class="dv">2</span> <span class="fl">0.03145121</span>    <span class="dv">1</span>
+<span class="dv">3</span> <span class="fl">0.04165134</span>    <span class="dv">1</span>
+<span class="dv">4</span> <span class="fl">0.06056327</span>    <span class="dv">1</span>
+<span class="dv">5</span> <span class="fl">0.07110612</span>    <span class="dv">1</span>
+&gt;<span class="st"> </span><span class="kw">plot</span>(pred)</code></pre></div>
+<p><img src="rocTree-tree_files/figure-html/pred-1.png" width="700"></p>
+<div id="refs" class="references">
+
+</div>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+        <div id="tocnav">
+      <h2 class="hasAnchor">
+<a href="#tocnav" class="anchor"></a>Contents</h2>
+      <ul class="nav nav-pills nav-stacked">
+<li><a href="#simulated-data">Simulated data</a></li>
+      <li><a href="#the-roctree-function">The <code>rocTree</code> function</a></li>
+      <li><a href="#the-control-options">The <code>control</code> options</a></li>
+      <li><a href="#fitting-survival-tree">Fitting survival tree</a></li>
+      <li><a href="#plotting-survival-tree">Plotting survival tree</a></li>
+      <li><a href="#pruning-survival-tree">Pruning survival tree</a></li>
+      <li><a href="#hazard-estimates">Hazard estimates</a></li>
+      <li><a href="#prediction">Prediction</a></li>
+      </ul>
+</div>
       </div>
 
 </div>

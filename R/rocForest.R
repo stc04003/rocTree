@@ -59,6 +59,7 @@ rocForest <- function(formula, data, id, subset, splitBy = c("CON", "dCON"), con
     parm.control <- control[names(control) %in% names(attr(getClass(splitBy), "slots"))]
     parm <- do.call("new", c(list(Class = splitBy), parm.control))
     parm@splitBy <- splitBy
+    if (parm@tau <= 0) parm@tau <- as.numeric(quantile(Y0, .9))
     if (parm@h <= 0) parm@h <- parm@tau/20
     if (parm@hN <= 0) parm@hN <- parm@tau/20
     if (!any(Y %in% Y0)) {
