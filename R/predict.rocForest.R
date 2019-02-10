@@ -107,6 +107,8 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
     return(out)
 }  
 
+is.predict.rocForest <- function(x) inherits(x, "predict.rocForest")
+
 #' This function provides one weight matrix using a tree from the forest
 #'
 #' ##@importFrom memoise memoise

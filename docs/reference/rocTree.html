@@ -126,7 +126,7 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>rocTree</span>(<span class='no'>formula</span>, <span class='no'>data</span>, <span class='no'>id</span>, <span class='no'>subset</span>, <span class='kw'>splitBy</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"CON"</span>, <span class='st'>"dCON"</span>),
+    <pre class="usage"><span class='fu'>rocTree</span>(<span class='no'>formula</span>, <span class='no'>data</span>, <span class='no'>id</span>, <span class='no'>subset</span>, <span class='kw'>splitBy</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"dCON"</span>, <span class='st'>"CON"</span>),
   <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>())</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -157,9 +157,9 @@ the fitting process.</p></td>
     </tr>
     <tr>
       <th>splitBy</th>
-      <td><p>a character string specifying the splitting algorithm. The available options are `CON` and `dCON`
+      <td><p>a character string specifying the splitting algorithm. The available options are 'CON' and 'dCON'
 corresponding to the splitting algorithm based on the total concordance measure or the difference
-in concordance measure, respectively.</p></td>
+in concordance measure, respectively. The default value is 'dCON'.</p></td>
     </tr>
     <tr>
       <th>control</th>
@@ -222,7 +222,9 @@ when <code>prune</code> = TRUE; the default value is FALSE.</p></dd>
 #&gt;  ¦--2) z1 &lt;= 0.32000     
 #&gt;  ¦   ¦--4) z1 &lt;= 0.13000*
 #&gt;  ¦   °--5) z1 &gt; 0.13000* 
-#&gt;  °--3) z1 &gt; 0.32000*     
+#&gt;  °--3) z1 &gt; 0.32000      
+#&gt;      ¦--6) z2 &lt;= 0.84000*
+#&gt;      °--7) z2 &gt; 0.84000* 
 #&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

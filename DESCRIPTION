@@ -4,7 +4,7 @@ Title: Receiver Operating Characteristic (ROC)-Guided Classification
 Version: 0.99.9
 Authors@R: c(person("Yifei", "Sun", email = "ys3072@cumc.columbia.edu", role = "aut"),
 	   person("Mei-Cheng", "Wang", email = "mcwang@jhu.edu", role = "aut"),
-	   person("Sy Han", "Chiou", email = "schiou@utdallas", role = c("aut", "cre")))
+	   person("Sy Han", "Chiou", email = "schiou@utdallas.edu", role = c("aut", "cre")))
 Description: Methods for ROC-guided classification and survival tree. The algorithms for growing and pruning trees are guided by criteria based on the ROC curve.
 Depends: R (>= 3.4.0)
 License: GPL (>= 3)
@@ -19,4 +19,4 @@ Packaged: 2019-01-31 06:09:40 UTC; schiou
 Author: Yifei Sun [aut],
   Mei-Cheng Wang [aut],
   Sy Han Chiou [aut, cre]
-Maintainer: Sy Han Chiou <schiou@utdallas>
+Maintainer: Sy Han Chiou <schiou@utdallas.edu>

@@ -79,13 +79,14 @@
 <!--/.navbar -->
 
       
-      </header><div class="row">
+      </header><script src="rocTree-forest_files/htmlwidgets-1.3/htmlwidgets.js"></script><script src="rocTree-forest_files/viz-0.3/viz.js"></script><link href="rocTree-forest_files/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
+<script src="rocTree-forest_files/grViz-binding-1.0.0/grViz.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Fitting ROC-guided survival forest in <code>rocTree</code> package</h1>
                         <h4 class="author">Sy Han (Steven) Chiou</h4>
             
-            <h4 class="date">2019-02-09</h4>
+            <h4 class="date">2019-02-10</h4>
       
       <small class="dont-index">Source: <a href="http://github.com/stc04003/rocTree/blob/master/vignettes/rocTree-forest.Rmd"><code>vignettes/rocTree-forest.Rmd</code></a></small>
       <div class="hidden name"><code>rocTree-forest.Rmd</code></div>
@@ -116,10 +117,141 @@ Median survival time:<span class="st"> </span><span class="fl">0.3213932</span><
 <a href="#the-rocforest-function" class="anchor"></a>The <code>rocForest</code> function</h2>
 <p>The complete list of arguments in <code>rocForest</code> are as follow:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw">args</span>(rocForest)
-function (formula, data, id, subset, <span class="dt">splitBy =</span> <span class="kw">c</span>(<span class="st">"CON"</span>, <span class="st">"dCON"</span>), 
+function (formula, data, id, subset, <span class="dt">splitBy =</span> <span class="kw">c</span>(<span class="st">"dCON"</span>, <span class="st">"CON"</span>), 
     <span class="dt">control =</span> <span class="kw">list</span>()) 
 <span class="ot">NULL</span></code></pre></div>
-<p>The arguments are as follows</p>
+<p>The arguments are as follows:</p>
+<ul>
+<li>
+<code>formula</code> is a formula object, with the response on the left of a <code>~</code> operator, and the predictors on the right. The response must be a survival object returned by the function <code>Surv</code> from the <code>survival</code> package.</li>
+<li>
+<code>data</code> is an optional data frame to interpret the variables occurring in the <code>formula</code>.</li>
+<li>
+<code>id</code> an optional vector used to identify the longitudinal observations of subject’s id. The length of <code>id</code> should be the same as the total number of observations. If <code>id</code> is missing, then each row of <code>data</code> represents a distinct observation from subjects and all covariates are treated as a baseline covariate.</li>
+<li>
+<code>subset</code> an optional vector specifying a subset of observations to be used in the fitting process.</li>
+<li>
+<code>splitBy</code> a character string specifying the splitting algorithm. The available options are <code>CON</code> and <code>dCON</code> corresponding to the splitting algorithm based on the total concordance measure or the difference in concordance measure, respectively. The default value is <code>dCON</code>.</li>
+<li>
+<code>control</code> a list of control parameters.</li>
+</ul>
+</div>
+<div id="the-control-options" class="section level2">
+<h2 class="hasAnchor">
+<a href="#the-control-options" class="anchor"></a>The <code>control</code> options</h2>
+<p>Some of the options in <code>control</code> are shared with that for <code>rocTree</code>. The argument <code>control</code> defaults to a list with the following values:</p>
+<ul>
+<li>
+<code>tau</code> is the maximum follow-up time; default value is the 90th percentile of the unique observed survival times.</li>
+<li>
+<code>M</code> is the maximum node number allowed to be in the tree; the default value is <code>1000</code>.</li>
+<li>
+<code>hN</code> is the smoothing parameter used in the Kernel; the default value is <code>tau / 20</code>.</li>
+<li>
+<code>minsp</code> is the minimum number of failure required in a node after a split; the default value is <code>20</code>.</li>
+<li>
+<code>minsp2</code> is the minimum number of failure required in a terminal node after a split; the default value is <code>5</code>.</li>
+<li>
+<code>disc</code> is a logical vector specifying whether the covariates in <code>formula</code> are discrete (<code>1</code>). The length of <code>disc</code> should be the same as the number of covariates in <code>formula</code>.</li>
+<li>
+<code>parallel</code> is a logical vector specifying whether parallel computing will be applied to grow the random forest; the default value is <code>FALSE</code>.</li>
+<li>
+<code>parCluster</code> is an integer value specifying the number of CPU cores to be used when <code>parallel = TRUE</code>. The default value is half of the number of CPU cores detected.</li>
+<li>
+<code>B</code> is the number of survival trees to grow for the random forest; the default value is <code>500</code>.</li>
+<li>
+<code>fsz</code> is a <code>function</code> or a numerical value to specify the size of subsample. The default value is half of the number of subjects, e.g., <code>round(n) / 2</code>, where <code>n</code> is the number of subjects.</li>
+</ul>
+</div>
+<div id="growing-a-random-forest" class="section level2">
+<h2 class="hasAnchor">
+<a href="#growing-a-random-forest" class="anchor"></a>Growing a Random Forest</h2>
+<p>Random forests improve the variance reduction of bagging by reducing the correlation between the trees via random selection of predictors in the tree- growing process. In the following, we grow the random forest with fully grown trees with small terminal nodes and without pruning. We first load the <code>survival</code> package to enable <code>Surv</code>. A random forest with 500 survival trees can be grown as follow:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw">library</span>(survival)
+&gt;<span class="st"> </span><span class="kw">system.time</span>(fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rocForest.html">rocForest</a></span>(<span class="kw">Surv</span>(Time, death) ~<span class="st"> </span>z1 +<span class="st"> </span>z2, <span class="dt">id =</span> id, <span class="dt">data =</span> dat, 
++<span class="st">                              </span><span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">minsp =</span> <span class="dv">3</span>, <span class="dt">minsp2 =</span> <span class="dv">1</span>, <span class="dt">parallel =</span> <span class="ot">TRUE</span>)))
+   user  system elapsed 
+  <span class="fl">0.088</span>   <span class="fl">0.020</span>   <span class="fl">4.533</span> </code></pre></div>
+<p>Some of the important parameters can be printed directly.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span>fit
+rocForest result
+
+Call:
+<span class="st"> </span><span class="kw"><a href="../reference/rocForest.html">rocForest</a></span>(<span class="dt">formula =</span> <span class="kw">Surv</span>(Time, death) ~<span class="st"> </span>z1 +<span class="st"> </span>z2, <span class="dt">data =</span> dat,      <span class="dt">id =</span> id, <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">minsp =</span> <span class="dv">3</span>, <span class="dt">minsp2 =</span> <span class="dv">1</span>, <span class="dt">parallel =</span> <span class="ot">TRUE</span>)) 
+
+Sample size:<span class="st">                                  </span><span class="dv">100</span> 
+Number of independent variables:<span class="st">              </span><span class="dv">2</span> 
+Number of trees:<span class="st">                              </span><span class="dv">500</span> 
+Split rule:<span class="st">                                   </span>dCON 
+Number of variables tried at each split:<span class="st">      </span><span class="dv">2</span> 
+Size of subsample:<span class="st">                            </span><span class="dv">50</span> 
+Minimum number of failure in a node:<span class="st">          </span><span class="dv">3</span> 
+Minimum number of failure in a teminal node:<span class="st">  </span><span class="dv">1</span> </code></pre></div>
+<p>The function <code>rocForest</code> returns an object of S3 class – <code>rocForest</code>. The 500 survival trees are stored in <code>fit$forest</code>. These survival trees can be printed and plotted with the generic function <code>print</code> and <code>plot</code>, respectively. For example, the first of the 500 survival trees can be printed/plotted as below.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw">print</span>(fit, <span class="dt">tree =</span> <span class="dv">1</span>)
+ ROC-guided survival forest:<span class="st"> </span>tree <span class="co"># 1 </span>
+
+ node<span class="er">)</span>, split
+   *<span class="st"> </span>denotes terminal node
+  
+Root                                   
+ ¦--<span class="dv">2</span><span class="er">)</span> z1 &lt;=<span class="st"> </span><span class="fl">0.47312</span>                   
+ ¦   ¦--<span class="dv">4</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.34409</span>               
+ ¦   ¦   ¦--<span class="dv">8</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.11828</span>           
+ ¦   ¦   ¦   ¦--<span class="dv">16</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.10753</span>      
+ ¦   ¦   ¦   ¦   ¦--<span class="dv">32</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.086022</span>*
+<span class="st"> </span>¦   ¦   ¦   ¦   °--<span class="dv">33</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.086022</span>*<span class="st"> </span>
+<span class="st"> </span>¦   ¦   ¦   °--<span class="dv">17</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.10753</span>*<span class="st">      </span>
+<span class="st"> </span>¦   ¦   °--<span class="dv">9</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.11828</span>*<span class="st">           </span>
+<span class="st"> </span>¦   °--<span class="dv">5</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.34409</span>                
+ ¦       ¦--<span class="dv">10</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.48387</span>          
+ ¦       ¦   ¦--<span class="dv">20</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.40860</span>*<span class="st">     </span>
+<span class="st"> </span>¦       ¦   °--<span class="dv">21</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.40860</span>*<span class="st">      </span>
+<span class="st"> </span>¦       °--<span class="dv">11</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.48387</span>           
+ °--<span class="dv">3</span><span class="er">)</span> z1 &gt;<span class="st"> </span><span class="fl">0.47312</span>                    
+     ¦--<span class="dv">6</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.83871</span>               
+     °--<span class="dv">7</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.83871</span>                
+         ¦--<span class="dv">14</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.88172</span>*<span class="st">         </span>
+<span class="st">         </span>°--<span class="dv">15</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.88172</span>*<span class="st">          </span>
+<span class="er">&gt;</span><span class="st"> </span><span class="kw">plot</span>(fit, <span class="dt">tree =</span> <span class="dv">1</span>)</code></pre></div>
+<p></p>
+<div id="htmlwidget-97afbc258549605e1c1b" style="width:700px;height:432.632880098888px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-97afbc258549605e1c1b">{"x":{"diagram":"digraph {\n\ngraph [rankdir = \"TB\"]\n\n\n\n  \"1\" [label = \"Root\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"2\" [label = \"2)  <= 0.4731\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"3\" [label = \"4)  <= 0.3441\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"4\" [label = \"8)  <= 0.1183\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"5\" [label = \"16)  <= 0.1075\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"6\" [label = \"32)  <= 0.08602*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"7\" [label = \"33)  > 0.08602*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"8\" [label = \"17)  > 0.1075*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"9\" [label = \"9)  > 0.1183*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"10\" [label = \"5)  > 0.3441\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"11\" [label = \"10)  <= 0.4839\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"12\" [label = \"20)  <= 0.4086*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"13\" [label = \"21)  > 0.4086*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"14\" [label = \"11)  > 0.4839\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"15\" [label = \"3)  > 0.4731\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"16\" [label = \"6)  <= 0.8387\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"17\" [label = \"7)  > 0.8387\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"18\" [label = \"14)  <= 0.8817*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"19\" [label = \"15)  > 0.8817*\", fontname = \"helvetica\", shape = \"ellipse\", fillcolor = \"#FFFFFF\", fontcolor = \"#000000\"] \n  \"1\"->\"2\" \n  \"1\"->\"15\" \n  \"2\"->\"3\" \n  \"2\"->\"10\" \n  \"15\"->\"16\" \n  \"15\"->\"17\" \n  \"3\"->\"4\" \n  \"3\"->\"9\" \n  \"10\"->\"11\" \n  \"10\"->\"14\" \n  \"17\"->\"18\" \n  \"17\"->\"19\" \n  \"4\"->\"5\" \n  \"4\"->\"8\" \n  \"11\"->\"12\" \n  \"11\"->\"13\" \n  \"5\"->\"6\" \n  \"5\"->\"7\" \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script> The other trees can be printed/plotted similarly by specifying the <code>tree</code> argument. Users are referred to the <a href="https://www.sychiou.com/rocTree/articles/rocTree-tree.html">Package vignette on fitting time-invariant survival tree</a> for different printing/plotting options.
+</div>
+<div id="prediction" class="section level2">
+<h2 class="hasAnchor">
+<a href="#prediction" class="anchor"></a>Prediction</h2>
+<p>Suppose we have a new data that is generated as below:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span>newdat &lt;-<span class="st"> </span>dplyr::<span class="kw">tibble</span>(<span class="dt">Time =</span> <span class="kw">sort</span>(<span class="kw">unique</span>(dat$Time)), 
++<span class="st">                         </span><span class="dt">z1 =</span> <span class="dv">1</span> *<span class="st"> </span>(Time &lt;<span class="st"> </span><span class="kw">median</span>(Time)), 
++<span class="st">                         </span><span class="dt">z2 =</span> <span class="kw">runif</span>(<span class="dv">1</span>))
+&gt;<span class="st"> </span>newdat
+<span class="co"># A tibble: 100 x 3</span>
+     Time    z1    z2
+    &lt;dbl&gt;<span class="st"> </span><span class="er">&lt;</span>dbl&gt;<span class="st"> </span><span class="er">&lt;</span>dbl&gt;
+<span class="st"> </span><span class="dv">1</span> <span class="fl">0.0168</span>     <span class="dv">1</span> <span class="fl">0.590</span>
+ <span class="dv">2</span> <span class="fl">0.0315</span>     <span class="dv">1</span> <span class="fl">0.590</span>
+ <span class="dv">3</span> <span class="fl">0.0417</span>     <span class="dv">1</span> <span class="fl">0.590</span>
+ <span class="dv">4</span> <span class="fl">0.0606</span>     <span class="dv">1</span> <span class="fl">0.590</span>
+ <span class="dv">5</span> <span class="fl">0.0711</span>     <span class="dv">1</span> <span class="fl">0.590</span>
+ <span class="dv">6</span> <span class="fl">0.0803</span>     <span class="dv">1</span> <span class="fl">0.590</span>
+ <span class="dv">7</span> <span class="fl">0.0872</span>     <span class="dv">1</span> <span class="fl">0.590</span>
+ <span class="dv">8</span> <span class="fl">0.0901</span>     <span class="dv">1</span> <span class="fl">0.590</span>
+ <span class="dv">9</span> <span class="fl">0.102</span>      <span class="dv">1</span> <span class="fl">0.590</span>
+<span class="dv">10</span> <span class="fl">0.105</span>      <span class="dv">1</span> <span class="fl">0.590</span>
+<span class="co"># ... with 90 more rows</span></code></pre></div>
+<p>The predicted survival curve can be plotted with the following codes.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span>pred &lt;-<span class="st"> </span><span class="kw">predict</span>(fit, newdat)
+&gt;<span class="st"> </span>pred
+ Fitted survival probabilities for subject <span class="co"># 1 :</span>
+        Time      Surv
+<span class="dv">1</span> <span class="fl">0.01676500</span> <span class="fl">1.0000000</span>
+<span class="dv">2</span> <span class="fl">0.03145121</span> <span class="fl">1.0000000</span>
+<span class="dv">3</span> <span class="fl">0.04165134</span> <span class="fl">0.9993752</span>
+<span class="dv">4</span> <span class="fl">0.06056327</span> <span class="fl">0.9993752</span>
+<span class="dv">5</span> <span class="fl">0.07110612</span> <span class="fl">0.9993752</span>
+&gt;<span class="st"> </span><span class="kw">plot</span>(pred)</code></pre></div>
+<p><img src="rocTree-forest_files/figure-html/pred-1.png" width="700"></p>
 <div id="refs" class="references">
 
 </div>
@@ -133,6 +265,9 @@ function (formula, data, id, subset, <span class="dt">splitBy =</span> <span cla
       <ul class="nav nav-pills nav-stacked">
 <li><a href="#simulated-data">Simulated data</a></li>
       <li><a href="#the-rocforest-function">The <code>rocForest</code> function</a></li>
+      <li><a href="#the-control-options">The <code>control</code> options</a></li>
+      <li><a href="#growing-a-random-forest">Growing a Random Forest</a></li>
+      <li><a href="#prediction">Prediction</a></li>
       </ul>
 </div>
       </div>

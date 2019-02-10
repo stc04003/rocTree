@@ -1,4 +1,5 @@
 #' Class definition
+#'
 #' @importFrom methods getClass
 #' @noRd 
 setClass("splitClass",
@@ -18,10 +19,6 @@ setClass("dCON", contains = "splitClass")
 setGeneric("grow", function(Y, E, X.list, parm) standardGeneric("grow"))
 setMethod("grow", signature(parm = "CON"), growSeq)
 setMethod("grow", signature(parm = "dCON"), growRP)
-
-## setGeneric("prune", function(Y1, E1, X1.list, Y2, E2, X2.list, X12.list, beta.seq, parm) standardGeneric("prune"))
-## setMethod("prune", signature(parm = "CON"), pruneSeq)
-## setMethod("prune", signature(parm = "dCON"), pruneRP)
 
 #' ROC-guided Regression Trees
 #'
@@ -166,7 +163,8 @@ rocTree <- function(formula, data, id, subset, splitBy = c("dCON", "CON"), contr
     return(out)
 }
 
-#'
+#' rocTree controls
+#' 
 #' @param fsz forest size; S in the codes.
 #' @noRd
 rocTree.control <- function(l) {

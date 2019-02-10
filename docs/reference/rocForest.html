@@ -126,7 +126,7 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>rocForest</span>(<span class='no'>formula</span>, <span class='no'>data</span>, <span class='no'>id</span>, <span class='no'>subset</span>, <span class='kw'>splitBy</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"CON"</span>, <span class='st'>"dCON"</span>),
+    <pre class="usage"><span class='fu'>rocForest</span>(<span class='no'>formula</span>, <span class='no'>data</span>, <span class='no'>id</span>, <span class='no'>subset</span>, <span class='kw'>splitBy</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"dCON"</span>, <span class='st'>"CON"</span>),
   <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>())</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -157,7 +157,9 @@ the fitting process.</p></td>
     </tr>
     <tr>
       <th>splitBy</th>
-      <td><p>a character string specifying the splitting algorithm. See *Details*.</p></td>
+      <td><p>a character string specifying the splitting algorithm. The available options are 'CON' and 'dCON'
+corresponding to the splitting algorithm based on the total concordance measure or the difference
+in concordance measure, respectively. The default value is 'dCON'.</p></td>
     </tr>
     <tr>
       <th>control</th>
@@ -168,8 +170,25 @@ features of control parameters.</p></td>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An object of S3 class "<code>rocForest</code>" representing the fit,
-with the following components:</p>
+    <p>An object of S3 class "<code>rocForest</code>" representing the fit.</p>
+    
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>The argument "control" defaults to a list with the following values:</p><dl class='dl-horizontal'>
+  <dt><code>tau</code></dt><dd><p>maximum follow-up time; default value is the 90th percentile of the unique observed survival times.</p></dd>
+  <dt><code>M</code></dt><dd><p>maximum node number allowed to be in the tree; the default value is 1000.</p></dd>
+  <dt><code>hN</code></dt><dd><p>smoothing parameter; the default value is "tau / 20".</p></dd>
+  <dt><code>minsp</code></dt><dd><p>the minimum number of failure required in a node after a split; the default value is 20.</p></dd>
+  <dt><code>minsp2</code></dt><dd><p>the minimum number of failure required in a terminal node after a split; the default value is 5.</p></dd>
+  <dt><code>disc</code></dt><dd><p>a logical vector specifying whether the input covariate are discrete (<code>disc</code> = 1).
+The length of "disc" should be the same as the number of covariates.</p></dd>
+  <dt><code>parallel</code></dt><dd><p>a logical vector specifying whether parallel computing will be applied to grow the random forest; the default value is FALSE.</p></dd>
+  <dt><code>parCluster</code></dt><dd><p>an integer value specifying the number of CPU cores to be used when 
+<code>parallel</code> = TRUE. The default value is half of the number of CPU cores detected.</p></dd>
+  <dt><code>B</code></dt><dd><p>is the number of survival trees to grow for the random forest; the default value is 500.</p></dd>
+  <dt><code>fsz</code></dt><dd><p>is a function or a numerical value to specify the size of subsample.
+The default value is half of the number of subjects, e.g., round(n) / 2, where n is the number of subjects.</p></dd>
+</dl>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -186,8 +205,9 @@ with the following components:</p>
 #&gt; Sample size:                                  100 
 #&gt; Number of independent variables:              2 
 #&gt; Number of trees:                              50 
-#&gt; Split rule:                                   CON 
+#&gt; Split rule:                                   dCON 
 #&gt; Number of variables tried at each split:      2 
+#&gt; Size of subsample:                            50 
 #&gt; Minimum number of failure in a node:          3 
 #&gt; Minimum number of failure in a teminal node:  1 </div><div class='input'>
 <span class='co'>## Print individual trees</span>
@@ -210,39 +230,43 @@ with the following components:</p>
 #&gt;      ¦--6) z2 &lt;= 0.46154          
 #&gt;      ¦   ¦--12) z2 &lt;= 0.19780     
 #&gt;      ¦   °--13) z2 &gt; 0.19780      
-#&gt;      ¦       ¦--26) z2 &lt;= 0.25275*
-#&gt;      ¦       °--27) z2 &gt; 0.25275* 
+#&gt;      ¦       ¦--26) z2 &lt;= 0.31868*
+#&gt;      ¦       °--27) z2 &gt; 0.31868* 
 #&gt;      °--7) z2 &gt; 0.46154           
-#&gt;          ¦--14) z2 &lt;= 0.97802     
-#&gt;          ¦   ¦--28) z1 &lt;= 0.74725*
-#&gt;          ¦   °--29) z1 &gt; 0.74725* 
-#&gt;          °--15) z2 &gt; 0.97802*     
+#&gt;          ¦--14) z1 &lt;= 0.75824     
+#&gt;          ¦   ¦--28) z2 &lt;= 0.83516*
+#&gt;          ¦   °--29) z2 &gt; 0.83516* 
+#&gt;          °--15) z1 &gt; 0.75824      
+#&gt;              ¦--30) z1 &lt;= 0.94505*
+#&gt;              °--31) z1 &gt; 0.94505* 
 #&gt; </div><div class='input'><span class='fu'>print</span>(<span class='no'>fit</span>, <span class='fl'>2</span>)</div><div class='output co'>#&gt;  ROC-guided survival forest: tree # 2 
 #&gt; 
 #&gt;  node), split
 #&gt;    * denotes terminal node
 #&gt;   
-#&gt; Root                              
-#&gt;  ¦--2) z1 &lt;= 0.33000              
-#&gt;  ¦   ¦--4) z1 &lt;= 0.11000          
-#&gt;  ¦   ¦   ¦--8) z1 &lt;= 0.090000     
-#&gt;  ¦   ¦   °--9) z1 &gt; 0.090000*     
-#&gt;  ¦   °--5) z1 &gt; 0.11000           
-#&gt;  ¦       ¦--10) z1 &lt;= 0.18000*    
-#&gt;  ¦       °--11) z1 &gt; 0.18000      
-#&gt;  °--3) z1 &gt; 0.33000               
-#&gt;      ¦--6) z1 &lt;= 0.83000          
-#&gt;      ¦   ¦--12) z1 &lt;= 0.56000     
-#&gt;      ¦   °--13) z1 &gt; 0.56000      
-#&gt;      ¦       ¦--26) z2 &lt;= 0.59000*
-#&gt;      ¦       °--27) z2 &gt; 0.59000  
-#&gt;      °--7) z1 &gt; 0.83000           
-#&gt;          ¦--14) z2 &lt;= 0.31000     
-#&gt;          ¦   ¦--28) z1 &lt;= 0.98000*
-#&gt;          ¦   °--29) z1 &gt; 0.98000* 
-#&gt;          °--15) z2 &gt; 0.31000      
-#&gt;              ¦--30) z2 &lt;= 0.94000*
-#&gt;              °--31) z2 &gt; 0.94000* 
+#&gt; Root                                  
+#&gt;  ¦--2) z1 &lt;= 0.47000                  
+#&gt;  ¦   ¦--4) z2 &lt;= 0.42000              
+#&gt;  ¦   ¦   ¦--8) z1 &lt;= 0.19000*         
+#&gt;  ¦   ¦   °--9) z1 &gt; 0.19000*          
+#&gt;  ¦   °--5) z2 &gt; 0.42000               
+#&gt;  ¦       ¦--10) z2 &lt;= 0.78000         
+#&gt;  ¦       ¦   ¦--20) z2 &lt;= 0.71000     
+#&gt;  ¦       ¦   ¦   ¦--40) z2 &lt;= 0.43000*
+#&gt;  ¦       ¦   ¦   °--41) z2 &gt; 0.43000  
+#&gt;  ¦       ¦   °--21) z2 &gt; 0.71000*     
+#&gt;  ¦       °--11) z2 &gt; 0.78000          
+#&gt;  ¦           ¦--22) z1 &lt;= 0.16000*    
+#&gt;  ¦           °--23) z1 &gt; 0.16000      
+#&gt;  °--3) z1 &gt; 0.47000                   
+#&gt;      ¦--6) z1 &lt;= 0.83000              
+#&gt;      ¦   ¦--12) z2 &lt;= 0.62000*        
+#&gt;      ¦   °--13) z2 &gt; 0.62000*         
+#&gt;      °--7) z1 &gt; 0.83000               
+#&gt;          ¦--14) z2 &lt;= 0.99000         
+#&gt;          ¦   ¦--28) z1 &lt;= 0.85000*    
+#&gt;          ¦   °--29) z1 &gt; 0.85000      
+#&gt;          °--15) z2 &gt; 0.99000*         
 #&gt; </div><div class='input'>
 </div></pre>
   </div>
@@ -252,6 +276,8 @@ with the following components:</p>
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
+
+      <li><a href="#details">Details</a></li>
       
       <li><a href="#examples">Examples</a></li>
     </ul>

@@ -68,7 +68,7 @@ We first load the `survival` package to enable `Surv`.
 The fully grown (unpruned) time-invariant survival tree can be constructed as follow:
 ```{R tree}
 library(survival)
-fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat)
+system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat))
 ```
 The function `rocTree` returns an object of S3 class -- `rocTree` with the following major components:
 
@@ -118,8 +118,8 @@ Setting `prune = TRUE` in the `control` list will prune the survival tree. In th
 to choose the tuning parameter in the concordance-complexity measure:
 ```{R tree2, tidy = TRUE}
 set.seed(2019)
-fit2 <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, 
-                control = list(prune = TRUE, nfld = 5))
+system.time(fit2 <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, 
+                control = list(prune = TRUE, nfld = 5)))
 fit2
 ```
 The resulting tree is much smaller than the un-pruned tree in `fit`. 

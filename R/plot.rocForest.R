@@ -21,3 +21,13 @@ plot.rocForest <- function(x, tree = 1L, output = c("graph", "visNetwork"),
     plot.rocTree(tmp, output = output, digits = digits, control = control)
 }
 
+#' @noRd
+#' @export
+plot.predict.rocForest <- function(x, ..., control = list()) {
+    if (!is.predict.rocForest(x)) stop("Response must be a \"predict.rocForest\" object")
+    tmp <- data.frame(x = x$pred[[1]]$Time, y = x$pred[[1]]$Surv)
+    gg <- ggplot(tmp, aes(x = x, y = y)) + geom_step(lwd = I(1.1)) +
+        xlab("Time") + ylab("Survival probabilities")
+    gg
+}
+

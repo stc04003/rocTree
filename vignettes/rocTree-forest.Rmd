@@ -65,9 +65,47 @@ The argument `control` defaults to a list with the following values:
 
 ## Growing a Random Forest
 
+Random forests improve the variance reduction of bagging
+by reducing the correlation between the trees via random selection of predictors in the tree-
+growing process.
+In the following, we grow the random forest with fully grown trees with small terminal nodes and without pruning.
 We first load the `survival` package to enable `Surv`.
-The fully grown (unpruned) time-invariant survival tree can be constructed as follow:
-```{R tree}
+A random forest with 500 survival trees can be grown as follow:
+```{R tree, tidy = TRUE, cache = TRUE}
 library(survival)
-fit <- rocForest(Surv(Time, death) ~ z1 + z2, id = id, data = dat)
+system.time(fit <- rocForest(Surv(Time, death) ~ z1 + z2, id = id, data = dat, 
+                             control = list(minsp = 3, minsp2 = 1, parallel = TRUE)))
+```
+Some of the important parameters can be printed directly.
+```{R print, tidy = TRUE}
+fit
+```
+
+The function `rocForest` returns an object of S3 class -- `rocForest`. 
+The 500 survival trees are stored in `fit$forest`.
+These survival trees can be printed and plotted with the generic function `print` and `plot`, respectively.
+For example, the first of the 500 survival trees can be printed/plotted as below.
+```{R tree1}
+print(fit, tree = 1)
+plot(fit, tree = 1)
+```
+The other trees can be printed/plotted similarly by specifying the `tree` argument.
+Users are referred to the [Package vignette on fitting time-invariant survival tree](https://www.sychiou.com/rocTree/articles/rocTree-tree.html) 
+for different printing/plotting options. 
+
+
+## Prediction
+
+Suppose we have a new data that is generated as below:
+```{R newDat}
+newdat <- dplyr::tibble(Time = sort(unique(dat$Time)), 
+                        z1 = 1 * (Time < median(Time)), 
+                        z2 = runif(1))
+newdat
+```
+The predicted survival curve can be plotted with the following codes.
+```{R pred}
+pred <- predict(fit, newdat)
+pred
+plot(pred)
 ```

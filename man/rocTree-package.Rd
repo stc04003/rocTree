@@ -39,7 +39,7 @@ fit
 For more details, see the \code{rocTree} vignette by running: \code{vignette("rocTree")}
 }
 \author{
-\strong{Maintainer}: Sy Han Chiou \email{schiou@utdallas}
+\strong{Maintainer}: Sy Han Chiou \email{schiou@utdallas.edu}
 
 Authors:
 \itemize{

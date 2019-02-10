@@ -144,6 +144,6 @@ plot.predict.rocTree <- function(x, ..., control = list()) {
     if (!is.predict.rocTree(x)) stop("Response must be a \"predict.rocTree\" object")
     tmp <- data.frame(x = x$pred$Time, y = x$pred$Surv)
     gg <- ggplot(tmp, aes(x = x, y = y)) + geom_step(lwd = I(1.1)) +
-        xlab("Time") + ylab("Hazard")
+        xlab("Time") + ylab("Survival probabilities")
     gg
 }

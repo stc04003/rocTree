@@ -155,7 +155,7 @@ Then a criterion based on ROC is used in the tree-building algorithm.</p>
 <span class='fu'>library</span>(<span class='no'>survival</span>)
 <span class='fu'>data</span>(<span class='no'>simudat</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: data set ‘simudat’ not found</span></div><div class='input'><span class='fu'>system.time</span>(<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rocTree.html'>rocTree</a></span>(<span class='fu'><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>dat</span>,
 <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>CV</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>nflds</span> <span class='kw'>=</span> <span class='fl'>10</span>)))</div><div class='output co'>#&gt;    user  system elapsed 
-#&gt;   0.252   0.004   0.258 </div><div class='input'><span class='no'>fit</span></div><div class='output co'>#&gt;  ROC-guided survival tree
+#&gt;   0.160   0.000   0.161 </div><div class='input'><span class='no'>fit</span></div><div class='output co'>#&gt;  ROC-guided survival tree
 #&gt; 
 #&gt;  node), split
 #&gt;    * denotes terminal node
@@ -166,15 +166,15 @@ Then a criterion based on ROC is used in the tree-building algorithm.</p>
 #&gt;  ¦   ¦   ¦--8) z1 &lt;= 0.050000*    
 #&gt;  ¦   ¦   °--9) z1 &gt; 0.050000*     
 #&gt;  ¦   °--5) z1 &gt; 0.13000           
-#&gt;  ¦       ¦--10) z1 &lt;= 0.23000     
-#&gt;  ¦       ¦   ¦--20) z2 &lt;= 0.65000*
-#&gt;  ¦       ¦   °--21) z2 &gt; 0.65000* 
-#&gt;  ¦       °--11) z1 &gt; 0.23000*     
+#&gt;  ¦       ¦--10) z1 &lt;= 0.21000     
+#&gt;  ¦       ¦   ¦--20) z2 &lt;= 0.71000*
+#&gt;  ¦       ¦   °--21) z2 &gt; 0.71000* 
+#&gt;  ¦       °--11) z1 &gt; 0.21000*     
 #&gt;  °--3) z1 &gt; 0.32000               
-#&gt;      ¦--6) z2 &lt;= 0.89000          
+#&gt;      ¦--6) z2 &lt;= 0.84000          
 #&gt;      ¦   ¦--12) z1 &lt;= 0.66000*    
 #&gt;      ¦   °--13) z1 &gt; 0.66000*     
-#&gt;      °--7) z2 &gt; 0.89000*          
+#&gt;      °--7) z2 &gt; 0.84000*          
 #&gt; </div><div class='input'>
 </div></pre>
   </div>
@@ -193,7 +193,7 @@ Then a criterion based on ROC is used in the tree-building algorithm.</p>
 
     <h2>Author</h2>
     
-<strong>Maintainer</strong>: Sy Han Chiou <a href='mailto:schiou@utdallas'>schiou@utdallas</a>
+<strong>Maintainer</strong>: Sy Han Chiou <a href='mailto:schiou@utdallas.edu'>schiou@utdallas.edu</a>
 
 Authors:
 <ul>

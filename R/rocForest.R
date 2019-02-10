@@ -49,8 +49,7 @@
 #' print(fit, 1)
 #' print(fit, 2)
 #'
-#' @return An object of S3 class "\code{rocForest}" representing the fit,
-#' with the following components:
+#' @return An object of S3 class "\code{rocForest}" representing the fit.
 rocForest <- function(formula, data, id, subset, splitBy = c("dCON", "CON"), control = list()) {
     splitBy <- match.arg(splitBy)
     ## ctrl <- rocTree.control(control)

@@ -31,8 +31,7 @@ in concordance measure, respectively. The default value is 'dCON'.}
 features of control parameters.}
 }
 \value{
-An object of S3 class "\code{rocForest}" representing the fit,
-with the following components:
+An object of S3 class "\code{rocForest}" representing the fit.
 }
 \description{
 Fits a "\code{rocForest}" model.
