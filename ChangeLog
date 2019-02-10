@@ -1,3 +1,9 @@
+2019-02-10 Sy Han Chiou <schiou@utdallas.edu>
+	* Version 0.99-9
+	* Making package ready for CRAN
+2019-02-07 Sy Han Chiou <schiou@utdallas.edu>
+	* Version 0.99-8
+	* Modified dCON
 2018-06-26 Sy Han Chiou <schiou@utdallas.edu>
 	* Version 0.99-7
 	* Added forest
