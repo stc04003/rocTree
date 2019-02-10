@@ -31,5 +31,5 @@ The `rocTree` provides implementations to a unified framework for tree-structure
 [Online document](https://www.sychiou.com/rocTree/index.html) includes:
 
 -   Package vignette on [simulating data used in examples](https://www.sychiou.com/rocTree/articles/rocTree-sim.html).
--   Package vignette on [fitting time-invariant survival tree](https://www.sychiou.com/rocTree/articles/rocTree-tree.html).
--   Package vignette on [fitting survival forest](https://www.sychiou.com/rocTree/articles/rocTree-forest.html).
+-   Package vignette on [growing time-invariant survival tree](https://www.sychiou.com/rocTree/articles/rocTree-tree.html).
+-   Package vignette on [growing survival forest](https://www.sychiou.com/rocTree/articles/rocTree-forest.html).

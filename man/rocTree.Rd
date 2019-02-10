@@ -4,7 +4,7 @@
 \alias{rocTree}
 \title{ROC-guided Regression Trees}
 \usage{
-rocTree(formula, data, id, subset, splitBy = c("CON", "dCON"),
+rocTree(formula, data, id, subset, splitBy = c("dCON", "CON"),
   control = list())
 }
 \arguments{
@@ -23,9 +23,9 @@ all covariates are treated as a baseline covariate.}
 \item{subset}{an optional vector specifying a subset of observations to be used in
 the fitting process.}
 
-\item{splitBy}{a character string specifying the splitting algorithm. The available options are `CON` and `dCON`
+\item{splitBy}{a character string specifying the splitting algorithm. The available options are 'CON' and 'dCON'
 corresponding to the splitting algorithm based on the total concordance measure or the difference
-in concordance measure, respectively.}
+in concordance measure, respectively. The default value is 'dCON'.}
 
 \item{control}{a list of control parameters. See 'details' for important special
 features of control parameters.}

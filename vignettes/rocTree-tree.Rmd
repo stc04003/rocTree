@@ -43,7 +43,7 @@ The arguments are as follows
 * `data` is an optional data frame to interpret the variables occurring in the `formula`.
 * `id` an optional vector used to identify the longitudinal observations of subject's id. The length of `id` should be the same as the total number of observations. If `id` is missing, then each row of `data` represents a distinct observation from subjects and all covariates are treated as a baseline covariate. 
 * `subset` an optional vector specifying a subset of observations to be used in the fitting process.
-* `splitBy` a character string specifying the splitting algorithm. The available options are `CON` and `dCON` corresponding to the splitting algorithm based on the total concordance measure or the difference in concordance measure, respectively.
+* `splitBy` a character string specifying the splitting algorithm. The available options are `CON` and `dCON` corresponding to the splitting algorithm based on the total concordance measure or the difference in concordance measure, respectively. The default value is `dCON`.
 * `control` a list of control parameters. 
 
 ## The `control` options
@@ -62,7 +62,7 @@ The argument `control` defaults to a list with the following values:
 * `parallel` is a logical vector specifying whether parallel computing will be applied in cross-validation; the default value is `FALSE`. 
 * `parCluster` is an integer value specifying the number of CPU cores to be used when `prune = TRUE` and `parallel = TRUE`. The default value is half of the number of CPU cores detected. 
 
-## Fitting survival tree
+## Growing a survival tree
 
 We first load the `survival` package to enable `Surv`.
 The fully grown (unpruned) time-invariant survival tree can be constructed as follow:
@@ -90,7 +90,7 @@ The survival tree is printed in the structure similar to that in the `data.tree`
 print(fit, dt = FALSE)
 ```
 
-## Plotting survival tree
+## Plotting the survival tree
 
 The survival tree can also be plotted with the `GraphViz`/`DiagrammeR` engine via the generic function `plot`.
 ```{r plot, fig.align = "center", fig.width = 6}
@@ -111,7 +111,7 @@ plot(fit, control = list(rankdir = "LR", shape = "rect"))
 plot(fit, control = list(shape = "egg", nodeOnly = TRUE))
 ```
 
-## Pruning survival tree
+## Pruning the survival tree
 
 Pruning reduces the complexity of the final classifier, and hence improves predictive accuracy by the reduction of overfitting.
 Setting `prune = TRUE` in the `control` list will prune the survival tree. In the following example, we used five-fold cross-validation 

@@ -250,7 +250,37 @@ Median survival time: 0.3213932</code></pre>
 function (formula, data, id, subset, splitBy = c(&quot;CON&quot;, &quot;dCON&quot;), 
     control = list()) 
 NULL</code></pre>
-<p>The arguments are as follows</p>
+<p>The arguments are as follows:</p>
+<ul>
+<li><code>formula</code> is a formula object, with the response on the left of a <code>~</code> operator, and the predictors on the right. The response must be a survival object returned by the function <code>Surv</code> from the <code>survival</code> package.</li>
+<li><code>data</code> is an optional data frame to interpret the variables occurring in the <code>formula</code>.</li>
+<li><code>id</code> an optional vector used to identify the longitudinal observations of subject’s id. The length of <code>id</code> should be the same as the total number of observations. If <code>id</code> is missing, then each row of <code>data</code> represents a distinct observation from subjects and all covariates are treated as a baseline covariate.</li>
+<li><code>subset</code> an optional vector specifying a subset of observations to be used in the fitting process.</li>
+<li><code>splitBy</code> a character string specifying the splitting algorithm. The available options are <code>CON</code> and <code>dCON</code> corresponding to the splitting algorithm based on the total concordance measure or the difference in concordance measure, respectively. The default value is <code>dCON</code>.</li>
+<li><code>control</code> a list of control parameters.</li>
+</ul>
+</div>
+<div id="the-control-options" class="section level2">
+<h2>The <code>control</code> options</h2>
+<p>Some of the options in <code>control</code> are shared with that for <code>rocTree</code>. The argument <code>control</code> defaults to a list with the following values:</p>
+<ul>
+<li><code>tau</code> is the maximum follow-up time; default value is the 90th percentile of the unique observed survival times.</li>
+<li><code>M</code> is the maximum node number allowed to be in the tree; the default value is <code>1000</code>.</li>
+<li><code>hN</code> is the smoothing parameter used in the Kernel; the default value is <code>tau / 20</code>.</li>
+<li><code>minsp</code> is the minimum number of failure required in a node after a split; the default value is <code>20</code>.</li>
+<li><code>minsp2</code> is the minimum number of failure required in a terminal node after a split; the default value is <code>5</code>.</li>
+<li><code>disc</code> is a logical vector specifying whether the covariates in <code>formula</code> are discrete (<code>1</code>). The length of <code>disc</code> should be the same as the number of covariates in <code>formula</code>.</li>
+<li><code>parallel</code> is a logical vector specifying whether parallel computing will be applied to grow the random forest; the default value is <code>FALSE</code>.</li>
+<li><code>parCluster</code> is an integer value specifying the number of CPU cores to be used when <code>parallel = TRUE</code>. The default value is half of the number of CPU cores detected.</li>
+<li><code>B</code> is the number of survival trees to grow for the random forest; the default value is <code>500</code>.</li>
+<li><code>fsz</code> is a <code>function</code> or a numerical value to specify the size of subsample. The default value is half of the number of subjects, e.g., <code>round(n) / 2</code>, where <code>n</code> is the number of subjects.</li>
+</ul>
+</div>
+<div id="fitting-survival-tree" class="section level2">
+<h2>Fitting survival tree</h2>
+<p>We first load the <code>survival</code> package to enable <code>Surv</code>. The fully grown (unpruned) time-invariant survival tree can be constructed as follow:</p>
+<pre class="r"><code>&gt; library(survival)
+&gt; fit &lt;- rocForest(Surv(Time, death) ~ z1 + z2, id = id, data = dat)</code></pre>
 </div>
 
 

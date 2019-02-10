@@ -58,9 +58,9 @@ setMethod("grow", signature(parm = "dCON"), growRP)
 #' all covariates are treated as a baseline covariate. 
 #' @param subset an optional vector specifying a subset of observations to be used in
 #' the fitting process.
-#' @param splitBy a character string specifying the splitting algorithm. The available options are `CON` and `dCON`
+#' @param splitBy a character string specifying the splitting algorithm. The available options are 'CON' and 'dCON'
 #' corresponding to the splitting algorithm based on the total concordance measure or the difference
-#' in concordance measure, respectively. 
+#' in concordance measure, respectively. The default value is 'dCON'.
 #' @param control a list of control parameters. See 'details' for important special
 #' features of control parameters.
 #' @export
@@ -81,7 +81,7 @@ setMethod("grow", signature(parm = "dCON"), growRP)
 #' fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat,
 #'        control = list(prune = TRUE, nflds = 5))
 #' fit
-rocTree <- function(formula, data, id, subset, splitBy = c("CON", "dCON"), control = list()) {
+rocTree <- function(formula, data, id, subset, splitBy = c("dCON", "CON"), control = list()) {
     splitBy <- match.arg(splitBy)
     parm.control <- control[names(control) %in% names(attr(getClass(splitBy), "slots"))]
     parm <- do.call("new", c(list(Class = splitBy), parm.control))
@@ -167,7 +167,7 @@ rocTree <- function(formula, data, id, subset, splitBy = c("CON", "dCON"), contr
 }
 
 #'
-#' @param fsz forest size; S in the codes; removing this 
+#' @param fsz forest size; S in the codes.
 #' @noRd
 rocTree.control <- function(l) {
     if (missing(l)) l <- NULL

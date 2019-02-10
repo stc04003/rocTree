@@ -1,6 +1,23 @@
 #' ROC-guided Regression Forest
 #'
 #' Fits a "\code{rocForest}" model.
+#'
+#'  The argument "control" defaults to a list with the following values:
+#' \describe{
+#'   \item{\code{tau}}{maximum follow-up time; default value is the 90th percentile of the unique observed survival times.}
+#'   \item{\code{M}}{maximum node number allowed to be in the tree; the default value is 1000.}
+#'   \item{\code{hN}}{smoothing parameter; the default value is "tau / 20".}
+#'   \item{\code{minsp}}{the minimum number of failure required in a node after a split; the default value is 20.}
+#'   \item{\code{minsp2}}{the minimum number of failure required in a terminal node after a split; the default value is 5.}
+#'   \item{\code{disc}}{a logical vector specifying whether the input covariate are discrete (\code{disc} = 1).
+#' The length of "disc" should be the same as the number of covariates.}
+#'   \item{\code{parallel}}{a logical vector specifying whether parallel computing will be applied to grow the random forest; the default value is FALSE.}
+#'   \item{\code{parCluster}}{an integer value specifying the number of CPU cores to be used when 
+#' \code{parallel} = TRUE. The default value is half of the number of CPU cores detected. }
+#'   \item{\code{B}}{is the number of survival trees to grow for the random forest; the default value is 500.}
+#'   \item{\code{fsz}}{is a function or a numerical value to specify the size of subsample.
+#' The default value is half of the number of subjects, e.g., round(n) / 2, where n is the number of subjects.}
+#' }
 #' 
 #' @param formula a formula object, with the response on the left of a '~' operator,
 #' and the terms on the right. The response must be a survival object returned by the
@@ -13,7 +30,9 @@
 #' should be the same as the number of observations.
 #' @param subset an optional vector specifying a subset of observations to be used in
 #' the fitting process.
-#' @param splitBy a character string specifying the splitting algorithm. See *Details*.
+#' @param splitBy a character string specifying the splitting algorithm. The available options are 'CON' and 'dCON'
+#' corresponding to the splitting algorithm based on the total concordance measure or the difference
+#' in concordance measure, respectively. The default value is 'dCON'.
 #' @param control a list of control parameters. See 'details' for important special
 #' features of control parameters.
 #' @export
@@ -32,7 +51,7 @@
 #'
 #' @return An object of S3 class "\code{rocForest}" representing the fit,
 #' with the following components:
-rocForest <- function(formula, data, id, subset, splitBy = c("CON", "dCON"), control = list()) {
+rocForest <- function(formula, data, id, subset, splitBy = c("dCON", "CON"), control = list()) {
     splitBy <- match.arg(splitBy)
     ## ctrl <- rocTree.control(control)
     Call <- match.call()
