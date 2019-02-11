@@ -22,5 +22,5 @@ The function prints the contents of an \code{rocForest} object by default.}
 Prints a tree from an \code{rocForest} object.
 }
 \seealso{
-\code{\link{rocForest}}
+\code{\link{rocForest}}, \code{\link{print.rocTree}}
 }

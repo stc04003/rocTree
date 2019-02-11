@@ -4,21 +4,16 @@
 \alias{plotTreeHaz}
 \title{Plotting the estimated hazard function from an rocTree object}
 \usage{
-plotTreeHaz(x, control = list())
+plotTreeHaz(x, ghN = NULL)
 }
 \arguments{
 \item{x}{an object of class "rocTree", usually returned by the rocTree function.}
 
-\item{control}{A list of control parameters. See "details" for important special features of control parameters.}
+\item{ghN}{an optional smoothing parameter used in smoothing hazard functions;
+the default value is 0.2.}
 }
 \description{
 Plot the estimated hazard function from rocTree objects.
-}
-\details{
-The argument "control" defaults to a list with the following values:
-\describe{
-  \item{\code{ghN}}{smoothing parameter used in smoothing hazard functions; the default value is 0.2.}
-}
 }
 \examples{
 set.seed(1)

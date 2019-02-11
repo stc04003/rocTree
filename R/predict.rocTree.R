@@ -1,6 +1,6 @@
 #' Predicting based on a \code{rocTree} model.
 #'
-#' The function gives predicted values.
+#' The function gives predicted values with a \code{rocTree} fit.
 #'
 #' @param object is an \code{rocTree} object.
 #' @param newdata is an optional data frame in which to look for variables with which to predict.

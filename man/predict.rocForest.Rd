@@ -5,7 +5,7 @@
 \title{Predicting based on a \code{rocForest} model.}
 \usage{
 \method{predict}{rocForest}(object, newdata, type = c("survival",
-  "hazard", "cumHaz", "hazard0"), ...)
+  "hazard", "cumHaz"), ...)
 }
 \arguments{
 \item{object}{is an \code{rocForest} object.}
@@ -19,7 +19,7 @@ If the covariate observation time is not supplied, covariates will be treated as
 \item{...}{for future developments.}
 }
 \description{
-The function gives predicted values.
+The function gives predicted values with a \code{rocForest} fit.
 }
 \seealso{
 \code{\link{predict.rocTree}}

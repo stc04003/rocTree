@@ -9,7 +9,7 @@
 #' @param dt  an optional logical vector. If TRUE, tree structure based on \strong{\code{data.tree} structure} is printed.
 #' @param ... for future development.
 #'
-#' @seealso \code{\link{rocForest}}
+#' @seealso \code{\link{rocForest}}, \code{\link{print.rocTree}}
 #'
 #' @export
 print.rocForest <- function(x, tree = NULL, digits = 5, dt = TRUE, ...) {

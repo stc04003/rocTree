@@ -1,30 +1,34 @@
-#' rocTree:Receiver Operating Characteristic (ROC)-Guided Classification and Survival Tree
+#' rocTree:Receiver Operating Characteristic (ROC)-Guided Classification Survival Tree and Forest.
+#'
+#' The \code{rocTree} package uses a Receiver Operating Characteristic guided classification
+#' algorithm to grow and prune survival trees.
+#' The \code{rocTree} package also provides implementation to grow random forest.
 #' 
-#' \code{rocTree} uses a ROC-guided classification algorithm to grow and prune survival trees.
-#' Hazards at terminal notes are also computed.
 #'
 #' @aliases rocTree-package
 #' @section Introduction:
-#' Existing classification, regression, and survival trees are typically implemented via a
-#' greedy algorithm that maximizes the within node homogeneity or between node heterogeneity.
-#' Sun and Wang (2018+) re-define the ROC curves for tree classifiers using the idea of
-#' randomized test and show that the target function yields the highest ROC curve.
-#' Then a criterion based on ROC is used in the tree-building algorithm. 
+#' The \code{rocTree} package provides implementations to a unified framework for
+#' tree-structured analysis
+#' with censored survival outcomes.
+#' Different from many existing tree building algorithms,
+#' the \code{rocTree} package incorporates time-dependent covariates by constructing
+#' a time-invariant partition scheme on the survivor population.
+#' The partition-based risk prediction function is constructed using an algorithm guided by
+#' the Receiver Operating Characteristic (ROC) curve.
+#' Specifically, the generalized time-dependent ROC curves for survival trees show that the
+#' target hazard function yields the highest ROC curve.
+#' The optimality of the target hazard function motivates us to use a weighted average of the
+#' time-dependent area under the curve on a set of time points to evaluate the prediction
+#' performance of survival trees and to guide splitting and pruning.
+#' Moreover, the \code{rocTree} package also offers a novel risk prediction forest algorithm,
+#' where the ensemble is on unbiased martingale estimating equations.
 #' 
 #' @section Methods:
-#' The package contains functions to construct ROC-guided survival trees (\code{\link{rocTree}}).
-#'
-#' @examples
-#' set.seed(1)
-#' dat <- simu(100, 0, 1.3)
-#' library(survival)
-#' data(simudat)
-#' system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat,
-#' control = list(CV = TRUE, nflds = 10)))
-#' fit
+#' The package contains functions to construct ROC-guided survival trees (\code{\link{rocTree}})
+#' and random forest (\code{\link{rocForest}}).
 #' 
-#' @seealso \code{\link{rocTree}}
-#' @seealso For more details, see the \code{rocTree} vignette by running: \code{vignette("rocTree")}
+#' @seealso \code{\link{rocTree}}, \code{\link{rocForest}}
+#' @seealso For more details, see the vignettes at \link{https://www.sychiou.com/rocTree/index.html}.
 #' @docType package
 #' 
 #' @importFrom stats model.extract model.matrix model.response

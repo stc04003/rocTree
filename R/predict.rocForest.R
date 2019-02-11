@@ -1,6 +1,6 @@
 #' Predicting based on a \code{rocForest} model.
 #'
-#' The function gives predicted values.
+#' The function gives predicted values with a \code{rocForest} fit.
 #'
 #' @param object is an \code{rocForest} object.
 #' @param newdata is an optional data frame in which to look for variables with which to predict.
@@ -11,7 +11,8 @@
 #'
 #' @seealso \code{\link{predict.rocTree}}
 #' @export
-predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "cumHaz", "hazard0"), ...) {
+predict.rocForest <- function(object, newdata,
+                              type = c("survival", "hazard", "cumHaz"), ...) {
     if (!is.rocForest(object)) stop("Response must be a \"rocForest\" object")
     type <- match.arg(type)
     parm <- object$parm
@@ -75,10 +76,11 @@ predict.rocForest <- function(object, newdata, type = c("survival", "hazard", "c
             if (type == "cumHaz") {
                 pred[[i]] <- data.frame(Time = Y0, cumHaz = cumsum(rowSums(matk3 * Wi[[i]])))
             }
-            if (type == "hazard0") {
-                matk <- t(sapply(t0, function(z) object$E0 * K3(z, Y0, object$parm@ghN) / object$parm@ghN))
-                pred[[i]] <- data.frame(Time = t0, haz = colSums(t(matk) * diag(Wi[[i]])))
-            }
+            ## if (type == "hazard0") {
+            ##     matk <- t(sapply(t0, function(z) object$E0 * K3(z, Y0, object$parm@ghN) /
+            ## object$parm@ghN))
+            ##     pred[[i]] <- data.frame(Time = t0, haz = colSums(t(matk) * diag(Wi[[i]])))
+            ## }
         }
     }
     if (type == "hazard") {

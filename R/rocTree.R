@@ -197,7 +197,8 @@ rocTree.control <- function(l) {
 #' @param y is the ordered event time observed in the data.
 #' @param id subject's id
 #' 
-#' @export
+#' @noRd
+#' @details internal
 rocTree.Xlist <- function(x, disc, y, id) {
     yi <- unlist(lapply(split(y, id), max), use.names = FALSE)
     m <- unlist(lapply(split(y, id), length), use.names = FALSE)

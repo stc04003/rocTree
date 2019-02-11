@@ -96,8 +96,10 @@ The survival tree can also be plotted with the `GraphViz`/`DiagrammeR` engine vi
 ```{r plot, fig.align = "center", fig.width = 6}
 plot(fit)
 ```
-The `plot` feature also allows the following useful options adopted from the [`Graphviz`/`DiagrammeR`](http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html) environment to be passed to `option`:
+The `plot` feature also allows the following arguments adopted from the [`Graphviz`/`DiagrammeR`](http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html) environment to be passed to `option`:
 
+* `output` is a string specifying the output type. The possible values are `graph` and `visNetwork`; `graph` (the default) renders the graph using the `grViz` function, and `visNetwork` renders the graph using the `visnetwork` function.
+* `digits` the number of digits to print.
 * `rankdir` is a character string specifying the direction of the tree flow. The available options are top-to-bottom (`TB`), bottom-to-top (`BT`), left-to-right (`LR`), and right-to-left (`RL`); the default value is `TB`.
 * `shape` is a character string specifying the shape style. Some of the available options are `ellipse`, `oval`, `rectangle`, `square`, `egg`, `plaintext`, `diamond`, and `triangle`. The default value is `ellipse`.
 * `nodeOnly` is a logical value indicating whether to display only the node number; the default value is `TRUE`.
@@ -107,8 +109,9 @@ The `plot` feature also allows the following useful options adopted from the [`G
 
 The following codes illustrate some of the different options.
 ```{r plot2, fig.align = "center", fig.width = 6, fig.show="hold"}
-plot(fit, control = list(rankdir = "LR", shape = "rect"))
-plot(fit, control = list(shape = "egg", nodeOnly = TRUE))
+plot(fit, rankdir = "LR", shape = "rect")
+plot(fit, shape = "egg", nodeOnly = TRUE)
+plot(fit, output = "visNetwork", digits = 2)
 ```
 
 ## Pruning the survival tree

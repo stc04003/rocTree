@@ -5,7 +5,9 @@
 \title{Plotting an \code{rocTree} object}
 \usage{
 \method{plot}{rocTree}(x, output = c("graph", "visNetwork"),
-  digits = 4, control = list(), ...)
+  digits = 4, rankdir = c("TB", "BT", "LR", "RL"), shape = "ellipse",
+  nodeOnly = FALSE, savePlot = FALSE, file_name = "pic.pdf",
+  file_type = "pdf", ...)
 }
 \arguments{
 \item{x}{an object of class "\code{rocTree}", usually returned by the rocTree function.}
@@ -14,23 +16,24 @@
 
 \item{digits}{the number of digits to print.}
 
-\item{control}{a list of control parameters. See "details" for important features of control parameters.}
+\item{rankdir}{is a character string specifying the direction of the tree flow. The available options are top-to-bottom ("TB"), bottom-to-top ("BT"), left-to-right ("LR"),
+and right-to-left ("RL"); the default value is "TB".}
+
+\item{shape}{is a character string specifying the shape style.
+Some of the available options are "ellipse", "oval", "rectangle", "square", "egg", "plaintext", "diamond", and "triangle". The default value is "ellipse".}
+
+\item{nodeOnly}{is a logical value indicating whether to display only the node number; the default value is "TRUE".}
+
+\item{savePlot}{is a logical value indicating whether the plot will be saved (exported); the default value is "FALSE".}
+
+\item{file_name}{is a character string specifying the name of the plot when "savePlot = TRUE". The file name should include its extension. The default value is "pic.pdf"}
+
+\item{file_type}{is a character string specifying the type of file to be exported. Options for graph files are: "png", "pdf", "svg", and "ps". The default value is "pdf".}
 
 \item{...}{arguments to be passed to or from other methods.}
 }
 \description{
-Plots an \code{rocTree} object. The function uses a \code{dgr_graph} object, render the graph in the RStudio Viewer.
-}
-\details{
-The argument \code{control} consists of some options to be passed down to \code{render_graph} of the \code{DiagrammeR} package.
-The argument defaults to a list with the following values:
-\describe{
-  \item{rankdir}{a character vector specifying the drawing direction.
-The default value is \code{TB} (top-to-bottom).
-Other options include \code{BT} (bottom-to-top), \code{LR} (left-to-right), and \code{RL} (right-to-left).}
-  \item{shape}{a character vector specifying the shape of nodes. The default value is "ellipse". See the polygon-based nodes in \code{graphviz} for more options.}
-  \item{nodeOnly}{a logical vector specifying whether to display only the node number.}
-}
+Plots an \code{rocTree} object. The function returns a \code{dgr_graph} object and is rendered in the RStudio Viewer.
 }
 \examples{
 set.seed(1)
@@ -39,8 +42,8 @@ library(survival)
 system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id,
 data = dat, control = list(prune = TRUE, nflds = 10)))
 plot(fit)
-plot(fit, control = list(rankdir = "LR", nodeOnly = TRUE))
-plot(fit, output = "visNetwork", control = list(nodeOnly = TRUE, shape = "box"))
+plot(fit, rankdir = "LR", nodeOnly = TRUE)
+plot(fit, output = "visNetwork", nodeOnly = TRUE, shape = "box")
 }
 \seealso{
 See \code{\link{rocTree}} for creating \code{rocTree} objects.

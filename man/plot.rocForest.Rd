@@ -5,21 +5,29 @@
 \title{Plotting an \code{rocForest} object}
 \usage{
 \method{plot}{rocForest}(x, tree = 1L, output = c("graph",
-  "visNetwork"), digits = 4, control = list(), ...)
+  "visNetwork"), digits = 4, rankdir = c("TB", "BT", "LR", "RL"),
+  shape = "ellipse", nodeOnly = FALSE, savePlot = FALSE,
+  file_name = "pic.pdf", file_type = "pdf", ...)
 }
 \arguments{
-\item{x}{an \code{rocForest} object.}
-
-\item{tree}{an integer specifying the \eqn{n^{th}} tree in the forest to print.}
-
 \item{output}{a string specifying the output type; graph (the default) renders the graph using the \code{grViz} function, and \code{visNetwork} renders the graph using the visnetwork function.}
 
 \item{digits}{the number of digits to print.}
 
-\item{control}{a list of control parameters. See "details" for important features of control parameters.}
+\item{rankdir}{is a character string specifying the direction of the tree flow. The available options are top-to-bottom ("TB"), bottom-to-top ("BT"), left-to-right ("LR"),
+and right-to-left ("RL"); the default value is "TB".}
 
-\item{...}{arguments to be passed to or from other methods.}
+\item{shape}{is a character string specifying the shape style.
+Some of the available options are "ellipse", "oval", "rectangle", "square", "egg", "plaintext", "diamond", and "triangle". The default value is "ellipse".}
+
+\item{nodeOnly}{is a logical value indicating whether to display only the node number; the default value is "TRUE".}
+
+\item{savePlot}{is a logical value indicating whether the plot will be saved (exported); the default value is "FALSE".}
+
+\item{file_name}{is a character string specifying the name of the plot when "savePlot = TRUE". The file name should include its extension. The default value is "pic.pdf"}
+
+\item{file_type}{is a character string specifying the type of file to be exported. Options for graph files are: "png", "pdf", "svg", and "ps". The default value is "pdf".}
 }
 \description{
-Plots a tree from an \code{rocForest} object.
+Plots a tree from an \code{rocForest} object. See \code{\link{plot.rocTree}} for more details.
 }
