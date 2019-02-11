@@ -14,6 +14,7 @@ cache:
   - C:\RLibrary
 
 environment:
+  R_VERSION: stable
   USE_RTOOLS: true
   
 # Adapt as necessary starting from here
