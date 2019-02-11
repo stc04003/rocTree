@@ -37,8 +37,6 @@ and random forest (\code{\link{rocForest}}).
 
 \seealso{
 \code{\link{rocTree}}, \code{\link{rocForest}}
-
-For more details, see the vignettes at \link{https://www.sychiou.com/rocTree/index.html}.
 }
 \author{
 \strong{Maintainer}: Sy Han Chiou \email{schiou@utdallas.edu}

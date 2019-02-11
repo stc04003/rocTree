@@ -14,7 +14,8 @@
 #' @param savePlot is a logical value indicating whether the plot will be saved (exported); the default value is "FALSE".
 #' @param file_name is a character string specifying the name of the plot when "savePlot = TRUE". The file name should include its extension. The default value is "pic.pdf"
 #' @param file_type is a character string specifying the type of file to be exported. Options for graph files are: "png", "pdf", "svg", and "ps". The default value is "pdf".
-#'
+#' @param ... arguments to be passed to or from other methods.
+#' 
 #' @export
 plot.rocForest <- function(x, tree = 1L, output = c("graph", "visNetwork"),
                            digits = 4,

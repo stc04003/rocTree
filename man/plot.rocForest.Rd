@@ -31,6 +31,8 @@ Some of the available options are "ellipse", "oval", "rectangle", "square", "egg
 \item{file_name}{is a character string specifying the name of the plot when "savePlot = TRUE". The file name should include its extension. The default value is "pic.pdf"}
 
 \item{file_type}{is a character string specifying the type of file to be exported. Options for graph files are: "png", "pdf", "svg", and "ps". The default value is "pdf".}
+
+\item{...}{arguments to be passed to or from other methods.}
 }
 \description{
 Plots a tree from an \code{rocForest} object. See \code{\link{plot.rocTree}} for more details.

@@ -28,7 +28,6 @@
 #' and random forest (\code{\link{rocForest}}).
 #' 
 #' @seealso \code{\link{rocTree}}, \code{\link{rocForest}}
-#' @seealso For more details, see the vignettes at \link{https://www.sychiou.com/rocTree/index.html}.
 #' @docType package
 #' 
 #' @importFrom stats model.extract model.matrix model.response
