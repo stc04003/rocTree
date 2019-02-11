@@ -57,3 +57,7 @@ martingale estimating equations.
 * Package vignette on [simulating data used in examples](https://www.sychiou.com/rocTree/articles/rocTree-sim.html).
 * Package vignette on [growing time-invariant survival tree](https://www.sychiou.com/rocTree/articles/rocTree-tree.html).
 * Package vignette on [growing survival forest](https://www.sychiou.com/rocTree/articles/rocTree-forest.html).
+
+## Reference
+
+Yifei Sun, Sy Han Chiou, Mei-Cheng Wang. ROC-Guided Survival Trees and Forests. [arXiv:1809.05627](https://arxiv.org/abs/1809.05627).
