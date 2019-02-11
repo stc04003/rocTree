@@ -2,6 +2,8 @@
 #'
 #' Plots a tree from an \code{rocForest} object. See \code{\link{plot.rocTree}} for more details.
 #'
+#' @param x an \code{rocForest} object.
+#' @param tree an integer specifying the \eqn{n^{th}} tree in the forest to print.
 #' @param output a string specifying the output type; graph (the default) renders the graph using the \code{grViz} function, and \code{visNetwork} renders the graph using the visnetwork function.
 #' @param digits the number of digits to print.
 #' @param rankdir is a character string specifying the direction of the tree flow. The available options are top-to-bottom ("TB"), bottom-to-top ("BT"), left-to-right ("LR"),

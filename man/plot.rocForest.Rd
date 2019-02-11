@@ -10,6 +10,10 @@
   file_name = "pic.pdf", file_type = "pdf", ...)
 }
 \arguments{
+\item{x}{an \code{rocForest} object.}
+
+\item{tree}{an integer specifying the \eqn{n^{th}} tree in the forest to print.}
+
 \item{output}{a string specifying the output type; graph (the default) renders the graph using the \code{grViz} function, and \code{visNetwork} renders the graph using the visnetwork function.}
 
 \item{digits}{the number of digits to print.}
