@@ -15,7 +15,7 @@ Imports: DiagrammeR (>= 1.0.0), parallel, data.tree (>= 0.7.5), graphics, stats,
 URL: http://github.com/stc04003/rocTree
 BugReports: http://github.com/stc04003/rocTree/issues    
 NeedsCompilation: yes
-Packaged: 2019-01-31 06:09:40 UTC; schiou
+Packaged: 2019-02-10 06:09:40 UTC; schiou
 Author: Yifei Sun [aut],
   Mei-Cheng Wang [aut],
   Sy Han Chiou [aut, cre]
