@@ -40,7 +40,7 @@ The returned data.frame can be supply to \code{trueHaz} and \code{trueSurv} to g
 This function is used to generate simulated data under various settings.
 Let \eqn{Z} be a \eqn{p}-dimensional vector of possible time-dependent covariates and
 \eqn{\beta} be the vector of regression coefficient.
-The survival times (\eqn{T}) are generated from the hazard function sepecified as follow:
+The survival times (\eqn{T}) are generated from the hazard function specified as follow:
 \describe{
 \item{Scenario 1.1}{Proportional hazards model:
 \deqn{\lambda(t|Z) = \lambda_0(t) e^{-0.5 Z_1 + 0.5 Z_2 - 0.5 Z_3 ... + 0.5 Z_{10}},}}

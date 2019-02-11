@@ -56,7 +56,7 @@ The argument `control` defaults to a list with the following values:
 * `minsp` is the minimum number of failure required in a node after a split; the default value is `20`. 
 * `minsp2` is the minimum number of failure required in a terminal node after a split; the default value is `5`.
 * `disc` is a logical vector specifying whether the covariates in `formula` are discrete (`1`). The length of `disc` should be the same as the number of covariates in `formula`.
-* `prune` a logical vector specifying whether to prune the survival tree. If `TRUE`, a cross-validation procedure will be performed to determine the optimal subtree; the default value is `TRUE`.
+* `prune` a logical vector specifying whether to prune the survival tree. If `TRUE`, a cross-validation procedure will be performed to determine the optimal sub-tree; the default value is `TRUE`.
 * `nflds` is the number of folds used in the cross-validation. This argument is only needed if `prune = TRUE`. The default value is `10`.
 * `Trace` is a logical vector specifying whether to display the splitting path; the default value is `FALSE`.
 * `parallel` is a logical vector specifying whether parallel computing will be applied in cross-validation; the default value is `FALSE`. 
@@ -65,7 +65,7 @@ The argument `control` defaults to a list with the following values:
 ## Growing a survival tree
 
 We first load the `survival` package to enable `Surv`.
-The fully grown (unpruned) time-invariant survival tree can be constructed as follow:
+The fully grown (un-pruned) time-invariant survival tree can be constructed as follow:
 ```{R tree}
 library(survival)
 system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat))
@@ -76,7 +76,7 @@ The function `rocTree` returns an object of S3 class -- `rocTree` with the follo
   * `nd` node number.
   * `terminal` describe the node characteristic; `0` if a node is internal, `1` if a node is splitable, and `2` if a node is a terminal node.
   * `u` is the proportion being split in $\tau_L$.
-  * `u2` is the minimum proporiton in $\tau_L$ across time.
+  * `u2` is the minimum proportion in $\tau_L$ across time.
   * `p` indicate which covariate was split at the node. 
   * `cut` is the covariate value being split at the node.
 * `dfFinal` is a data.frame consists of unsmoothed hazard estimates at the observed survival times for the terminal nodes.

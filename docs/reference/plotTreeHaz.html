@@ -149,7 +149,7 @@ the default value is 0.2.</p></td>
 <span class='fu'>library</span>(<span class='no'>survival</span>)
 <span class='fu'>system.time</span>(<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rocTree.html'>rocTree</a></span>(<span class='fu'><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>,
 <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>dat</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>prune</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>nflds</span> <span class='kw'>=</span> <span class='fl'>10</span>)))</div><div class='output co'>#&gt;    user  system elapsed 
-#&gt;   1.368   0.004   1.371 </div><div class='input'><span class='fu'>plotTreeHaz</span>(<span class='no'>fit</span>)</div><div class='img'><img src='plotTreeHaz-1.png' alt='' width='700' height='433' /></div></pre>
+#&gt;   1.344   0.004   1.347 </div><div class='input'><span class='fu'>plotTreeHaz</span>(<span class='no'>fit</span>)</div><div class='img'><img src='plotTreeHaz-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

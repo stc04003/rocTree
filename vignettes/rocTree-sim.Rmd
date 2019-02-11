@@ -138,5 +138,5 @@ dat2 <- simu(n = 5, cen = 0.5, sce = 2.1, summary = TRUE)
 dat2
 ```
 In this scenario, the covariate information was observed at `Time = 0.00883` and `0.102` for subject \#1, who died (`death = 1`) at `Time = 0.102`.
-Similarly, the covaraite information was observed at `Time = 0.00883`, `0.102`, `0.105`, and `0.137` for subject \#2, who was censored (`death = 0`) at `Time 0.137`. 
+Similarly, the covariate information was observed at `Time = 0.00883`, `0.102`, `0.105`, and `0.137` for subject \#2, who was censored (`death = 0`) at `Time 0.137`. 
 Moreover, `z1` is a time-dependent covariate and its value changed from 1 (at `Time = 0.00883`) to 0 ( at `Time` $\ge$ `0.102`) for subject \#2.
