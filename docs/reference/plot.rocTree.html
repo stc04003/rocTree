@@ -32,7 +32,7 @@
 
 <meta property="og:title" content="Plotting an <code>rocTree</code> object — plot.rocTree" />
 
-<meta property="og:description" content="Plots an rocTree object. The function uses a dgr_graph object, render the graph in the RStudio Viewer." />
+<meta property="og:description" content="Plots an rocTree object. The function returns a dgr_graph object and is rendered in the RStudio Viewer." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -122,13 +122,15 @@
 
     <div class="ref-description">
     
-    <p>Plots an <code>rocTree</code> object. The function uses a <code>dgr_graph</code> object, render the graph in the RStudio Viewer.</p>
+    <p>Plots an <code>rocTree</code> object. The function returns a <code>dgr_graph</code> object and is rendered in the RStudio Viewer.</p>
     
     </div>
 
     <pre class="usage"><span class='co'># S3 method for rocTree</span>
 <span class='fu'>plot</span>(<span class='no'>x</span>, <span class='kw'>output</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"graph"</span>, <span class='st'>"visNetwork"</span>),
-  <span class='kw'>digits</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(), <span class='no'>...</span>)</pre>
+  <span class='kw'>digits</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>rankdir</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"TB"</span>, <span class='st'>"BT"</span>, <span class='st'>"LR"</span>, <span class='st'>"RL"</span>), <span class='kw'>shape</span> <span class='kw'>=</span> <span class='st'>"ellipse"</span>,
+  <span class='kw'>nodeOnly</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>savePlot</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>file_name</span> <span class='kw'>=</span> <span class='st'>"pic.pdf"</span>,
+  <span class='kw'>file_type</span> <span class='kw'>=</span> <span class='st'>"pdf"</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -146,25 +148,36 @@
       <td><p>the number of digits to print.</p></td>
     </tr>
     <tr>
-      <th>control</th>
-      <td><p>a list of control parameters. See "details" for important features of control parameters.</p></td>
+      <th>rankdir</th>
+      <td><p>is a character string specifying the direction of the tree flow. The available options are top-to-bottom ("TB"), bottom-to-top ("BT"), left-to-right ("LR"),
+and right-to-left ("RL"); the default value is "TB".</p></td>
+    </tr>
+    <tr>
+      <th>shape</th>
+      <td><p>is a character string specifying the shape style.
+Some of the available options are "ellipse", "oval", "rectangle", "square", "egg", "plaintext", "diamond", and "triangle". The default value is "ellipse".</p></td>
+    </tr>
+    <tr>
+      <th>nodeOnly</th>
+      <td><p>is a logical value indicating whether to display only the node number; the default value is "TRUE".</p></td>
+    </tr>
+    <tr>
+      <th>savePlot</th>
+      <td><p>is a logical value indicating whether the plot will be saved (exported); the default value is "FALSE".</p></td>
+    </tr>
+    <tr>
+      <th>file_name</th>
+      <td><p>is a character string specifying the name of the plot when "savePlot = TRUE". The file name should include its extension. The default value is "pic.pdf"</p></td>
+    </tr>
+    <tr>
+      <th>file_type</th>
+      <td><p>is a character string specifying the type of file to be exported. Options for graph files are: "png", "pdf", "svg", and "ps". The default value is "pdf".</p></td>
     </tr>
     <tr>
       <th>...</th>
       <td><p>arguments to be passed to or from other methods.</p></td>
     </tr>
     </table>
-    
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>The argument <code>control</code> consists of some options to be passed down to <code>render_graph</code> of the <code>DiagrammeR</code> package.
-The argument defaults to a list with the following values:</p><dl class='dl-horizontal'>
-  <dt>rankdir</dt><dd><p>a character vector specifying the drawing direction.
-The default value is <code>TB</code> (top-to-bottom).
-Other options include <code>BT</code> (bottom-to-top), <code>LR</code> (left-to-right), and <code>RL</code> (right-to-left).</p></dd>
-  <dt>shape</dt><dd><p>a character vector specifying the shape of nodes. The default value is "ellipse". See the polygon-based nodes in <code>graphviz</code> for more options.</p></dd>
-  <dt>nodeOnly</dt><dd><p>a logical vector specifying whether to display only the node number.</p></dd>
-</dl>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
@@ -177,17 +190,15 @@ Other options include <code>BT</code> (bottom-to-top), <code>LR</code> (left-to-
 <span class='fu'>library</span>(<span class='no'>survival</span>)
 <span class='fu'>system.time</span>(<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rocTree.html'>rocTree</a></span>(<span class='fu'><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>,
 <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>dat</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>prune</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>nflds</span> <span class='kw'>=</span> <span class='fl'>10</span>)))</div><div class='output co'>#&gt;    user  system elapsed 
-#&gt;   1.464   0.012   1.479 </div><div class='input'><span class='fu'>plot</span>(<span class='no'>fit</span>)
-<span class='fu'>plot</span>(<span class='no'>fit</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>rankdir</span> <span class='kw'>=</span> <span class='st'>"LR"</span>, <span class='kw'>nodeOnly</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>))
-<span class='fu'>plot</span>(<span class='no'>fit</span>, <span class='kw'>output</span> <span class='kw'>=</span> <span class='st'>"visNetwork"</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>nodeOnly</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>shape</span> <span class='kw'>=</span> <span class='st'>"box"</span>))</div></pre>
+#&gt;   1.496   0.016   1.513 </div><div class='input'><span class='fu'>plot</span>(<span class='no'>fit</span>)
+<span class='fu'>plot</span>(<span class='no'>fit</span>, <span class='kw'>rankdir</span> <span class='kw'>=</span> <span class='st'>"LR"</span>, <span class='kw'>nodeOnly</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+<span class='fu'>plot</span>(<span class='no'>fit</span>, <span class='kw'>output</span> <span class='kw'>=</span> <span class='st'>"visNetwork"</span>, <span class='kw'>nodeOnly</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>shape</span> <span class='kw'>=</span> <span class='st'>"box"</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#details">Details</a></li>
-
       <li><a href="#see-also">See also</a></li>
       
       <li><a href="#examples">Examples</a></li>

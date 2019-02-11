@@ -32,7 +32,7 @@
 
 <meta property="og:title" content="Plotting an <code>rocForest</code> object — plot.rocForest" />
 
-<meta property="og:description" content="Plots a tree from an rocForest object." />
+<meta property="og:description" content="Plots a tree from an rocForest object. See plot.rocTree for more details." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -122,25 +122,19 @@
 
     <div class="ref-description">
     
-    <p>Plots a tree from an <code>rocForest</code> object.</p>
+    <p>Plots a tree from an <code>rocForest</code> object. See <code><a href='plot.rocTree.html'>plot.rocTree</a></code> for more details.</p>
     
     </div>
 
     <pre class="usage"><span class='co'># S3 method for rocForest</span>
 <span class='fu'>plot</span>(<span class='no'>x</span>, <span class='kw'>tree</span> <span class='kw'>=</span> <span class='fl'>1L</span>, <span class='kw'>output</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"graph"</span>,
-  <span class='st'>"visNetwork"</span>), <span class='kw'>digits</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(), <span class='no'>...</span>)</pre>
+  <span class='st'>"visNetwork"</span>), <span class='kw'>digits</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>rankdir</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"TB"</span>, <span class='st'>"BT"</span>, <span class='st'>"LR"</span>, <span class='st'>"RL"</span>),
+  <span class='kw'>shape</span> <span class='kw'>=</span> <span class='st'>"ellipse"</span>, <span class='kw'>nodeOnly</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>savePlot</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>file_name</span> <span class='kw'>=</span> <span class='st'>"pic.pdf"</span>, <span class='kw'>file_type</span> <span class='kw'>=</span> <span class='st'>"pdf"</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>x</th>
-      <td><p>an <code>rocForest</code> object.</p></td>
-    </tr>
-    <tr>
-      <th>tree</th>
-      <td><p>an integer specifying the \(n^{th}\) tree in the forest to print.</p></td>
-    </tr>
     <tr>
       <th>output</th>
       <td><p>a string specifying the output type; graph (the default) renders the graph using the <code>grViz</code> function, and <code>visNetwork</code> renders the graph using the visnetwork function.</p></td>
@@ -150,12 +144,30 @@
       <td><p>the number of digits to print.</p></td>
     </tr>
     <tr>
-      <th>control</th>
-      <td><p>a list of control parameters. See "details" for important features of control parameters.</p></td>
+      <th>rankdir</th>
+      <td><p>is a character string specifying the direction of the tree flow. The available options are top-to-bottom ("TB"), bottom-to-top ("BT"), left-to-right ("LR"),
+and right-to-left ("RL"); the default value is "TB".</p></td>
     </tr>
     <tr>
-      <th>...</th>
-      <td><p>arguments to be passed to or from other methods.</p></td>
+      <th>shape</th>
+      <td><p>is a character string specifying the shape style.
+Some of the available options are "ellipse", "oval", "rectangle", "square", "egg", "plaintext", "diamond", and "triangle". The default value is "ellipse".</p></td>
+    </tr>
+    <tr>
+      <th>nodeOnly</th>
+      <td><p>is a logical value indicating whether to display only the node number; the default value is "TRUE".</p></td>
+    </tr>
+    <tr>
+      <th>savePlot</th>
+      <td><p>is a logical value indicating whether the plot will be saved (exported); the default value is "FALSE".</p></td>
+    </tr>
+    <tr>
+      <th>file_name</th>
+      <td><p>is a character string specifying the name of the plot when "savePlot = TRUE". The file name should include its extension. The default value is "pic.pdf"</p></td>
+    </tr>
+    <tr>
+      <th>file_type</th>
+      <td><p>is a character string specifying the type of file to be exported. Options for graph files are: "png", "pdf", "svg", and "ps". The default value is "pdf".</p></td>
     </tr>
     </table>
     

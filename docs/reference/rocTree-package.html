@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>rocTree:Receiver Operating Characteristic (ROC)-Guided Classification and Survival Tree — rocTree-package • rocTree</title>
+<title>rocTree:Receiver Operating Characteristic (ROC)-Guided Classification Survival Tree and Forest. — rocTree-package • rocTree</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -30,10 +30,11 @@
 
 
 
-<meta property="og:title" content="rocTree:Receiver Operating Characteristic (ROC)-Guided Classification and Survival Tree — rocTree-package" />
+<meta property="og:title" content="rocTree:Receiver Operating Characteristic (ROC)-Guided Classification Survival Tree and Forest. — rocTree-package" />
 
-<meta property="og:description" content="rocTree uses a ROC-guided classification algorithm to grow and prune survival trees.
-Hazards at terminal notes are also computed." />
+<meta property="og:description" content="The rocTree package uses a Receiver Operating Characteristic guided classification
+algorithm to grow and prune survival trees.
+The rocTree package also provides implementation to grow random forest." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -116,15 +117,16 @@ Hazards at terminal notes are also computed." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>rocTree:Receiver Operating Characteristic (ROC)-Guided Classification and Survival Tree</h1>
+    <h1>rocTree:Receiver Operating Characteristic (ROC)-Guided Classification Survival Tree and Forest.</h1>
     <small class="dont-index">Source: <a href='http://github.com/stc04003/rocTree/blob/master/R/rocTree_pkg.R'><code>R/rocTree_pkg.R</code></a></small>
     <div class="hidden name"><code>rocTree-package.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p><code>rocTree</code> uses a ROC-guided classification algorithm to grow and prune survival trees.
-Hazards at terminal notes are also computed.</p>
+    <p>The <code>rocTree</code> package uses a Receiver Operating Characteristic guided classification
+algorithm to grow and prune survival trees.
+The <code>rocTree</code> package also provides implementation to grow random forest.</p>
     
     </div>
 
@@ -132,51 +134,34 @@ Hazards at terminal notes are also computed.</p>
     <h2 class="hasAnchor" id="introduction"><a class="anchor" href="#introduction"></a>Introduction</h2>
 
     
-    <p>Existing classification, regression, and survival trees are typically implemented via a
-greedy algorithm that maximizes the within node homogeneity or between node heterogeneity.
-Sun and Wang (2018+) re-define the ROC curves for tree classifiers using the idea of
-randomized test and show that the target function yields the highest ROC curve.
-Then a criterion based on ROC is used in the tree-building algorithm.</p>
+    <p>The <code>rocTree</code> package provides implementations to a unified framework for
+tree-structured analysis
+with censored survival outcomes.
+Different from many existing tree building algorithms,
+the <code>rocTree</code> package incorporates time-dependent covariates by constructing
+a time-invariant partition scheme on the survivor population.
+The partition-based risk prediction function is constructed using an algorithm guided by
+the Receiver Operating Characteristic (ROC) curve.
+Specifically, the generalized time-dependent ROC curves for survival trees show that the
+target hazard function yields the highest ROC curve.
+The optimality of the target hazard function motivates us to use a weighted average of the
+time-dependent area under the curve on a set of time points to evaluate the prediction
+performance of survival trees and to guide splitting and pruning.
+Moreover, the <code>rocTree</code> package also offers a novel risk prediction forest algorithm,
+where the ensemble is on unbiased martingale estimating equations.</p>
     
     <h2 class="hasAnchor" id="methods"><a class="anchor" href="#methods"></a>Methods</h2>
 
     
-    <p>The package contains functions to construct ROC-guided survival trees (<code><a href='rocTree.html'>rocTree</a></code>).</p>
+    <p>The package contains functions to construct ROC-guided survival trees (<code><a href='rocTree.html'>rocTree</a></code>)
+and random forest (<code><a href='rocForest.html'>rocForest</a></code>).</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='rocTree.html'>rocTree</a></code></p>
-<p>For more details, see the <code>rocTree</code> vignette by running: <code>vignette("rocTree")</code></p></div>
+    <div class='dont-index'><p><code><a href='rocTree.html'>rocTree</a></code>, <code><a href='rocForest.html'>rocForest</a></code></p>
+<p>For more details, see the vignettes at https://www.sychiou.com/rocTree/index.html.</p></div>
     
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>set.seed</span>(<span class='fl'>1</span>)
-<span class='no'>dat</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='simu.html'>simu</a></span>(<span class='fl'>100</span>, <span class='fl'>0</span>, <span class='fl'>1.3</span>)
-<span class='fu'>library</span>(<span class='no'>survival</span>)
-<span class='fu'>data</span>(<span class='no'>simudat</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: data set ‘simudat’ not found</span></div><div class='input'><span class='fu'>system.time</span>(<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rocTree.html'>rocTree</a></span>(<span class='fu'><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>dat</span>,
-<span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>CV</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>nflds</span> <span class='kw'>=</span> <span class='fl'>10</span>)))</div><div class='output co'>#&gt;    user  system elapsed 
-#&gt;   0.160   0.000   0.161 </div><div class='input'><span class='no'>fit</span></div><div class='output co'>#&gt;  ROC-guided survival tree
-#&gt; 
-#&gt;  node), split
-#&gt;    * denotes terminal node
-#&gt;   
-#&gt; Root                              
-#&gt;  ¦--2) z1 &lt;= 0.32000              
-#&gt;  ¦   ¦--4) z1 &lt;= 0.13000          
-#&gt;  ¦   ¦   ¦--8) z1 &lt;= 0.050000*    
-#&gt;  ¦   ¦   °--9) z1 &gt; 0.050000*     
-#&gt;  ¦   °--5) z1 &gt; 0.13000           
-#&gt;  ¦       ¦--10) z1 &lt;= 0.21000     
-#&gt;  ¦       ¦   ¦--20) z2 &lt;= 0.71000*
-#&gt;  ¦       ¦   °--21) z2 &gt; 0.71000* 
-#&gt;  ¦       °--11) z1 &gt; 0.21000*     
-#&gt;  °--3) z1 &gt; 0.32000               
-#&gt;      ¦--6) z2 &lt;= 0.84000          
-#&gt;      ¦   ¦--12) z1 &lt;= 0.66000*    
-#&gt;      ¦   °--13) z1 &gt; 0.66000*     
-#&gt;      °--7) z2 &gt; 0.84000*          
-#&gt; </div><div class='input'>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -187,9 +172,7 @@ Then a criterion based on ROC is used in the tree-building algorithm.</p>
       <li><a href="#methods">Methods</a></li>
 
       <li><a href="#see-also">See also</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
+          </ul>
 
     <h2>Author</h2>
     

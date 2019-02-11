@@ -126,7 +126,7 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>plotTreeHaz</span>(<span class='no'>x</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>())</pre>
+    <pre class="usage"><span class='fu'>plotTreeHaz</span>(<span class='no'>x</span>, <span class='kw'>ghN</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -136,16 +136,11 @@
       <td><p>an object of class "rocTree", usually returned by the rocTree function.</p></td>
     </tr>
     <tr>
-      <th>control</th>
-      <td><p>A list of control parameters. See "details" for important special features of control parameters.</p></td>
+      <th>ghN</th>
+      <td><p>an optional smoothing parameter used in smoothing hazard functions;
+the default value is 0.2.</p></td>
     </tr>
     </table>
-    
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>The argument "control" defaults to a list with the following values:</p><dl class='dl-horizontal'>
-  <dt><code>ghN</code></dt><dd><p>smoothing parameter used in smoothing hazard functions; the default value is 0.2.</p></dd>
-</dl>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -154,15 +149,13 @@
 <span class='fu'>library</span>(<span class='no'>survival</span>)
 <span class='fu'>system.time</span>(<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rocTree.html'>rocTree</a></span>(<span class='fu'><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>,
 <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>dat</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>prune</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>nflds</span> <span class='kw'>=</span> <span class='fl'>10</span>)))</div><div class='output co'>#&gt;    user  system elapsed 
-#&gt;   1.320   0.008   1.331 </div><div class='input'><span class='fu'>plotTreeHaz</span>(<span class='no'>fit</span>)</div><div class='img'><img src='plotTreeHaz-1.png' alt='' width='700' height='433' /></div></pre>
+#&gt;   1.368   0.004   1.371 </div><div class='input'><span class='fu'>plotTreeHaz</span>(<span class='no'>fit</span>)</div><div class='img'><img src='plotTreeHaz-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#details">Details</a></li>
-      
+            
       <li><a href="#examples">Examples</a></li>
     </ul>
 
