@@ -4,6 +4,8 @@ language: R
 sudo: false
 cache: packages
 r:
-  - oldrel
   - release
   - devel
+repos:
+  CRAN: https://cloud.r-project.org
+  ropensci: http://packages.ropensci.org
