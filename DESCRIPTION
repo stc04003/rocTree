@@ -1,11 +1,11 @@
 Package: rocTree
 Title: Receiver Operating Characteristic (ROC)-Guided Classification
         and Survival Tree
-Version: 0.99.9
+Version: 1.0.0
 Authors@R: c(person("Yifei", "Sun", email = "ys3072@cumc.columbia.edu", role = "aut"),
 	   person("Mei-Cheng", "Wang", email = "mcwang@jhu.edu", role = "aut"),
 	   person("Sy Han", "Chiou", email = "schiou@utdallas.edu", role = c("aut", "cre")))
-Description: Methods for ROC-guided classification and survival tree. The algorithms for growing and pruning trees are guided by criteria based on the ROC curve.
+Description: This package provides algorithms for growing and pruning trees are guided by criteria based on the ROC curve. A detailed description of the implemented methods can be found in Sun et al. (2019) <arXiv:1809.05627>.
 Depends: R (>= 3.4.0)
 License: GPL (>= 3)
 Encoding: UTF-8
