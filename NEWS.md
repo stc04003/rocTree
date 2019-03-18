@@ -1,3 +1,7 @@
+2019-03-18 Sy Han Chiou <schiou@utdallas.edu>
+	* Version 1.0.0
+	* Update DESCRIPTION as suggested
+	* Making package ready for CRAN
 2019-02-10 Sy Han Chiou <schiou@utdallas.edu>
 	* Version 0.99-9
 	* Making package ready for CRAN
@@ -16,7 +20,7 @@
 2018-05-08 Sy Han Chiou <schiou@utdallas.edu>
 	* Version 0.99-5
 	* Modified the print funciton; tree now print with data.tree package, but the old way can still be called.
-	* Added the plot function (from DiagrammeR); tree can be ploted in seveal ways.
+	* Added the plot function (from DiagrammeR); tree can be plotted in seveal ways.
 	* Added plot saving feature.
 2018-05-03 Sy Han Chiou <schiou@utdallas.edu>
 	* Version 0.99-4
