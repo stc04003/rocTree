@@ -5,7 +5,7 @@ Version: 1.0.0
 Authors@R: c(person("Yifei", "Sun", email = "ys3072@cumc.columbia.edu", role = "aut"),
 	   person("Mei-Cheng", "Wang", email = "mcwang@jhu.edu", role = "aut"),
 	   person("Sy Han", "Chiou", email = "schiou@utdallas.edu", role = c("aut", "cre")))
-Description: This package provides algorithms for growing and pruning trees are guided by criteria based on the ROC curve. A detailed description of the implemented methods can be found in Sun et al. (2019) <arXiv:1809.05627>.
+Description: Receiver Operating Characteristic (ROC)-guided survival trees and forests algorithms are implemented, providing a unified framework for tree-structured analysis with censored survival outcomes. A time-invariant partition scheme on the survivor population was considered to incorporate time-dependent covariates. Motivated by ideas of randomized tests, generalized time-dependent ROC curves were used to evaluate the performance of survival trees and establish the optimality of the target hazard function. The optimality of the target hazard function motivates us to use a weighted average of the time-dependent area under the curve (AUC) on a set of time points to evaluate the prediction performance of survival trees and to guide splitting and pruning. A detailed description of the implemented methods can be found in Sun et al. (2019) <arXiv:1809.05627>.
 Depends: R (>= 3.4.0)
 License: GPL (>= 3)
 Encoding: UTF-8
