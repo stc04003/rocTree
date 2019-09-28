@@ -133,7 +133,7 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
         out$Frame <- cleanTreeMat(out$treeMat, cutoff = cutoff)
     }
     out$call <- Call
-    out$data <- list(.Y = .Y, .D = .D, .X0 = .X0, .Y0 = .Y0, .D0 = .D0, .id = .id, .id2 = .id2)
+    out$data <- list(.Y = .Y, .D = .D, .X = .X0, .Y0 = .Y0, .D0 = .D0, .X0 = .mat1Z, .id = .id, .id2 = .id2)
     out$rName <- all.vars(formula)[1]
     out$vNames <- attr(mt, "term.labels")
     out$ensemble <- ensemble

@@ -7,7 +7,8 @@
 \method{plot}{rocTree}(x, output = c("graph", "visNetwork"),
   digits = 4, tree = 1L, rankdir = c("TB", "BT", "LR", "RL"),
   shape = "ellipse", nodeOnly = FALSE, savePlot = FALSE,
-  file_name = "pic.pdf", file_type = "pdf", ...)
+  file_name = "pic.pdf", file_type = "pdf", type = c("tree",
+  "survival", "hazard"), ...)
 }
 \arguments{
 \item{x}{an object of class "\code{rocTree}", usually returned by the rocTree function.}
@@ -29,6 +30,8 @@ Some of the available options are "ellipse", "oval", "rectangle", "square", "egg
 \item{file_name}{is a character string specifying the name of the plot when "savePlot = TRUE". The file name should include its extension. The default value is "pic.pdf"}
 
 \item{file_type}{is a character string specifying the type of file to be exported. Options for graph files are: "png", "pdf", "svg", and "ps". The default value is "pdf".}
+
+\item{type}{is an optional character string specifying the type of plots to produce.}
 
 \item{...}{arguments to be passed to or from other methods.}
 }

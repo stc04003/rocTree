@@ -16,3 +16,43 @@ plot(pred)
 
 pred <- predict(fit, newdat, type = "hazard")
 plot(pred)
+
+
+library(ggplot2)
+
+## survival
+tmp <- data.frame(fit$data$.Y0, fit$data$.X0)
+colnames(tmp) <- c(fit$rName, fit$vNames)
+atTerm <- lapply(split(tmp, fit$nodeLabel + 1), function(x) predict(fit, newdata = x)$pred)
+atTerm <- do.call(rbind, atTerm)
+atTerm$nd <- as.factor(rep(sort(unique(fit$nodeLabel)) + 1, table(fit$nodeLabel)))
+rownames(atTerm) <- NULL
+
+ggplot(atTerm, aes(x = Time, y = Survival, col = nd)) + geom_step(lwd = I(1.1)) +
+    xlab("Time") + ylab("Survival probabilities") + labs(col = "Node")
+
+
+## Hazard
+atTerm <- lapply(split(tmp, fit$nodeLabel + 1), function(x)
+    predict(fit, newdata = x, type = "haz", control = list(h = .4))$pred)
+atTerm <- do.call(rbind, atTerm)
+atTerm$nd <- as.factor(rep(sort(unique(fit$nodeLabel)) + 1, table(fit$nodeLabel)))
+rownames(atTerm) <- NULL
+
+ggplot(atTerm, aes(x = Time, y = hazard, col = nd)) +
+    geom_smooth(method = "loess", se = FALSE) + 
+    xlab("Time") + ylab("Hazard estimates") + labs(col = "Nodes")
+
+ggplot(atTerm, aes(x = Time, y = hazard, col = nd)) +
+    geom_step(lwd = I(1.1)) +
+    xlab("Time") + ylab("Hazard estimates") + labs(col = "Nodes")
+
+
+
+test <- function(tt = c("tree", "surv", "haz")) {
+    tt <- match.arg(tt)
+    print(tt)
+}
+
+test()
+test("h")

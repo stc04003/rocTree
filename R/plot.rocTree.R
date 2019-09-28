@@ -13,6 +13,7 @@
 #' @param savePlot is a logical value indicating whether the plot will be saved (exported); the default value is "FALSE".
 #' @param file_name is a character string specifying the name of the plot when "savePlot = TRUE". The file name should include its extension. The default value is "pic.pdf"
 #' @param file_type is a character string specifying the type of file to be exported. Options for graph files are: "png", "pdf", "svg", and "ps". The default value is "pdf".
+#' @param type is an optional character string specifying the type of plots to produce.
 #' @param ... arguments to be passed to or from other methods.
 #'
 #' @seealso See \code{\link{rocTree}} for creating \code{rocTree} objects.
@@ -27,47 +28,75 @@ plot.rocTree <- function(x, output = c("graph", "visNetwork"),
                          nodeOnly = FALSE,
                          savePlot = FALSE, 
                          file_name = "pic.pdf",
-                         file_type = "pdf", ...) {
+                         file_type = "pdf",
+                         type = c("tree", "survival", "hazard"),...) {
     if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object")
     output <- match.arg(output)
+    type <- match.arg(type)
     rankdir <- match.arg(rankdir)
-    if (x$ensemble) {
-        if (!is.wholenumber(tree)) stop("Tree number must be an integer.")
-        if (tree > length(x$trees)) stop("Tree number exceeded the number of trees in forest.")    
-        Frame <- x$Frame[[tree]]
-    } else {
-        Frame <- x$Frame
+    if (type == "survival") {
+        tmp <- data.frame(x$data$.Y0, x$data$.X0)
+        colnames(tmp) <- c(x$rName, x$vNames)
+        atTerm <- lapply(split(tmp, x$nodeLabel + 1), function(x) predict(fit, newdata = x)$pred)
+        atTerm <- do.call(rbind, atTerm)
+        atTerm$nd <- as.factor(rep(sort(unique(x$nodeLabel)) + 1, table(x$nodeLabel)))
+        rownames(atTerm) <- NULL
+        ggplot(atTerm, aes(x = Time, y = Survival, col = nd)) + geom_step(lwd = I(1.1)) +
+            xlab("Time") + ylab("Survival probabilities") + labs(col = "Node")
     }
-    ## create data.tree
-    root <- Node$new("Root", type = "root", decision = "", nd = 1)
-    for (i in 2:nrow(Frame)) {
-        if (i <= 3) parent <- "root"
-        if (i > 3) parent <- paste0("Node", Frame$nd[i] %/% 2)
-        if (Frame$is.terminal[i] == 2) {
-            type <- "terminal"
-            display <- with(Frame, paste0(nd[i], ") ", tree.split.names(nd[i], nd, p, cutVal, x$vNames, digits), "*"))
+    if (type == "hazard") {
+        tmp <- data.frame(x$data$.Y0, x$data$.X0)
+        colnames(tmp) <- c(x$rName, x$vNames)
+        atTerm <- lapply(split(tmp, x$nodeLabel + 1), function(x)
+            predict(fit, newdata = x, type = "haz", control = list(h = .4))$pred)
+        atTerm <- do.call(rbind, atTerm)
+        atTerm$nd <- as.factor(rep(sort(unique(x$nodeLabel)) + 1, table(x$nodeLabel)))
+        rownames(atTerm) <- NULL
+        ggplot(atTerm, aes(x = Time, y = hazard, col = nd)) +
+            geom_smooth(method = "loess", se = FALSE) + 
+            xlab("Time") + ylab("Hazard estimates") + labs(col = "Nodes")
+    }
+    if (type == "tree") {
+        if (x$ensemble) {
+            if (!is.wholenumber(tree)) stop("Tree number must be an integer.")
+            if (tree > length(x$trees)) stop("Tree number exceeded the number of trees in forest.")    
+            Frame <- x$Frame[[tree]]
         } else {
-            type <- "interior"
-            display <- with(Frame, paste0(nd[i], ") ", tree.split.names(nd[i], nd, p, cutVal, x$vNames, digits)))
+            Frame <- x$Frame
         }
-        eval(parse(text = paste0("Node", Frame$nd[i], "<-", parent,
-                                 "$AddChild(display, type = type, nd = Frame$nd[i])")))
-    }
-    SetGraphStyle(root, rankdir = rankdir)
-    if (nodeOnly) {
-        GetNodeLabel <- function(node) {
-            switch(node$type,
-                   root = "Root", 
-                   terminal = paste0("Node ", node$nd),
-                   interior = paste0("Node ", node$nd))
+        ## create data.tree
+        root <- Node$new("Root", type = "root", decision = "", nd = 1)
+        for (i in 2:nrow(Frame)) {
+            if (i <= 3) parent <- "root"
+            if (i > 3) parent <- paste0("Node", Frame$nd[i] %/% 2)
+            if (Frame$is.terminal[i] == 2) {
+                type <- "terminal"
+                display <- with(
+                    Frame, paste0(nd[i], ") ", tree.split.names(nd[i], nd, p, cutVal, x$vNames, digits), "*"))
+            } else {
+                type <- "interior"
+                display <- with(
+                    Frame, paste0(nd[i], ") ", tree.split.names(nd[i], nd, p, cutVal, x$vNames, digits)))
+            }
+            eval(parse(text = paste0("Node", Frame$nd[i], "<-", parent,
+                                     "$AddChild(display, type = type, nd = Frame$nd[i])")))
         }
-        SetNodeStyle(root, fontname = 'helvetica', label = GetNodeLabel, shape = shape)
-    } else {
-        SetNodeStyle(root, fontname = 'helvetica', shape = shape)
+        SetGraphStyle(root, rankdir = rankdir)
+        if (nodeOnly) {
+            GetNodeLabel <- function(node) {
+                switch(node$type,
+                       root = "Root", 
+                       terminal = paste0("Node ", node$nd),
+                       interior = paste0("Node ", node$nd))
+            }
+            SetNodeStyle(root, fontname = 'helvetica', label = GetNodeLabel, shape = shape)
+        } else {
+            SetNodeStyle(root, fontname = 'helvetica', shape = shape)
+        }
+        ## x$graph <- ToDiagrammeRGraph(x, direction = "climb", pruneFun = NULL)
+        plot.Node(root, output = output, control = list(savePlot = savePlot,
+                                                        file_name = file_name, file_type = file_type))
     }
-    ## x$graph <- ToDiagrammeRGraph(x, direction = "climb", pruneFun = NULL)
-    plot.Node(root, output = output, control = list(savePlot = savePlot,
-                                                    file_name = file_name, file_type = file_type))
 }
 
 ## ---------------------------------------------------------------------------------------
