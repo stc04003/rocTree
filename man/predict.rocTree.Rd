@@ -32,6 +32,11 @@ set.seed(1)
 dat <- simu(100, 0, 1.3)
 
 fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE)
+plot(fit)
+
+plot(fit, type = "survival")
+plot(fit, type = "haz")
+
 
 newdat <- dplyr::tibble(Time = sort(unique(dat$Time)), 
                         z1 = 1 * (Time < median(Time)), 
@@ -44,6 +49,9 @@ plot(pred)
 pred <- predict(fit, newdat, type = "hazard")
 plot(pred)
 
+
+
+###############
 
 library(ggplot2)
 
