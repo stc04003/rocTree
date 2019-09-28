@@ -55,12 +55,3 @@ ggplot(atTerm, aes(x = Time, y = hazard, col = nd)) +
     geom_step(lwd = I(1.1)) +
     xlab("Time") + ylab("Hazard estimates") + labs(col = "Nodes")
 
-
-
-test <- function(tt = c("tree", "surv", "haz")) {
-    tt <- match.arg(tt)
-    print(tt)
-}
-
-test()
-test("h")
