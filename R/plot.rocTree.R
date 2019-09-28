@@ -45,8 +45,8 @@ plot.rocTree <- function(x, output = c("graph", "visNetwork"),
             tmp <- data.frame(x$data$.Y0, x$data$.X0)
             colnames(tmp) <- c(x$rName, x$vNames)
             t0 <- tmp[,1]
-            atTerm <- lapply(split(tmp, x$nodeLabel + 1), function(x)
-                data.frame(Time = t0, Survival = predict(fit, newdata = x)$survFun(t0)))
+            atTerm <- lapply(split(tmp, x$nodeLabel + 1), function(xx)
+                data.frame(Time = t0, Survival = predict(x, newdata = xx)$survFun(t0)))
             atTerm <- do.call(rbind, atTerm)
             atTerm$nd <- as.factor(rep(sort(unique(x$nodeLabel)) + 1, each = length(t0)))
             ## atTerm$nd <- as.factor(rep(sort(unique(x$nodeLabel)) + 1, table(x$nodeLabel)))
@@ -59,8 +59,8 @@ plot.rocTree <- function(x, output = c("graph", "visNetwork"),
             tmp <- data.frame(x$data$.Y0, x$data$.X0)
             colnames(tmp) <- c(x$rName, x$vNames)
             t0 <- tmp[,1]
-            atTerm <- lapply(split(tmp, x$nodeLabel + 1), function(x)
-                data.frame(Time = t0, Survival = predict(fit, newdata = x)$hazFun(t0)))
+            atTerm <- lapply(split(tmp, x$nodeLabel + 1), function(xx)
+                data.frame(Time = t0, hazard = predict(x, newdata = xx, type = "haz")$hazFun(t0)))
             atTerm <- do.call(rbind, atTerm)
             atTerm$nd <- as.factor(rep(sort(unique(x$nodeLabel)) + 1, each = length(t0)))
             rownames(atTerm) <- NULL
