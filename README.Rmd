@@ -8,7 +8,7 @@ output: github_document
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.4.0-6666ff.svg)](https://cran.r-project.org/)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/rocTree)](https://cran.r-project.org/package=rocTree)
-[![packageversion](https://img.shields.io/badge/Package%20version-1.0.0-orange.svg?style=flat-square)](commits/master)
+[![packageversion](https://img.shields.io/badge/Package%20version-1.1.0-orange.svg?style=flat-square)](commits/master)
 [![Travis-CI Build Status](https://travis-ci.org/stc04003/rocTree.svg?branch=master)](https://travis-ci.org/stc04003/rocTree)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/stc04003/rocTree?branch=master&svg=true)](https://ci.appveyor.com/project/stc04003/rocTree)
 [![Last-changedate](https://img.shields.io/badge/last%20change-`r gsub('-', '--', Sys.Date())`-yellowgreen.svg)](/commits/master)
@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-### ROC-guided survival trees and forests
+### ROC-guided survival trees and ensembles
 ***
 
 ### Development
@@ -48,7 +48,7 @@ Specifically, the generalized time-dependent ROC curves for survival trees show 
 The optimality of the target hazard function motivates us to use a weighted
 average of the time-dependent area under the curve (AUC) on a set of time points to
 evaluate the prediction performance of survival trees and to guide splitting and pruning.
-Moreover, the `rocTree` package also offers a novel risk prediction forest algorithm, where the ensemble is on unbiased
+Moreover, the `rocTree` package also offers a novel ensemble algorithm, where the ensemble is on unbiased
 martingale estimating equations. 
 
 ### Online documentations
@@ -60,4 +60,4 @@ martingale estimating equations.
 
 ## Reference
 
-Yifei Sun, Sy Han Chiou, Mei-Cheng Wang. ROC-Guided Survival Trees and Forests. [arXiv:1809.05627](https://arxiv.org/abs/1809.05627).
+Yifei Sun, Sy Han Chiou, Mei-Cheng Wang. ROC-Guided Survival Trees and Ensembles. [arXiv:1809.05627](https://arxiv.org/abs/1809.05627).

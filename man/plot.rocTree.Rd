@@ -5,9 +5,9 @@
 \title{Plotting an \code{rocTree} object}
 \usage{
 \method{plot}{rocTree}(x, output = c("graph", "visNetwork"),
-  digits = 4, rankdir = c("TB", "BT", "LR", "RL"), shape = "ellipse",
-  nodeOnly = FALSE, savePlot = FALSE, file_name = "pic.pdf",
-  file_type = "pdf", ...)
+  digits = 4, tree = 1L, rankdir = c("TB", "BT", "LR", "RL"),
+  shape = "ellipse", nodeOnly = FALSE, savePlot = FALSE,
+  file_name = "pic.pdf", file_type = "pdf", ...)
 }
 \arguments{
 \item{x}{an object of class "\code{rocTree}", usually returned by the rocTree function.}
@@ -36,14 +36,7 @@ Some of the available options are "ellipse", "oval", "rectangle", "square", "egg
 Plots an \code{rocTree} object. The function returns a \code{dgr_graph} object and is rendered in the RStudio Viewer.
 }
 \examples{
-set.seed(1)
-dat <- simu(100, 0, 1.3)
-library(survival)
-system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id,
-data = dat, control = list(prune = TRUE, nflds = 10)))
-plot(fit)
-plot(fit, rankdir = "LR", nodeOnly = TRUE)
-plot(fit, output = "visNetwork", nodeOnly = TRUE, shape = "box")
+inst/examples/ex_rocTree_plot.R
 }
 \seealso{
 See \code{\link{rocTree}} for creating \code{rocTree} objects.

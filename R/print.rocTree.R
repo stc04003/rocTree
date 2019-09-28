@@ -4,106 +4,38 @@
 #'
 #' @param x an \code{rocTree} object.
 #' @param digits the number of digits of numbers to print.
-#' @param dt  an optional logical vector. If TRUE, tree structure based on \strong{\code{data.tree} structure} is printed.
+#' @param tree an optional integer specifying the \eqn{n^{th}} tree in the forest to print.
+#' The function prints the contents of an \code{rocForest} object by default,
+#' if a tree is not specified.
 #' @param ... for future development.
 #'
+#' @importFrom data.tree Node ToDataFrameTree 
 #' @export
-#' @examples
-#' set.seed(1)
-#' dat <- simu(100, 0, 1.3)
-#' library(survival)
-#' system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id,
-#' data = dat, control = list(prune = TRUE, nflds = 10)))
-#' fit
-#' print(fit, dt = FALSE)
-print.rocTree <- function(x, digits = 5, dt = TRUE, ...) {
+#' @examples inst/examples/ex_rocTree.R
+print.rocTree <- function(x, digits = 5, tree = NULL, ...) {
     if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object.")
     ## digits = getOption("digits")
-    Frame <- x$Frame
-    ## create data.tree
-    root <- Node$new("Root", type = "root", decision = "", nd = 1)
-    if (nrow(Frame) > 1) {
-        for (i in 2:nrow(Frame)) {
-            if (i <= 3) parent <- "root"
-            if (i > 3) parent <- paste0("Node", Frame$nd[i] %/% 2)
-            if (Frame$terminal[i] == 2) {
-                type <- "terminal"
-                display <- with(Frame, paste0(nd[i], ") ", tree.split.names(nd[i], nd, p, cut, x$vNames, digits), "*"))
-            } else {
-                type <- "interior"
-                display <- with(Frame, paste0(nd[i], ") ", tree.split.names(nd[i], nd, p, cut, x$vNames, digits)))
-            }
-            eval(parse(text = paste0("Node", Frame$nd[i], "<-", parent,
-                                     "$AddChild(display, type = type, nd = Frame$nd[i])")))
-        }
-    }
-    if (!dt) classic.rocTree(x, ...)
-    else{
-        toPrint <- ToDataFrameTree(root)[[1]]
-        cat(" ROC-guided survival tree\n")
-        if (nrow(Frame) > 1) {        
-            cat("\n")
-            cat(" node), split\n")
-            cat("   * denotes terminal node\n")
-            cat("  ", toPrint, sep = "\n")
-        } else {
-            cat(" Decision tree found no splits.")
-        }
-        cat("\n")
-    }
-}
-
-classic.rocTree <- function(x, spaces = 2L, digits = 5, top2bottom = FALSE, ...) {
-    if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object")
-    ## digits = getOption("digits")
-    ## Prepare Frame and remove nodes after considering ndFinal
-    Frame <- data.frame(x$treeMat)
-    Frame <- subset(Frame, !is.na(Frame$u))
-    Frame$terminal[Frame$nd == 1] <- 0 ## root can't be a terminal node (keep?)
-    if (!is.null(x$ndFinal)) {
-        Frame$terminal[which(Frame$nd %in% x$ndFinal)] <- 2
-        if (sum((!(Frame$nd %in% x$ndFinal) & Frame$terminal == 2)) > 0) 
-            Frame <- Frame[-which(!(Frame$nd %in% x$ndFinal) & Frame$terminal == 2),]
-        tmp <- Frame$nd[Frame$terminal == 2]
-        tmp2 <- tree.depth(tmp)
-        rm1 <- c(sapply(x$nd[which(tmp2 < max(tmp2))],
-                        function(a) unlist(sapply(1:(1 + max(tmp2)), function(b) (2^b * a):(2^b * (a + 1) - 1)))))
-        rm <- unique(c(rm1, (max(tmp) + 1):(max(Frame$nd) + 1)))
-        Frame <- Frame[Frame$nd %in% setdiff(Frame$nd, rm),]
-    }   
-    node <- Frame$nd
-    depth <- tree.depth(node)
-    if (length(node) == 1) {indent <- paste0(format(node), ")")
+    if (!x$ensemble) {
+        printTree(x$Frame, x$vNames, digits)
     } else {
-        indent <- paste(rep(" ", spaces * 32L), collapse = "")
-        indent <- substring(indent, 1L, spaces * seq(depth))
-        indent <- paste0(c("", indent[depth]), format(node), ")")
+        if (!is.null(tree)) {
+            if (!is.wholenumber(tree)) stop("Tree number must be an integer.")
+            if (tree > length(x$trees)) stop("Tree number exceeded the number of trees in forest.")
+            printTree(x$Frame[[tree]], vNames = x$vNames, digits = digits)
+        } else {
+            cat("ROC-guided ensembles\n\n")
+            cat("Call:\n", deparse(x$call), "\n\n")
+            cat("Sample size:                                       ", ncol(x$xlist[[1]]), "\n")
+            cat("Number of independent variables:                   ", length(unique(x$data$.id)),"\n")
+            cat("Number of trees:                                   ", x$control$numTree, "\n")
+            cat("Split rule:                                        ", x$splitBy, "\n")
+            cat("Number of variables tried at each split:           ", x$control$mtry, "\n")
+            ## cat("Size of subsample:                           ", x$parm@fsz, "\n")
+            cat("Number of time points to evaluate CON:             ", x$control$K, "\n")
+            cat("Min. number of baseline obs. in a splittable node: ", x$control$minNode1, "\n")
+            cat("Min. number of baseline obs. in a terminal node:   ", x$control$minSplit1, "\n")
+        }
     }
-    termNd <- rep(" ", length(depth))
-    termNd[Frame$terminal == 2] <- "*"
-    slab <- with(Frame, sapply(nd, function(z) tree.split.names(z, nd, p, cut, x$vNames, digits)))
-    toPrint <- paste(indent, slab, termNd)
-    if (!top2bottom) {
-        k1 <- max(depth)
-        k2 <- 2^ceiling(log(max(node), base = 2) + 1e-7) - 1
-        tmpM <- matrix(rep(1:k2, 2^(k1 - tree.depth(1:k2))), k1 + 1, byrow = TRUE)
-        ind <- sapply(node, function(z) which.min(z - t(tmpM) > 0))
-        rk <- ind %% 2^k1
-        rk <- ifelse(rk > 0, rk, 2^k1)
-        rk <- rank(rk, ties.method = "first")
-        toPrint <- toPrint[order(rk)]
-    }
-    cat(" ROC-guided survival tree\n")
-    cat("\n")
-    cat(" node), split\n")
-    cat("   * denotes terminal node\n")
-    cat(" ", toPrint, sep = "\n")
-    cat("\n")
-}
-
-tree.depth <- function(nodes) {
-    depth <- floor(log(nodes, base = 2) + 1e-7)
-    depth - min(depth)
 }
 
 tree.split.names <- function(nd0, nd, p, cut, xname, digits = getOption("digits")) {
@@ -116,15 +48,55 @@ tree.split.names <- function(nd0, nd, p, cut, xname, digits = getOption("digits"
     }
 }
 
+#' Function to print a tree, this is called by print.rocTree()
+#' 
+#' @param Frame is the treeMat produced by `rocTree()`
+#' @param vNames is a vector consists of variable's names entered in the formula.
+#' The length of this vector must equal to p, the total number of covariates.
+#' 
+#' @keywords internal
+#' @noRd
+printTree <- function(Frame, vNames, digits) {
+    ## create data.tree
+    root <- Node$new("Root", type = "root", decision = "", nd = 1)
+    if (nrow(Frame) > 1) {
+        for (i in 2:nrow(Frame)) {
+            if (i <= 3) parent <- "root"
+            if (i > 3) parent <- paste0("Node", Frame$nd[i] %/% 2)
+            if (Frame$is.terminal[i] > 0) {
+                type <- "terminal"
+                display <- with(Frame, paste0(nd[i], ") ", tree.split.names(nd[i], nd, p, cutVal, vNames, digits), "*"))
+            } else {
+                type <- "interior"
+                display <- with(Frame, paste0(nd[i], ") ", tree.split.names(nd[i], nd, p, cutVal, vNames, digits)))
+            }
+            eval(parse(text = paste0("Node", Frame$nd[i], "<-", parent,
+                                     "$AddChild(display, type = type, nd = Frame$nd[i])")))
+        }
+    }
+    toPrint <- ToDataFrameTree(root)[[1]]
+    cat(" ROC-guided survival tree\n")
+    if (nrow(Frame) > 1) {        
+        cat("\n")
+        cat(" node), split\n")
+        cat("   * denotes terminal node\n")
+        cat("  ", toPrint, sep = "\n")
+    } else {
+        cat(" Decision tree found no splits.")
+    }
+    cat("\n")
+}
+
+#' Print a predicted object
 #' @export
-print.predict.rocTree <- function(x, tree = 1L, ...) {
-    if (!is.wholenumber(tree)) stop("Tree number must be an integer.")
-    if (names(x$pred)[[2]] == "Surv") {
+print.predict.rocTree <- function(x, ...) {
+    if (!is.predict.rocTree(x)) stop("Response must be a 'predict.rocTree' object")
+    if (names(x$pred)[[2]] == "Survival") {
         cat(" Fitted survival probabilities:\n")
     }
-    if (names(x$pred)[[2]] == "cumHaz") {
+    if (names(x$pred)[[2]] == "hazard") {
         cat(" Fitted cumulative hazard:\n")
     }
-    print(head(x$pred, 5))
+    print(x$pred, 5)
     cat("\n")
 }

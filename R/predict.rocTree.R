@@ -11,78 +11,66 @@
 #'
 #' @return Returns a \code{data.frame} of the predicted survival probabilities or cumulative hazard. 
 #'
-#' @seealso \code{\link{predict.rocForest}}
 #' @importFrom stats model.frame
 #' @export
-predict.rocTree <- function(object, newdata, type = c("survival", "hazard"), ...) {
-    if (!is.rocTree(object)) stop("Response must be a \"rocTree\" object")
+#' @example inst/examples/ex_predict_rocTree.R
+predict.rocTree <- function(object, newdata, type = c("survival", "hazard"),
+                            control = list(), ...) {
     type <- match.arg(type)
-    parm <- object$parm
-    if (missing(newdata)) {
-        xlist <- object$xlist
-        Y <- object$Y0
-        n <- length(Y)
-    } else {
-        res <- object$terms[[2]][[2]]
-        id <- attr(object$terms, "id")
-        if (all(is.na(newdata[,names(newdata) == res]))) res <- NULL
-        if (all(is.na(newdata[,names(newdata) == id]))) id <- NULL
-        newdata <- model.frame(paste(res, "~", paste(c(object$vNames, id), collapse = "+")), newdata)
-        res <- object$terms[[2]][[2]]
-        id <- attr(object$terms, "id")
-        if (!any(res == names(newdata))) newdata$Y <- max(object$Y0)
-        else names(newdata)[which(names(newdata) == res)] <- "Y"
-        if (!any(id == names(newdata))) newdata$id <- 1  ##:nrow(newdata)
-        else names(newdata)[which(names(newdata) == id)] <- "id"
-        p <- length(object$vNames)
-        Y <- newdata$Y
-        n <- length(unique(Y))
-        newdata$yind <- findInt(Y, object$Y0)
-        newdata <- newdata[order(newdata$yind, Y),]
-        X <- cbind(yind = newdata$yind, model.frame(delete.response(object$terms), newdata))
-        xlist <- rep(list(matrix(NA, n, length(unique(newdata$id)))), p)
-        sptdat <- split(X, newdata$yind)
-        X.path <- lapply(1:length(sptdat), function(z) {
-            tmp <- sptdat[[z]]
-            ind <- tmp[1,1]
-            sapply(1:p, function(y)
-                ## object$xlist[[y]][ind, findInt.X(tmp[,y+1], object$xlist0[[y]][ind,])])
-                cbind(0, object$xlist[[y]])[ind, findInt.X(tmp[,y+1], object$xlist0[[y]][ind,])]) ## mimicking ecdf
-            })
-        X.path <- data.frame(do.call(rbind, X.path))
-        for (i in 1:p) {
-            xlist[[i]] <- do.call(cbind, lapply(split(X.path[,i], newdata$id), function(z) c(z, rep(NA, n - length(z)))))
-        }
+    if (!is.rocTree(object)) stop("Response must be a 'rocTree' object")
+    if (missing(newdata)) stop("Argument 'newdata' is missing")
+    if (!(object$rName %in% colnames(newdata)))
+        stop(paste("Object '", object$rName, "' not found.", sep = ""))
+    if (!all(object$vName %in% colnames(newdata))) {
+        missingName <- which(!(object$vName %in% colnames(newdata)))
+        if (length(missingName) == 1)
+            stop(paste("Object '", object$vName[missingName], "' not found.", sep = ""))
+        if (length(missingName) > 1)
+            stop(paste("Objects '", paste(object$vName[missingName], collapse = ", "),
+                       "' not found.", sep = ""))
+    }    
+    type <- match.arg(type)
+    control0 <- object$control
+    control0[names(control0) %in% names(control)] <- control[names(control) %in% names(control0)]
+    control <- control0
+    raw <- newdata[findInt(object$data$.Y0, unlist(newdata[object$rName])), object$vNames]
+    rownames(raw) <- NULL
+    cutoff <- (1:control$nc) / (control$nc + 1)
+    if (type %in% "survival") {
+        if (object$ensemble)
+            pred <- predict_rocForest_C(t(raw), object$data$.Y0, object$data$.D0, object,
+                                        object$data$.X0, object$disc, cutoff)
+        else
+            pred <- predict_rocTree_C(t(raw), object$data$.Y0, object$data$.D0, object,
+                                      object$data$.X0, object$disc, cutoff)
+        object$survFun <- stepfun(object$data$.Y0, c(1, pred))
+        object$pred <- data.frame(Time = unlist(newdata[,object$rName]),
+                                  Survival = object$survFun(unlist(newdata[,object$rName])))
     }
-    ndInd <- matrix(1, n, dim(xlist[[1]])[2])
-    dfPred <- ndInd - 1
-    Frame <- object$Frame
-    for (i in 1:nrow(Frame)) {
-        if (Frame$terminal[i] == 0) {
-            ind <- xlist[[Frame$p[i]]] <= Frame$cut[i]
-            ndInd[ndInd == Frame$nd[i] & ifelse(is.na(ind), FALSE, ind)] <- Frame$nd[i] * 2
-            ndInd[ndInd == Frame$nd[i] & ifelse(is.na(ind), FALSE, !ind)] <- Frame$nd[i] * 2 + 1
-        }
+    if (type %in% "hazard") {
+        ## t0 <- seq(min(object$data$.Y0), max(object$data$.Y0), length.out = control$K)
+        ## t0 <- seq(quantile(object$data$.Y0, .05), quantile(object$data$.Y0, .95),
+        ##           length.out = control$K)
+        t0 <- unlist(newdata[,object$rName])
+        knots <- findInt(t0, object$data$.Y0)
+        ## .mat1f2 <- sapply(object$data$.Y0[knots], K2, vec = object$data$.Y0, h = control$h) /
+        .mat1f2 <- sapply(t0, K2, vec = object$data$.Y0, h = control$h) / control$h
+        .mat1f2 <- .mat1f2[object$data$.D0 == 1,]
+        if (object$ensemble)
+            pred <- predict_rocForestHZ_C(t(raw[knots,]), t0, 
+                                          object$data$.Y0, object$data$.D0, .mat1f2,
+                                          control$h, object, object$data$.X0,
+                                          object$disc, cutoff)
+        else
+            pred <- predict_rocTreeHZ_C(t(raw[knots,]), t0, 
+                                          object$data$.Y0, object$data$.D0, .mat1f2,
+                                          control$h, object, object$data$.X0,
+                                          object$disc, cutoff)
+        object$hazFun <- stepfun(t0, c(1, pred))
+        object$pred <- data.frame(Time = t0, hazard = object$hazFun(t0))
     }
-    ndInd[is.na(xlist[[1]])] <- NA
-    for (i in 1:n) {
-        for (k in 1:length(object$ndFinal)) {
-            dfPred[i, ndInd[i,] == object$ndFinal[k]] <- object$dfFinal[i, k]
-        }
-    }
-    dfPred[is.na(xlist[[1]])] <- NA
-    if (type == "survival") {
-        pred <- data.frame(Time = sort(unique(Y)),
-                           Surv = rowMeans(apply(dfPred, 2, function(x) exp(-cumsum(x))), na.rm = TRUE))
-    }
-    if (type == "cumHaz") {
-        pred <- data.frame(Time = sort(unique(Y)),
-                           cumHaz = rowMeans(apply(dfPred, 2, function(x) cumsum(x)), na.rm = TRUE))
-    }
-    for (i in 1:length(xlist)) attr(xlist[[i]], "dimnames") <- NULL
-    out <- list(pred = pred, type = type, xlist = xlist, dfPred = dfPred)
-    class(out) <- "predict.rocTree"
-    return(out)
+    class(object) <- "predict.rocTree"
+    return(object)
 }
 
 is.predict.rocTree <- function(x) inherits(x, "predict.rocTree")

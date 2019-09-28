@@ -1,241 +1,210 @@
-#' Class definition
-#'
-#' @importFrom methods getClass
-#' @noRd 
-setClass("splitClass",
-         representation(tau = "numeric", M = "numeric", hN = "numeric", h = "numeric",
-                        minsp = "numeric", minsp2 = "numeric", disc = "numeric", nflds = "numeric",
-                        prune = "logical", Trace = "logical", parallel = "logical", parCluster = "numeric",
-                        B = "numeric", ghN = "numeric", fsz = "numeric", splitBy = "character"),
-         prototype(tau = 0, M = 1000, hN = 0, h = 0, minsp = 20, minsp2 = 5, disc = -1, nflds = 10,
-                   prune = FALSE, Trace = FALSE, parallel = FALSE,
-                   parCluster = parallel::detectCores() / 2,
-                   B = 500, ghN = 0.2, fsz = 0, splitBy = "CON"),
-         contains = "VIRTUAL")
-setClass("CON", contains = "splitClass")
-setClass("dCON", contains = "splitClass")
-#' Method dispatch
-#' @noRd
-setGeneric("grow", function(Y, E, X.list, parm) standardGeneric("grow"))
-setMethod("grow", signature(parm = "CON"), growSeq)
-setMethod("grow", signature(parm = "dCON"), growRP)
-
-#' ROC-guided Regression Trees
+#' Roc-guided survival trees
 #'
 #' Fits a "\code{rocTree}" model.
 #'
 #' The argument "control" defaults to a list with the following values:
 #' \describe{
-#'   \item{\code{tau}}{maximum follow-up time; default value is the 90th percentile of the unique observed survival times.}
-#'   \item{\code{M}}{maximum node number allowed to be in the tree; the default value is 1000.}
-#'   \item{\code{hN}}{smoothing parameter; the default value is "tau / 20".}
-#'   \item{\code{minsp}}{the minimum number of failure required in a node after a split; the default value is 20.}
-#'   \item{\code{minsp2}}{the minimum number of failure required in a terminal node after a split; the default value is 5.}
-#'   \item{\code{disc}}{a logical vector specifying whether the input covariate are discrete (\code{disc} = 1).
-#' The length of "disc" should be the same as the number of covariates.}
-#'   \item{\code{prune}}{a logical vector specifying whether to prune the survival tree. If `TRUE`,
-#' a cross-validation procedure will be performed to determine the optimal subtree; the default value is FALSE.}
-#'   \item{\code{nflds}}{the number of folds used in the cross-validation.
-#' This argument is only needed if \code{prune} = TRUE. The default value is 10.}
-#'   \item{\code{Trace}}{a logical vector specifying whether to display the splitting path; the default value is FALSE.}
-#'   \item{\code{parallel}}{a logical vector specifying whether parallel computing will be applied in cross-validation
-#' when \code{prune} = TRUE; the default value is FALSE.}
-#'   \item{\code{parCluster}}{an integer value specifying the number of CPU cores to be used when \code{prune} = TRUE and
-#' \code{parallel} = TRUE. The default value is half of the number of CPU cores detected. }
+#'   \item{\code{tau}}{is the maximum follow-up time; default value is the 90th percentile of the unique observed survival times.}
+#'   \item{\code{maxNode}}{is the maximum node number allowed to be in the tree; the default value is 500.}
+#'   \item{\code{numFold}}{is the number of folds used in the cross-validation. When \code{numFold > 0}, the survival tree will be pruned;
+#' when \code{numFold = 0}, the unpruned survival tree will be presented. The default value is 10.}
+#'   \item{\code{h}}{is the smoothing parameter used in the Kernel; the default value is \code{tau / 20}.}
+#'   \item{\code{minSplitTerm}}{is the minimum number of baseline observations in each terminal node; the default value is 15.}
+#'   \item{\code{minSplitNode}}{is the minimum number of baseline observations in each splitable node; the default value is 30.}
+#'   \item{\code{disc}}{is a logical vector specifying whether the covariates in \code{formula} are discrete (\code{TRUE}) or continuous (\code{FALSE}).
+#' The length of \code{disc} should be the same as the number of covariates in \code{formula}. When not specified, the \code{rocTree()} function assumes continuous covariates for all.}
+#'   \item{\code{K}}{is the number of time points on which the concordance measure is computed.
+#' A less refined time grids (smaller \code{K}) generally yields faster speed but a very small \code{K} is not recommanded. The default value is 20.}
 #' }
 #' 
-#' @param formula a formula object, with the response on the left of a '~' operator,
+#' @param formula is a formula object, with the response on the left of a '~' operator,
 #' and the terms on the right. The response must be a survival object returned by the
 #' 'Surv' function.
-#' @param data an optional data frame in which to interpret the variables occurring
+#' @param data is an optional data frame in which to interpret the variables occurring
 #' in the 'formula'.
-#' @param id an optional vector used to identify the longitudinal observations of subject's id.
+#' @param id is an optional vector used to identify the longitudinal observations of subject's id.
 #' The length of 'id' should be the same as the total number of observations.
 #' If 'id' is missing, each row of `data` represents a distinct observation from a subject and
 #' all covariates are treated as a baseline covariate. 
-#' @param subset an optional vector specifying a subset of observations to be used in
+#' @param subset is an optional vector specifying a subset of observations to be used in
 #' the fitting process.
-#' @param splitBy a character string specifying the splitting algorithm. The available options are 'CON' and 'dCON'
+#' @param ensemble is an optional logical value. If \code{TRUE} (default), ensemble methods will be fitted.
+#' Otherwise, the survival tree will be fitted.
+#' @param splitBy is a character string specifying the splitting algorithm. The available options are 'CON' and 'dCON'
 #' corresponding to the splitting algorithm based on the total concordance measure or the difference
 #' in concordance measure, respectively. The default value is 'dCON'.
 #' @param control a list of control parameters. See 'details' for important special
 #' features of control parameters.
+#'
 #' @export
-#' 
-#' @return An object of S3 class "\code{rocTree}" representing the fit, with the
-#' following components:
-#' \describe{
-#' \item{Frame}{is a data frame describe the resulting tree.}
-#' \item{dfFinal}{estimated hazards at all terminal nodes.}
-#' }
+#'
+#' @return An object of S4 class "\code{rocTree}" representig the fit, with the following components:
+#'
+#'
 #' @references Sun Y. and Wang, M.C. (2018+). ROC-guided classification and survival trees. \emph{Technical report}.
 #' @keywords rocTree
 #' @seealso See \code{\link{print.rocTree}} and \code{\link{plot.rocTree}} for printing and plotting an \code{rocTree}, respectively.
-#' @examples
-#' library(survival)
-#' set.seed(1)
-#' dat <- simu(100, 0, 1.3)
-#' fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat,
-#'        control = list(prune = TRUE, nflds = 5))
-#' fit
-rocTree <- function(formula, data, id, subset, splitBy = c("dCON", "CON"), control = list()) {
+#'
+#' @example inst/examples/ex_rocTree.R
+#' @importFrom survival Surv
+#' 
+rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCON", "CON"),
+                    control = list()) {
     splitBy <- match.arg(splitBy)
-    parm.control <- control[names(control) %in% names(attr(getClass(splitBy), "slots"))]
-    parm <- do.call("new", c(list(Class = splitBy), parm.control))
-    parm@splitBy <- splitBy
+    control <- rocTree.control(control)
     Call <- match.call()
-    indx <- match(c("formula", "data", "id", "subset"), names(Call), nomatch = 0L)
-    if (indx[1] == 0L) stop("A 'formula' argument is required")
-    tmp <- Call[c(1L, indx)]
-    tmp[[1L]] <- quote(stats::model.frame)
-    ## prepare data
-    m <- eval.parent(tmp)
-    Y <- model.response(m)[,1]
-    Status <- model.response(m)[,2]
-    id <- model.extract(m, id)
-    if (is.null(id)) id <- 1:nrow(m)
-    Y0 <- unlist(lapply(split(Y, id), max))
-    ## sort m by Y0
-    ## do.call(rbind, split(m, id)[unique(id)[order(Y0)]])
-    if (parm@tau <= 0) parm@tau <- as.numeric(quantile(Y0, .9))
-    if (parm@h <= 0) parm@h <- parm@tau / 20
-    if (parm@hN <= 0) parm@hN <- parm@tau / 20    
-    if (parm@fsz <= 0) parm@fsz <- round(length(Y0) / 2)
-    DF <- m[unlist(lapply(unique(id)[order(Y0)], function(x) which(id == x))),]
-    rownames(DF) <- NULL
-    Y <- model.response(DF)[,1]
-    Status <- model.response(DF)[,2]
-    id <- model.extract(DF, id)
-    if (is.null(id)) id <- 1:nrow(m)
-    Y0 <- unlist(lapply(split(Y, id), max))
-    if (!any(Y %in% Y0)) {
-        DF <- DF[Y %in% Y0,]
-        Y <- model.response(DF)[,1]
-        id <- model.extract(DF, id)
+    if (missing(formula)) stop("Argument 'formula' is required.")
+    if (missing(data))
+        data <- environment(formula)
+    ## take care of subset individual for possible non-numeric ID
+    if (! missing(subset)) {
+        sSubset <- substitute(subset)
+        subIdx <- eval(sSubset, data, parent.frame())
+        if (!is.logical(subIdx)) stop("'subset' must be logical")
+        subIdx <- subIdx & ! is.na(subIdx)
+        data <- data[subIdx, ]
     }
-    if (is.null(id)) {id <- 1:nrow(DF)
-    } else {id <- rep(1:length(unique(id)), table(factor(id, levels = unique(id))))}
-    X <- model.matrix(attr(m, "terms"), DF)
-    if (sum(colnames(X) == "(Intercept)") > 0) 
-        X <- as.matrix(X[, -which(colnames(X) == "(Intercept)")])
-    p <- ncol(X)
-    vNames <- colnames(X)
-    if (parm@disc[1] < 0) parm@disc <- rep(0, p)
-    if (length(parm@disc) == 1) parm@disc <- rep(parm@disc, p)
-    xlist <- sapply(1:p, function(z) rocTree.Xlist(X[,z], parm@disc[z], Y, id), simplify = FALSE)
-    xlist0 <- sapply(1:p, function(z) rocTree.Xlist(X[,z], 1, Y, id), simplify = FALSE) ## for prediction
-    Y0 <- unlist(lapply(split(Y, id), max), use.names = FALSE)
-    E0 <- unlist(lapply(split(Status, id), max), use.names = FALSE)
-    ## Grow
-    out <- grow(Y0, E0, xlist, parm)
-    ## prune
-    if (parm@prune & length(out$beta.seq) > 2) 
-        out$con2.seq <- rocTree.cv(out$beta.seq, Y, Status, id, X, parm)
-    out <- c(out, rocTree.final(out, Y0, E0, xlist, parm))
-    ## out <- c(out, rocTree.haz(out$dfFinal, Y0, ctrl))
-    ## names(out$r2Final) <- 
-    names(out$dfFinal) <- paste("Node", out$ndFinal, sep = "")
-    out$Y0 <- Y0
-    out$E0 <- E0
-    out$xlist <- xlist
-    out$xlist0 <- xlist0
-    out$vNames <- vNames
-    ## Create Frame for print and plot
-    ## Prepare Frame and remove nodes after considering ndFinal
-    Frame <- out$treeMat
-    Frame <- base::subset(Frame, !is.na(Frame$u))
-    if (!is.null(out$ndFinal)) {
-        Frame$terminal[which(Frame$nd %in% out$ndFinal)] <- 2
-        if (sum((!(Frame$nd %in% out$ndFinal) & Frame$terminal == 2)) > 0) 
-            Frame <- Frame[-which(!(Frame$nd %in% out$ndFinal) & Frame$terminal == 2),]
-        tmp <- Frame$nd[Frame$terminal == 2]
-        tmp2 <- tree.depth(tmp)
-        rm1 <- c(sapply(out$nd[which(tmp2 < max(tmp2))],
-                        function(a) unlist(sapply(1:(1 + max(tmp2)), function(b) (2^b * a):(2^b * (a + 1) - 1)))))
-        rm <- unique(c(rm1, (max(tmp) + 1):(max(Frame$nd) + 1)))
-        Frame <- Frame[Frame$nd %in% setdiff(Frame$nd, rm),]
+    ## extract information
+    Call <- match.call(expand.dots = FALSE)
+    callName <- match(c("formula", "data", "id"), names(Call), nomatch = 0L)
+    mcall <- Call[c(1L, callName)]
+    mcall[[1L]] <- quote(stats::model.frame)
+    mf <- eval(mcall, parent.frame())
+    mt <- attr(mf, "terms")
+    .Y <- model.response(mf)[,1]
+    .D <- model.response(mf)[,2]
+    .X <- stats::model.matrix(formula, data = mf)
+    if (any(colnames(.X) == "(Intercept)"))
+        .X <- .X[,!(colnames(.X) == "(Intercept)"), drop = FALSE]
+    .id <- model.extract(mf, id)
+    names(.id) <- names(.Y) <- names(.D) <- rownames(.X) <- NULL
+    if (is.null(.id)) {
+        .id <- .id2 <- 1:length(.Y)
+        ord <- order(.Y)
+    } else {
+        tmp <- aggregate(.Y ~ .id, FUN = max)
+        ord <- unlist(sapply(tmp$.id[order(tmp$.Y)], function(x) which(.id == x)), use.names = F)
+        .id2 <- rep(1:length(unique(.id)), table(.id)[unique(.id[ord])])
     }
-    out$Frame <- Frame
-    out$parm <- parm
-    out$terms <- attr(m, "terms")
-    attr(out$terms, "id") <- Call[[match("id", names(Call))]]
+    ## .Y, .id, .X, .D are original data
+    ## .Y2, .id2, .X2, .D2 are ordered data
+    ## data.frame(.Y = .Y[ord], .D = .D[ord], .id = .id[ord], .id2 = .id2, .X[ord,])
+    .p <- ncol(.X)
+    .n <- length(unique(.id))
+    .Y <- .Y[ord]
+    .D <- .D[ord]
+    .X0 <- .X <- .X[ord,, drop = FALSE]
+    .Y0 <- .Y[cumsum(table(.id2))]
+    .D0 <- .D[cumsum(table(.id2))]
+    if (is.function(control$mtry)) control$mtry <- control$mtry(.p)
+    if (is.function(control$tau)) control$tau <- control$tau(.Y0)
+    if (is.function(control$h)) control$h <- control$h(control$tau)
+    disc <- rep(control$disc, .p)
+    cutoff <- (1:control$nc) / (control$nc + 1)
+    .tk <- quantile(unique(.Y0[.D0 > 0]), 1:control$K / (control$K + 1), names = FALSE)
+    .X[order(.Y), disc == 0] <- apply(.X[, disc == 0, drop = FALSE], 2, function(.x)
+        unlist(lapply(split(.x, sequence(1:length(unique(.Y)))), fecdf)))
+    .X[,disc == 0] <- apply(.X[,disc == 0, drop = FALSE], 2, function(x)
+        findInterval(x, cutoff)) + 1
+    .hk <- rep(control$h, control$K)
+    .hk[.tk < control$h] <- .tk[.tk < control$h]
+    .mat1f <- t(.D0 * mapply(function(x,h) K2(x, .Y0, h) / h, .tk, .hk))
+    .mat1Z <- .X[cumsum(table(.id2)),, drop = FALSE]
+    .mat2k <- make_mat2(.tk, .Y, .id2, .X)
+    .zt <- make_mat2_t(.Y0[.D0 == 1], .Y, .id2, .X)
+    .zy <- t(.mat1Z[.D0 == 1,])
+    .range0  <- apply(.X, 2, range)
+    if (ensemble) {
+        out <- rocForest_C(.mat1f, .mat1Z, .mat2k, .range0, .zt, .zy, .D0,
+                           which(c("dCON", "CON") %in% splitBy),
+                           control$numTree,
+                           control$minSplitTerm,
+                           control$minSplitNode,
+                           control$maxNode,
+                           control$mtry)
+        out$Frame <- lapply(out$trees, cleanTreeMat, cutoff = cutoff)
+    } else {
+        out <- rocTree_C(.mat1f, .mat1Z, .mat2k, .range0, .zt, .zy, .D0,
+                         which(c("dCON", "CON") %in% splitBy),
+                         control$numFold,
+                         control$minSplitTerm,
+                         control$minSplitNode,
+                         control$maxNode)
+        out$Frame <- cleanTreeMat(out$treeMat, cutoff = cutoff)
+    }
+    out$call <- Call
+    out$data <- list(.Y = .Y, .D = .D, .X0 = .X0, .Y0 = .Y0, .D0 = .D0, .id = .id, .id2 = .id2)
+    out$rName <- all.vars(formula)[1]
+    out$vNames <- attr(mt, "term.labels")
+    out$ensemble <- ensemble
+    out$splitBy <- splitBy
+    out$disc <- disc
+    out$control <- control
     class(out) <- "rocTree"
     return(out)
 }
 
 #' rocTree controls
 #' 
-#' @param fsz forest size; S in the codes.
+#' @keywords internal
 #' @noRd
 rocTree.control <- function(l) {
-    if (missing(l)) l <- NULL
-    ## default list
-    dl <- list(tau = NULL, M = 1000, hN = NULL, h = NULL,
-               minsp = 20, minsp2 = 5, disc = 0, nflds = 10, prune = FALSE, Trace = FALSE,
-               parallel = FALSE, parCluster = detectCores() / 2, B = 500, ghN = .2,
-               fsz = function(n) round(n/2))
-    naml <- names(l)
-    if (!all(naml %in% names(dl)))
-        stop("unknown names in control: ", naml[!(naml %in% names(dl))])
-    dl[naml] <- l
-    if (is.null(dl$hN)) dl$hN <- dl$tau / 20
-    if (is.null(dl$h)) dl$h <- dl$tau / 20
+    ## default values
+    dl <- list(numTree = 500, numFold = 10, minSplitNode = 30, minSplitTerm = 15,
+               maxNode = 500, K = 20, nc = 200, disc = FALSE,
+               tau = function(x) quantile(x, .9),
+               h = function(x) x / 20, 
+               mtry = function(x) ceiling(sqrt(x)))
+    l.name <- names(l)    
+    if (!all(l.name %in% names(dl)))
+        warning("unknown names in control are ignored: ", l.name[!(l.name %in% names(dl))])
+    dl[names(dl) %in% l.name] <- l[l.name %in% names(dl)]
+    ## if (is.null(dl$hN)) dl$hN <- dl$tau / 20
     return(dl)
 }
 
-#' Prepare xlist in \code{rocTree} and \code{rocForest}
-#' 
-#' An internal function used to prepare \code{x.list}.
-#' This is exported for now to provide transformed covariate path
-#' for fitting rpart and ctree.
-#'
-#' Should this be make public?
-#'
-#' @param x is a covariate vector.
-#' @param disc a binary value indicating whether \code{x} is disctete;
-#' \code{disc = 1} if discrete.
-#' @param y is the ordered event time observed in the data.
-#' @param id subject's id
-#' 
+#' Check if it is a `rocTree` object
+#' @keywords internal
 #' @noRd
-#' @details internal
-rocTree.Xlist <- function(x, disc, y, id) {
-    yi <- unlist(lapply(split(y, id), max), use.names = FALSE)
-    m <- unlist(lapply(split(y, id), length), use.names = FALSE)
-    n <- length(unique(id))
-    tmp <- unlist(lapply(split(y, id), function(z)
-        match(yi, z))) + rep(c(0, cumsum(m)[-length(m)]), each = n)
-    xlist <- matrix(x[tmp], n)
-    if (!disc) xlist <- t(apply(xlist, 1, rank, ties.method = "max", na.last = "keep")) /
-                   rowSums(!is.na(xlist))
-    return(xlist)
-}
-
 is.rocTree <- function(x) inherits(x, "rocTree")
 
-rocTree.cv <- function(beta.seq, Y, Status, id, X, parm) {
-    n <- length(unique(id))
-    nflds <- parm@nflds
-    di <- unlist(lapply(split(Status, id), max), use.names = FALSE)
-    flds <- folds(n, nflds)
-    fldstep <- 0
-    while(min(unlist(lapply(flds, function(x) sum(di[x])))) == 0) {
-        flds <- folds(n, nflds)
-        fldstep <- fldstep + 1
-        if (fldstep > 50) stop("Not enough events")
+
+
+#' Clean the `treeMat` from tree and forests; make it easier to read and compatible with print function
+#' @keywords internal
+#' @noRd
+cleanTreeMat <- function(treeMat, cutoff) {
+    ## prepraing treeMat
+    ## Remove 0 rows and redefine child nodes
+    ## 0 rows were produced from prunning
+    treeMat <- data.frame(treeMat)
+    names(treeMat) <- c("p", "cutOrd", "left", "right", "is.terminal")
+    treeMat$p <- ifelse(treeMat$is.terminal == 1, NA, treeMat$p + 1)
+    ## treeMat$p + (1 - treeMat$is.terminal)
+    treeMat$left <- ifelse(treeMat$left == 0, NA, treeMat$left + 1)
+    treeMat$right <- ifelse(treeMat$right == 0, NA, treeMat$right + 1)
+    mv <- rowSums(treeMat[,2:5], na.rm = TRUE) == 0
+    if (sum(mv) > 0) {
+        treeMat <- treeMat[-which(mv),]
+        treeMat$left <- match(treeMat$left, rownames(treeMat))
+        treeMat$right <- match(treeMat$right, rownames(treeMat))
+        rownames(treeMat) <- NULL
     }
-    p <- ncol(X)
-    x0list <- sapply(1:p, function(z) rocTree.Xlist(X[,z], 1, Y, id), simplify = FALSE)
-    if (!parm@parallel) con2.seq <- sapply(1:nflds, function(x) con.cv(Y, id, flds[[x]], Status, x0list, beta.seq, parm))
-    if (parm@parallel) {
-        cl <- makeCluster(parm@parCluster)
-        clusterExport(cl = cl, 
-                      varlist = c("Y", "id", "flds", "Status", "x0list", "beta.seq", "parm"),
-                      envir = environment())
-        con2.seq <- parSapply(cl, 1:nflds, function(x) con.cv(Y, id, flds[[x]], Status, x0list, beta.seq, parm))
-        stopCluster(cl)
+    if (nrow(treeMat) > 1) {
+        treeMat$cutVal <- cutoff[ifelse(treeMat$cutOrd > 0, treeMat$cutOrd, NA)]
+        if (nrow(treeMat) <= 3) {
+            treeMat$nd <- 1:3
+        } else {
+            nd <- 1:3
+            for (i in 2:(nrow(treeMat) - 2)) {
+                if (treeMat$is.terminal[i] == 0) nd <- c(nd, 2 * nd[i], 2 * nd[i] + 1)
+            }
+            treeMat$nd <- nd
+        }
+    } else {
+        treeMat$cutVal <- NA
+        treeMat$nd <- 1
     }
-    colnames(con2.seq) <- paste("result.", 1:nflds, sep = "")
-    rownames(con2.seq) <- NULL
-    con2.seq
+    treeMat$cutOrd <- ifelse(treeMat$is.terminal == 1, NA, treeMat$cutOrd)
+    return(treeMat)
 }

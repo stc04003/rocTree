@@ -1,3 +1,7 @@
+2019-09-21 Sy Han Chiou <schiou@utdallas.edu>
+	* Version 1.1.0
+	* Rewrite tree/ensemble algorithms with RCpp
+	* Significantly speed improvement
 2019-03-20 Sy Han Chiou <schiou@utdallas.edu>
 	* Version 1.0.0
 	* Update DESCRIPTION as suggested

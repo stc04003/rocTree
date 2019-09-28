@@ -4,14 +4,16 @@
 \alias{print.rocTree}
 \title{Printing an \code{rocTree} object}
 \usage{
-\method{print}{rocTree}(x, digits = 5, dt = TRUE, ...)
+\method{print}{rocTree}(x, digits = 5, tree = NULL, ...)
 }
 \arguments{
 \item{x}{an \code{rocTree} object.}
 
 \item{digits}{the number of digits of numbers to print.}
 
-\item{dt}{an optional logical vector. If TRUE, tree structure based on \strong{\code{data.tree} structure} is printed.}
+\item{tree}{an optional integer specifying the \eqn{n^{th}} tree in the forest to print.
+The function prints the contents of an \code{rocForest} object by default,
+if a tree is not specified.}
 
 \item{...}{for future development.}
 }
@@ -19,11 +21,5 @@
 The function prints an \code{rocTree} object. It is a method for the generic function print of class "\code{rocTree}".
 }
 \examples{
-set.seed(1)
-dat <- simu(100, 0, 1.3)
-library(survival)
-system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id,
-data = dat, control = list(prune = TRUE, nflds = 10)))
-fit
-print(fit, dt = FALSE)
+inst/examples/ex_rocTree.R
 }

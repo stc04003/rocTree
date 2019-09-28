@@ -41,54 +41,50 @@ The arguments are as follows
 
 * `formula` is a formula object, with the response on the left of a `~` operator, and the predictors on the right. The response must be a survival object returned by the function `Surv` from the `survival` package. 
 * `data` is an optional data frame to interpret the variables occurring in the `formula`.
-* `id` an optional vector used to identify the longitudinal observations of subject's id. The length of `id` should be the same as the total number of observations. If `id` is missing, then each row of `data` represents a distinct observation from subjects and all covariates are treated as a baseline covariate. 
-* `subset` an optional vector specifying a subset of observations to be used in the fitting process.
-* `splitBy` a character string specifying the splitting algorithm. The available options are `CON` and `dCON` corresponding to the splitting algorithm based on the total concordance measure or the difference in concordance measure, respectively. The default value is `dCON`.
-* `control` a list of control parameters. 
+* `id` is an optional vector used to identify the longitudinal observations of subject's id. The length of `id` should be the same as the total number of observations. If `id` is missing, then each row of `data` represents a distinct observation from subjects and all covariates are treated as a baseline covariate. 
+* `subset` is an optional vector specifying a subset of observations to be used in the fitting process.
+* `ensemble` is an optional logical value. If `TRUE` (default), ensemble methods will be fitted. Otherwise, the survival tree will be fitted.
+* `splitBy` is a character string specifying the splitting algorithm. The available options are `CON` and `dCON` corresponding to the splitting algorithm based on the total concordance measure or the difference in concordance measure, respectively. The default value is `dCON`.
+* `control` is a list of control parameters. 
 
 ## The `control` options
 
 The argument `control` defaults to a list with the following values:
 
 * `tau` is the maximum follow-up time; default value is the 90th percentile of the unique observed survival times. 
-* `M` is the maximum node number allowed to be in the tree; the default value is `1000`.
-* `hN` is the smoothing parameter used in the Kernel; the default value is `tau / 20`.
-* `minsp` is the minimum number of failure required in a node after a split; the default value is `20`. 
-* `minsp2` is the minimum number of failure required in a terminal node after a split; the default value is `5`.
-* `disc` is a logical vector specifying whether the covariates in `formula` are discrete (`1`). The length of `disc` should be the same as the number of covariates in `formula`.
-* `prune` a logical vector specifying whether to prune the survival tree. If `TRUE`, a cross-validation procedure will be performed to determine the optimal sub-tree; the default value is `TRUE`.
-* `nflds` is the number of folds used in the cross-validation. This argument is only needed if `prune = TRUE`. The default value is `10`.
-* `Trace` is a logical vector specifying whether to display the splitting path; the default value is `FALSE`.
-* `parallel` is a logical vector specifying whether parallel computing will be applied in cross-validation; the default value is `FALSE`. 
-* `parCluster` is an integer value specifying the number of CPU cores to be used when `prune = TRUE` and `parallel = TRUE`. The default value is half of the number of CPU cores detected. 
+* `maxNode` is the maximum node number allowed to be in the tree; the default value is `500`.
+* `numFold` is the number of folds used in the cross-validation. When `numFold > 0`, the survival tree will be pruned; when `numFold = 0`, the unpruned survival tree will be presented. The default value is `10`.
+* `h` is the smoothing parameter used in the Kernel; the default value is `tau / 20`.
+* `minSplitTerm` is the minimum number of baseline observations in each terminal node; the default value is `15`.
+* `minSplitNode` is the minimum number of baseline observations in each splitable node; the default value is `30`. 
+* `disc` is a logical vector specifying whether the covariates in `formula` are discrete (`TRUE`) or continuous (`FALSE`). The length of `disc` should be the same as the number of covariates in `formula`. When not specified, the `rocTree()` function assumes continuous covariates for all.
+* `K` is the number of time points on which the concordance measure is computed. A less refined time grids (smaller `K`) generally yields faster speed but a very small `K` is not recommanded. The default value is 20.
 
 ## Growing a survival tree
 
-We first load the `survival` package to enable `Surv`.
+We first load the `survival` package to enable the `Surv()` function, which we will use to specify the survival response.
 The fully grown (un-pruned) time-invariant survival tree can be constructed as follow:
 ```{R tree}
 library(survival)
-system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat))
+system.time(fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, 
+                           ensemble = FALSE, control = list(numFold = 0)))
 ```
-The function `rocTree` returns an object of S3 class -- `rocTree` with the following major components:
+The function `rocTree` returns an object of S3 class with the following major components:
 
 * `Frame` is a data frame describe the resulting tree. The columns are 
-  * `nd` node number.
-  * `terminal` describe the node characteristic; `0` if a node is internal, `1` if a node is splitable, and `2` if a node is a terminal node.
-  * `u` is the proportion being split in $\tau_L$.
-  * `u2` is the minimum proportion in $\tau_L$ across time.
   * `p` indicate which covariate was split at the node. 
-  * `cut` is the covariate value being split at the node.
-* `dfFinal` is a data.frame consists of unsmoothed hazard estimates at the observed survival times for the terminal nodes.
+  * `left` indicate the row number for the left child (if the current node splittable).
+  * `right` indicate the row number for the right child (if the current node splittable).
+  * `cutVal` indicate the covaraite value (after transformation) being split at the node.
+  * `cutOrd` indicate the rank of the covaraite value being split at the node.
+  * `nd` indicates the node number in display.
+  * `is.terminal` describe the node characteristic; `0` if a node is internal, `1` if a node is a terminal node.
 
 The time-invariant survival tree can be printed directly or with the generic function `print`.
 ```{r print}
 fit
 ```
-The survival tree is printed in the structure similar to that in the `data.tree` package. Setting `dt = FALSE` in the generic function prints the tree in a structure similar to that of the `rpart` package.
-```{r print2}
-print(fit, dt = FALSE)
-```
+The survival tree is printed in the structure similar to that in the `data.tree` package. 
 
 ## Plotting the survival tree
 
@@ -122,7 +118,7 @@ to choose the tuning parameter in the concordance-complexity measure:
 ```{R tree2, tidy = TRUE}
 set.seed(2019)
 system.time(fit2 <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, 
-                control = list(prune = TRUE, nfld = 5)))
+                            ensemble = FALSE, control = list(numFold = 10)))
 fit2
 ```
 The resulting tree is much smaller than the un-pruned tree in `fit`. 

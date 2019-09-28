@@ -5,7 +5,7 @@
 \title{Predicting based on a \code{rocTree} model.}
 \usage{
 \method{predict}{rocTree}(object, newdata, type = c("survival",
-  "hazard"), ...)
+  "hazard"), control = list(), ...)
 }
 \arguments{
 \item{object}{is an \code{rocTree} object.}
@@ -24,6 +24,21 @@ Returns a \code{data.frame} of the predicted survival probabilities or cumulativ
 \description{
 The function gives predicted values with a \code{rocTree} fit.
 }
-\seealso{
-\code{\link{predict.rocForest}}
+\examples{
+library(rocTree)
+library(survival)
+
+set.seed(1)
+dat <- simu(100, 0, 1.3)
+
+## Fitting a pruned survival tree
+rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE)
+
+## Fitting a unpruned survival tree
+rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE,
+        control = list(numFold = 0))
+
+## Fitting the ensemble algorithm (default)
+rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = TRUE)
+
 }

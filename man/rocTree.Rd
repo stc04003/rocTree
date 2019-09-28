@@ -2,28 +2,31 @@
 % Please edit documentation in R/rocTree.R
 \name{rocTree}
 \alias{rocTree}
-\title{ROC-guided Regression Trees}
+\title{Roc-guided survival trees}
 \usage{
-rocTree(formula, data, id, subset, splitBy = c("dCON", "CON"),
-  control = list())
+rocTree(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCON",
+  "CON"), control = list())
 }
 \arguments{
-\item{formula}{a formula object, with the response on the left of a '~' operator,
+\item{formula}{is a formula object, with the response on the left of a '~' operator,
 and the terms on the right. The response must be a survival object returned by the
 'Surv' function.}
 
-\item{data}{an optional data frame in which to interpret the variables occurring
+\item{data}{is an optional data frame in which to interpret the variables occurring
 in the 'formula'.}
 
-\item{id}{an optional vector used to identify the longitudinal observations of subject's id.
+\item{id}{is an optional vector used to identify the longitudinal observations of subject's id.
 The length of 'id' should be the same as the total number of observations.
 If 'id' is missing, each row of `data` represents a distinct observation from a subject and
 all covariates are treated as a baseline covariate.}
 
-\item{subset}{an optional vector specifying a subset of observations to be used in
+\item{subset}{is an optional vector specifying a subset of observations to be used in
 the fitting process.}
 
-\item{splitBy}{a character string specifying the splitting algorithm. The available options are 'CON' and 'dCON'
+\item{ensemble}{is an optional logical value. If \code{TRUE} (default), ensemble methods will be fitted.
+Otherwise, the survival tree will be fitted.}
+
+\item{splitBy}{is a character string specifying the splitting algorithm. The available options are 'CON' and 'dCON'
 corresponding to the splitting algorithm based on the total concordance measure or the difference
 in concordance measure, respectively. The default value is 'dCON'.}
 
@@ -31,12 +34,7 @@ in concordance measure, respectively. The default value is 'dCON'.}
 features of control parameters.}
 }
 \value{
-An object of S3 class "\code{rocTree}" representing the fit, with the
-following components:
-\describe{
-\item{Frame}{is a data frame describe the resulting tree.}
-\item{dfFinal}{estimated hazards at all terminal nodes.}
-}
+An object of S4 class "\code{rocTree}" representig the fit, with the following components:
 }
 \description{
 Fits a "\code{rocTree}" model.
@@ -44,31 +42,36 @@ Fits a "\code{rocTree}" model.
 \details{
 The argument "control" defaults to a list with the following values:
 \describe{
-  \item{\code{tau}}{maximum follow-up time; default value is the 90th percentile of the unique observed survival times.}
-  \item{\code{M}}{maximum node number allowed to be in the tree; the default value is 1000.}
-  \item{\code{hN}}{smoothing parameter; the default value is "tau / 20".}
-  \item{\code{minsp}}{the minimum number of failure required in a node after a split; the default value is 20.}
-  \item{\code{minsp2}}{the minimum number of failure required in a terminal node after a split; the default value is 5.}
-  \item{\code{disc}}{a logical vector specifying whether the input covariate are discrete (\code{disc} = 1).
-The length of "disc" should be the same as the number of covariates.}
-  \item{\code{prune}}{a logical vector specifying whether to prune the survival tree. If `TRUE`,
-a cross-validation procedure will be performed to determine the optimal subtree; the default value is FALSE.}
-  \item{\code{nflds}}{the number of folds used in the cross-validation.
-This argument is only needed if \code{prune} = TRUE. The default value is 10.}
-  \item{\code{Trace}}{a logical vector specifying whether to display the splitting path; the default value is FALSE.}
-  \item{\code{parallel}}{a logical vector specifying whether parallel computing will be applied in cross-validation
-when \code{prune} = TRUE; the default value is FALSE.}
-  \item{\code{parCluster}}{an integer value specifying the number of CPU cores to be used when \code{prune} = TRUE and
-\code{parallel} = TRUE. The default value is half of the number of CPU cores detected. }
+  \item{\code{tau}}{is the maximum follow-up time; default value is the 90th percentile of the unique observed survival times.}
+  \item{\code{maxNode}}{is the maximum node number allowed to be in the tree; the default value is 500.}
+  \item{\code{numFold}}{is the number of folds used in the cross-validation. When \code{numFold > 0}, the survival tree will be pruned;
+when \code{numFold = 0}, the unpruned survival tree will be presented. The default value is 10.}
+  \item{\code{h}}{is the smoothing parameter used in the Kernel; the default value is \code{tau / 20}.}
+  \item{\code{minSplitTerm}}{is the minimum number of baseline observations in each terminal node; the default value is 15.}
+  \item{\code{minSplitNode}}{is the minimum number of baseline observations in each splitable node; the default value is 30.}
+  \item{\code{disc}}{is a logical vector specifying whether the covariates in \code{formula} are discrete (\code{TRUE}) or continuous (\code{FALSE}).
+The length of \code{disc} should be the same as the number of covariates in \code{formula}. When not specified, the \code{rocTree()} function assumes continuous covariates for all.}
+  \item{\code{K}}{is the number of time points on which the concordance measure is computed.
+A less refined time grids (smaller \code{K}) generally yields faster speed but a very small \code{K} is not recommanded. The default value is 20.}
 }
 }
 \examples{
+library(rocTree)
 library(survival)
+
 set.seed(1)
 dat <- simu(100, 0, 1.3)
-fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat,
-       control = list(prune = TRUE, nflds = 5))
-fit
+
+## Fitting a pruned survival tree
+rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE)
+
+## Fitting a unpruned survival tree
+rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE,
+        control = list(numFold = 0))
+
+## Fitting the ensemble algorithm (default)
+rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = TRUE)
+
 }
 \references{
 Sun Y. and Wang, M.C. (2018+). ROC-guided classification and survival trees. \emph{Technical report}.
