@@ -69,6 +69,7 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"),
         object$hazFun <- stepfun(t0, c(1, pred))
         object$pred <- data.frame(Time = t0, hazard = object$hazFun(t0))
     }
+    rownames(object$pred) <- NULL
     class(object) <- "predict.rocTree"
     return(object)
 }

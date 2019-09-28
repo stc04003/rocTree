@@ -97,6 +97,6 @@ print.predict.rocTree <- function(x, ...) {
     if (names(x$pred)[[2]] == "hazard") {
         cat(" Fitted cumulative hazard:\n")
     }
-    print(x$pred, 5)
+    print(head(x$pred, 5))
     cat("\n")
 }

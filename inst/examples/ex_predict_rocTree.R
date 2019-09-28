@@ -4,13 +4,15 @@ library(survival)
 set.seed(1)
 dat <- simu(100, 0, 1.3)
 
-## Fitting a pruned survival tree
-rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE)
+fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE)
 
-## Fitting a unpruned survival tree
-rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE,
-        control = list(numFold = 0))
+newdat <- dplyr::tibble(Time = sort(unique(dat$Time)), 
+                        z1 = 1 * (Time < median(Time)), 
+                        z2 = runif(1))
+newdat
 
-## Fitting the ensemble algorithm (default)
-rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = TRUE)
+pred <- predict(fit, newdat)
+plot(pred)
 
+pred <- predict(fit, newdat, type = "hazard")
+plot(pred)
