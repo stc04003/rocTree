@@ -44,9 +44,12 @@ plot.rocTree <- function(x, output = c("graph", "visNetwork"),
         if (type == "survival") {
             tmp <- data.frame(x$data$.Y0, x$data$.X0)
             colnames(tmp) <- c(x$rName, x$vNames)
-            atTerm <- lapply(split(tmp, x$nodeLabel + 1), function(x) predict(fit, newdata = x)$pred)
+            t0 <- tmp[,1]
+            atTerm <- lapply(split(tmp, x$nodeLabel + 1), function(x)
+                data.frame(Time = t0, Survival = predict(fit, newdata = x)$survFun(t0)))
             atTerm <- do.call(rbind, atTerm)
-            atTerm$nd <- as.factor(rep(sort(unique(x$nodeLabel)) + 1, table(x$nodeLabel)))
+            atTerm$nd <- as.factor(rep(sort(unique(x$nodeLabel)) + 1, each = length(t0)))
+            ## atTerm$nd <- as.factor(rep(sort(unique(x$nodeLabel)) + 1, table(x$nodeLabel)))
             rownames(atTerm) <- NULL
             gg <- ggplot(atTerm, aes(x = Time, y = Survival, col = nd)) + geom_step(lwd = I(1.1)) +
                 xlab("Time") + ylab("Survival probabilities") + labs(col = "Node")
@@ -55,10 +58,11 @@ plot.rocTree <- function(x, output = c("graph", "visNetwork"),
         if (type == "hazard") {
             tmp <- data.frame(x$data$.Y0, x$data$.X0)
             colnames(tmp) <- c(x$rName, x$vNames)
+            t0 <- tmp[,1]
             atTerm <- lapply(split(tmp, x$nodeLabel + 1), function(x)
-                predict(fit, newdata = x, type = "haz", control = list(h = .4))$pred)
+                data.frame(Time = t0, Survival = predict(fit, newdata = x)$hazFun(t0)))
             atTerm <- do.call(rbind, atTerm)
-            atTerm$nd <- as.factor(rep(sort(unique(x$nodeLabel)) + 1, table(x$nodeLabel)))
+            atTerm$nd <- as.factor(rep(sort(unique(x$nodeLabel)) + 1, each = length(t0)))
             rownames(atTerm) <- NULL
             gg <- ggplot(atTerm, aes(x = Time, y = hazard, col = nd)) +
                 geom_smooth(method = "loess", se = FALSE) + 
