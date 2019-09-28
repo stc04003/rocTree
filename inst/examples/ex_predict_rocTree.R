@@ -10,6 +10,7 @@ plot(fit)
 plot(fit, type = "survival")
 plot(fit, type = "haz")
 
+debug(plot)
 
 newdat <- dplyr::tibble(Time = sort(unique(dat$Time)), 
                         z1 = 1 * (Time < median(Time)), 

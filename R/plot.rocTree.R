@@ -45,7 +45,12 @@ plot.rocTree <- function(x, output = c("graph", "visNetwork"),
             tmp <- data.frame(x$data$.Y0, x$data$.X0)
             colnames(tmp) <- c(x$rName, x$vNames)
             t0 <- tmp[,1]
-            atTerm <- lapply(split(tmp, x$nodeLabel), function(xx) xx[findInt(t0, xx[,1]),])           
+            atTerm <- lapply(split(tmp, x$nodeLabel), function(xx) {
+                xx <- xx[findInt(t0, xx[,1]),]
+                xx[,1] <- t0
+                rownames(xx) <- NULL
+                return(xx)
+            })
             atTerm <- lapply(atTerm, function(xx)
                 data.frame(Time = t0, Survival = predict(x, newdata = xx)$survFun(t0)))
             atTerm <- do.call(rbind, atTerm)
@@ -60,7 +65,12 @@ plot.rocTree <- function(x, output = c("graph", "visNetwork"),
             tmp <- data.frame(x$data$.Y0, x$data$.X0)
             colnames(tmp) <- c(x$rName, x$vNames)
             t0 <- tmp[,1]
-            atTerm <- lapply(split(tmp, x$nodeLabel), function(xx) xx[findInt(t0, xx[,1]),])           
+            atTerm <- lapply(split(tmp, x$nodeLabel), function(xx) {
+                xx <- xx[findInt(t0, xx[,1]),]
+                xx[,1] <- t0
+                rownames(xx) <- NULL
+                return(xx)
+            })
             atTerm <- lapply(atTerm, function(xx)
                 data.frame(Time = t0, hazard = predict(x, newdata = xx, type = "haz")$hazFun(t0)))
             atTerm <- do.call(rbind, atTerm)

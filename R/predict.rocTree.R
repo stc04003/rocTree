@@ -90,8 +90,3 @@ findInt.X <- function(x, y) {
     order(c(0, y))[pmax(1, findInterval(x, sort(c(0, y))))]
     ## order(y)[pmax(1, findInterval(x, sort(y)))]
 }
-
-## This is a working version for simulation, still need to think about how to make it more general.
-## To-do
-## (Y, ID) = ~~(yes, yes)~~, (no, yes), (yes, no), (no, no).
-## When Y is not given, assume the same covariates is observed through out?
