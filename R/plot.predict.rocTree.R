@@ -15,8 +15,9 @@ plot.predict.rocTree <- function(x, ...) {
     } 
     if (names(x$pred)[[2]] == "hazard") {
         tmp <- data.frame(x = x$pred$Time, y = x$pred$hazard)
-        gg <- ggplot(tmp, aes(x = x, y = y)) + geom_step(lwd = I(1.1)) +
-            xlab("Time") + ylab("Hazard estimate") + geom_smooth(method = "loess", se = FALSE)
+        gg <- ggplot(tmp, aes(x = x, y = y)) + ## geom_step(lwd = I(1.1)) +
+            xlab("Time") + ylab("Hazard estimate") +
+            geom_smooth(lwd = I(1.1), colour="black", method = "loess", se = FALSE)
     }
     gg
 }

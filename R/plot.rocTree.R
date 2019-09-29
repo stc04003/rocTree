@@ -1,6 +1,6 @@
 #' Plotting an \code{rocTree} object
 #'
-#' Plots an \code{rocTree} object. The function returns a \code{dgr_graph} object and is rendered in the RStudio Viewer.
+#' Plots an \code{rocTree} object. The function returns a \code{dgr_graph} object that is rendered in the RStudio Viewer or survival/hazard estimate at terminal nodes.
 #'   
 #' @param x an object of class "\code{rocTree}", usually returned by the rocTree function.
 #' @param output a string specifying the output type; graph (the default) renders the graph using the \code{grViz} function, and \code{visNetwork} renders the graph using the visnetwork function.
@@ -13,7 +13,9 @@
 #' @param savePlot is a logical value indicating whether the plot will be saved (exported); the default value is "FALSE".
 #' @param file_name is a character string specifying the name of the plot when "savePlot = TRUE". The file name should include its extension. The default value is "pic.pdf"
 #' @param file_type is a character string specifying the type of file to be exported. Options for graph files are: "png", "pdf", "svg", and "ps". The default value is "pdf".
-#' @param type is an optional character string specifying the type of plots to produce.
+#' @param type is an optional character string specifying the type of plots to produce. The available options are "tree" for plotting survival tree (default),
+#' "survival" for plotting the estimated survival probabilities for the terminal nodes, and "hazard" for plotting the estimated hazard for the terminal nodes.
+#' The \code{dgr_graph} options are available only when \code{type = tree}.
 #' @param ... arguments to be passed to or from other methods.
 #'
 #' @seealso See \code{\link{rocTree}} for creating \code{rocTree} objects.
@@ -21,7 +23,7 @@
 #' @importFrom data.tree SetGraphStyle SetNodeStyle
 #' @importFrom ggplot2 labs geom_smooth
 #' @export
-#' @examples inst/examples/ex_rocTree_plot.R
+#' @example inst/examples/ex_plot_rocTree.R
 plot.rocTree <- function(x, output = c("graph", "visNetwork"),
                          digits = 4, tree = 1L,
                          rankdir = c("TB", "BT", "LR", "RL"),
@@ -42,7 +44,7 @@ plot.rocTree <- function(x, output = c("graph", "visNetwork"),
     } else {
         Frame <- x$Frame
         if (type == "survival") {
-            tmp <- data.frame(x$data$.Y0, x$data$.X0)
+            tmp <- data.frame(x$data$.Y0, x$data$.X0)[x$data$.D0 > 0,]
             colnames(tmp) <- c(x$rName, x$vNames)
             t0 <- tmp[,1]
             atTerm <- lapply(split(tmp, x$nodeLabel), function(xx) {
@@ -62,7 +64,7 @@ plot.rocTree <- function(x, output = c("graph", "visNetwork"),
             return(gg)
         }
         if (type == "hazard") {
-            tmp <- data.frame(x$data$.Y0, x$data$.X0)
+            tmp <- data.frame(x$data$.Y0, x$data$.X0)[x$data$.D0 > 0,]
             colnames(tmp) <- c(x$rName, x$vNames)
             t0 <- tmp[,1]
             atTerm <- lapply(split(tmp, x$nodeLabel), function(xx) {

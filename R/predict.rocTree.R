@@ -52,6 +52,7 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"),
         ## t0 <- seq(quantile(object$data$.Y0, .05), quantile(object$data$.Y0, .95),
         ##           length.out = control$K)
         t0 <- unlist(newdata[,object$rName])
+        t0 <- seq(quantile(t0, .05), quantile(t0, .95), length.out = control$K)
         knots <- findInt(t0, object$data$.Y0)
         ## .mat1f2 <- sapply(object$data$.Y0[knots], K2, vec = object$data$.Y0, h = control$h) /
         .mat1f2 <- sapply(t0, K2, vec = object$data$.Y0, h = control$h) / control$h

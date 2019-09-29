@@ -24,10 +24,11 @@ to fit the proposed Receiver Operating Characteristic (ROC) guided survival tree
 ## Simulated data
 
 We will demonstrate the usage of `rocTree` function with a simulated data prepared by the [`simu`](https://www.sychiou.com/rocTree/articles/rocTree-sim.html) function.
-```{R load}
+```{R load, message = FALSE}
 library(rocTree)
-set.seed(2019)
-dat <- simu(n = 100, cen = 0.25, sce = 2.1, summary = TRUE)
+set.seed(0)
+dat <- simu(n = 100, cen = 0.25, sce = 2.3, summary = TRUE)
+head(dat)
 ```
 
 ## The `rocTree` function 
@@ -94,6 +95,7 @@ plot(fit)
 ```
 The `plot` feature also allows the following arguments adopted from the [`Graphviz`/`DiagrammeR`](http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html) environment to be passed to `option`:
 
+* `type` is an optional character string specifying what to plot. The available options are `tree` for plotting survival tree (default), `survival` for plotting the estimated survival probabilities for the terminal nodes, and `hazard` for plotting the estimated hazard for the terminal nodes. The following options are available only when `type = tree`.
 * `output` is a string specifying the output type. The possible values are `graph` and `visNetwork`; `graph` (the default) renders the graph using the `grViz` function, and `visNetwork` renders the graph using the `visnetwork` function.
 * `digits` the number of digits to print.
 * `rankdir` is a character string specifying the direction of the tree flow. The available options are top-to-bottom (`TB`), bottom-to-top (`BT`), left-to-right (`LR`), and right-to-left (`RL`); the default value is `TB`.
@@ -105,7 +107,7 @@ The `plot` feature also allows the following arguments adopted from the [`Graphv
 
 The following codes illustrate some of the different options.
 ```{r plot2, fig.align = "center", fig.width = 6, fig.show="hold"}
-plot(fit, rankdir = "LR", shape = "rect")
+plot(fit, rankdir = "LR", shape = "rect", digits = 2)
 plot(fit, shape = "egg", nodeOnly = TRUE)
 plot(fit, output = "visNetwork", digits = 2)
 ```
@@ -116,23 +118,23 @@ Pruning reduces the complexity of the final classifier, and hence improves predi
 Setting `prune = TRUE` in the `control` list will prune the survival tree. In the following example, we used five-fold cross-validation 
 to choose the tuning parameter in the concordance-complexity measure:
 ```{R tree2, tidy = TRUE}
-set.seed(2019)
 system.time(fit2 <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, 
                             ensemble = FALSE, control = list(numFold = 10)))
 fit2
+plot(fit2)
 ```
 The resulting tree is much smaller than the un-pruned tree in `fit`. 
 
-## Hazard estimates
+## Survival/Hazard estimates at terminal notes
 
 The time-invariant partition considered allows a sparse model and an easy interpretation
 of the decision rule. At each fixed time $t$, the tree partitions the survivor population and predicts the instantaneous failure risk.
 Thus the interpretation at a fixed time point is along the same line as classification and regression trees. 
 Since the risk within each terminal node changes with time, it is essential to look at the hazard curves of each terminal
-The smoothed hazard estimates at terminal nodes can be easily plotted with the function `plotTreeHaz`, as demonstrated below.
-In the following example, subjects in node 2 ($Z_1(t) \le 0.56$) yield the highest hazard for $t < 0.7$.
+The smoothed hazard estimates at terminal nodes can be easily plotted with the generic function `plot` with `type = "survival"` or `type = "hazard"`.
+The feature is demonstrated below.
 ```{R haz, fig.align = "center"}
-plotTreeHaz(fit2)
+plot(fit2, type = "hazard")
 ```
 
 ## Prediction
@@ -141,12 +143,13 @@ Suppose we have a new data that is generated as below:
 ```{R newDat}
 newdat <- dplyr::tibble(Time = sort(unique(dat$Time)), 
                         z1 = 1 * (Time < median(Time)), 
-                        z2 = runif(1))
+                        z2 = 0.5)
 newdat
 ```
 The predicted survival curve can be plotted with the following codes.
 ```{R pred}
-pred <- predict(fit2, newdat)
-pred
+(pred <- predict(fit2, newdat, type = "survival"))
+plot(pred)
+(pred <- predict(fit2, newdat, type = "hazard"))
 plot(pred)
 ```
