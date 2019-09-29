@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>rocTree:Receiver Operating Characteristic (ROC)-Guided Classification Survival Tree and Ensemble. — rocTree-package • rocTree</title>
+<title>Print a predicted object — print.predict.rocTree • rocTree</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,10 +30,9 @@
 
 
 
-<meta property="og:title" content="rocTree:Receiver Operating Characteristic (ROC)-Guided Classification Survival Tree and Ensemble. — rocTree-package" />
+<meta property="og:title" content="Print a predicted object — print.predict.rocTree" />
 
-<meta property="og:description" content="The rocTree package uses a Receiver Operating Characteristic (ROC) guided classification
-algorithm to grow prune survival trees and ensemble." />
+<meta property="og:description" content="Print a predicted object" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -121,67 +120,26 @@ algorithm to grow prune survival trees and ensemble." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>rocTree:Receiver Operating Characteristic (ROC)-Guided Classification Survival Tree and Ensemble.</h1>
-    <small class="dont-index">Source: <a href='https://github.com/stc04003/rocTree/blob/master/R/rocTree_pkg.R'><code>R/rocTree_pkg.R</code></a></small>
-    <div class="hidden name"><code>rocTree-package.Rd</code></div>
+    <h1>Print a predicted object</h1>
+    <small class="dont-index">Source: <a href='https://github.com/stc04003/rocTree/blob/master/R/print.rocTree.R'><code>R/print.rocTree.R</code></a></small>
+    <div class="hidden name"><code>print.predict.rocTree.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>The <code>rocTree</code> package uses a Receiver Operating Characteristic (ROC) guided classification
-algorithm to grow prune survival trees and ensemble.</p>
+    <p>Print a predicted object</p>
     
     </div>
 
+    <pre class="usage"><span class='co'># S3 method for predict.rocTree</span>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
         
-    <h2 class="hasAnchor" id="introduction"><a class="anchor" href="#introduction"></a>Introduction</h2>
-
-    
-    <p>The <code>rocTree</code> package provides implementations to a unified framework for
-tree-structured analysis with censored survival outcomes.
-Different from many existing tree building algorithms,
-the <code>rocTree</code> package incorporates time-dependent covariates by constructing
-a time-invariant partition scheme on the survivor population.
-The partition-based risk prediction function is constructed using an algorithm guided by
-the Receiver Operating Characteristic (ROC) curve.
-The generalized time-dependent ROC curves for survival trees show that the
-target hazard function yields the highest ROC curve.
-The optimality of the target hazard function motivates us to use a weighted average of the
-time-dependent area under the curve on a set of time points to evaluate the prediction
-performance of survival trees and to guide splitting and pruning.
-Moreover, the <code>rocTree</code> package also offers a novel ensemble algorithm,
-where the ensemble is on unbiased martingale estimating equations.</p>
-    
-    <h2 class="hasAnchor" id="methods"><a class="anchor" href="#methods"></a>Methods</h2>
-
-    
-    <p>The package contains functions to construct ROC-guided survival trees and ensemble through
-the main function <code><a href='rocTree.html'>rocTree</a></code>.</p>
-    
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p><code><a href='rocTree.html'>rocTree</a></code></p></div>
-    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      
-      <li><a href="#introduction">Introduction</a></li>
-
-      <li><a href="#methods">Methods</a></li>
-
-      <li><a href="#see-also">See also</a></li>
-          </ul>
-
-    <h2>Author</h2>
-    <p><strong>Maintainer</strong>: Sy Han Chiou <a href='mailto:schiou@utdallas.edu'>schiou@utdallas.edu</a></p>
-<p>Authors:</p><ul>
-<li><p>Yifei Sun <a href='mailto:ys3072@cumc.columbia.edu'>ys3072@cumc.columbia.edu</a></p></li>
-<li><p>Mei-Cheng Wang <a href='mailto:mcwang@jhu.edu'>mcwang@jhu.edu</a></p></li>
-</ul>
-
+                </ul>
 
   </div>
 </div>
