@@ -53,7 +53,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/rocTree-forest.html">Fitting ROC-guided survival forest in `rocTree` package</a>
+      <a href="../articles/rocTree-ensemble.html">Fitting ROC-guided ensemble in `rocTree` package</a>
     </li>
     <li>
       <a href="../articles/rocTree-sim.html">Generating simulated data in `rocTree` package</a>
@@ -184,7 +184,7 @@ function (formula, data, id, subset, <span class="dt">ensemble =</span> <span cl
 &gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/system.time">system.time</a></span>(fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rocTree.html">rocTree</a></span>(<span class="kw">Surv</span>(Time, death) ~<span class="st"> </span>z1 +<span class="st"> </span>z2, <span class="dt">id =</span> id, <span class="dt">data =</span> dat, 
 +<span class="st">                            </span><span class="dt">ensemble =</span> <span class="ot">FALSE</span>, <span class="dt">control =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">numFold =</span> <span class="dv">0</span>)))
    user  system elapsed 
-  <span class="fl">0.016</span>   <span class="fl">0.000</span>   <span class="fl">0.017</span> </code></pre></div>
+  <span class="fl">0.016</span>   <span class="fl">0.000</span>   <span class="fl">0.018</span> </code></pre></div>
 <p>The function <code>rocTree</code> returns an object of S3 class with the following major components:</p>
 <ul>
 <li>
@@ -266,7 +266,7 @@ Root
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/system.time">system.time</a></span>(fit2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rocTree.html">rocTree</a></span>(<span class="kw">Surv</span>(Time, death) ~<span class="st"> </span>z1 +<span class="st"> </span>z2, <span class="dt">id =</span> id, <span class="dt">data =</span> dat, 
 +<span class="st">     </span><span class="dt">ensemble =</span> <span class="ot">FALSE</span>, <span class="dt">control =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">numFold =</span> <span class="dv">10</span>)))
    user  system elapsed 
-  <span class="fl">0.040</span>   <span class="fl">0.000</span>   <span class="fl">0.038</span> 
+  <span class="fl">0.036</span>   <span class="fl">0.004</span>   <span class="fl">0.037</span> 
 &gt;<span class="st"> </span>fit2
  ROC-guided survival tree
 

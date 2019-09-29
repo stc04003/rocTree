@@ -2,7 +2,7 @@ pandoc: 1.16.0.2
 pkgdown: 1.3.0
 pkgdown_sha: ~
 articles:
-  rocTree-forest: rocTree-forest.html
+  rocTree-ensemble: rocTree-ensemble.html
   rocTree-sim: rocTree-sim.html
   rocTree-tree: rocTree-tree.html
 

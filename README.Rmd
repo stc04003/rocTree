@@ -56,7 +56,7 @@ martingale estimating equations.
 
 * Package vignette on [simulating data used in examples](https://www.sychiou.com/rocTree/articles/rocTree-sim.html).
 * Package vignette on [growing time-invariant survival trees](https://www.sychiou.com/rocTree/articles/rocTree-tree.html).
-* Package vignette on [growing survival forests](https://www.sychiou.com/rocTree/articles/rocTree-forest.html).
+* Package vignette on [ensemble method](https://www.sychiou.com/rocTree/articles/rocTree-ensemble.html).
 
 ## Reference
 

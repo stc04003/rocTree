@@ -8,7 +8,6 @@
 \.Rproj$
 ^\.Rproj\.user$
 ^\.Rhistory$
-^tests$
 ^vignettes$
 ^\.git$
 cran-comments.md
@@ -33,4 +32,5 @@ cran-comments.md
 ^simulation$
 ^test$
 ^working$
+^inst$
 ~$
