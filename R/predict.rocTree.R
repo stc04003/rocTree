@@ -7,6 +7,8 @@
 #' If omitted, the fitted predictors are used.
 #' If the covariate observation time is not supplied, covariates will be treated as at baseline.
 #' @param type is an optional character string specifying whether to predict the survival probability or the cumulative hazard rate.
+#' @param control a list of control parameters. See 'details' for important special
+#' features of control parameters. See \code{\link{rocTree}} for more details.
 #' @param ... for future developments.
 #'
 #' @return Returns a \code{data.frame} of the predicted survival probabilities or cumulative hazard. 

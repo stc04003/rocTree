@@ -15,3 +15,5 @@ skipcheck*
 ^appveyor\.yml$
 ^\.travis\.yml$
 cran-comments.md
+[.]xlsx$
+[.]o$

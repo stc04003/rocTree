@@ -11,7 +11,7 @@
 #'
 #' @importFrom data.tree Node ToDataFrameTree 
 #' @export
-#' @examples inst/examples/ex_rocTree.R
+#' @example inst/examples/ex_rocTree.R
 print.rocTree <- function(x, digits = 5, tree = NULL, ...) {
     if (!is.rocTree(x)) stop("Response must be a \"rocTree\" object.")
     ## digits = getOption("digits")
@@ -88,6 +88,10 @@ printTree <- function(Frame, vNames, digits) {
 }
 
 #' Print a predicted object
+#'
+#' @param x is an \code{rocTree} object
+#' @noRd
+#' 
 #' @export
 print.predict.rocTree <- function(x, ...) {
     if (!is.predict.rocTree(x)) stop("Response must be a 'predict.rocTree' object")

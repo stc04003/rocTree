@@ -17,6 +17,8 @@
 
 \item{digits}{the number of digits to print.}
 
+\item{tree}{is an optional integer specifying the \eqn{n^{th}} tree in the forest to print.}
+
 \item{rankdir}{is a character string specifying the direction of the tree flow. The available options are top-to-bottom ("TB"), bottom-to-top ("BT"), left-to-right ("LR"),
 and right-to-left ("RL"); the default value is "TB".}
 

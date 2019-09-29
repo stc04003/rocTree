@@ -4,7 +4,7 @@
 #' Used to calculate the empirical density function from ecdf
 #'
 #' @noRd
-#' @export
+#' @keywords internal
 fecdf <- function(x) rank(x, ties.method = "max", na.last = "keep") / length(x)
 
 

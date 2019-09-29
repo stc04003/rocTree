@@ -47,6 +47,7 @@
 #'
 #' @example inst/examples/ex_rocTree.R
 #' @importFrom survival Surv
+#' @importFrom stats aggregate predict stepfun
 #' 
 rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCON", "CON"),
                     control = list()) {

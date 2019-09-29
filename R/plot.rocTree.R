@@ -1,3 +1,5 @@
+globalVariables(c("nd", "hazard", "Survival")) ## global variables for plot.rocTree
+
 #' Plotting an \code{rocTree} object
 #'
 #' Plots an \code{rocTree} object. The function returns a \code{dgr_graph} object that is rendered in the RStudio Viewer or survival/hazard estimate at terminal nodes.
@@ -16,12 +18,14 @@
 #' @param type is an optional character string specifying the type of plots to produce. The available options are "tree" for plotting survival tree (default),
 #' "survival" for plotting the estimated survival probabilities for the terminal nodes, and "hazard" for plotting the estimated hazard for the terminal nodes.
 #' The \code{dgr_graph} options are available only when \code{type = tree}.
+#' @param tree is an optional integer specifying the \eqn{n^{th}} tree in the forest to print.
 #' @param ... arguments to be passed to or from other methods.
 #'
 #' @seealso See \code{\link{rocTree}} for creating \code{rocTree} objects.
 #' @importFrom DiagrammeR export_graph render_graph
 #' @importFrom data.tree SetGraphStyle SetNodeStyle
 #' @importFrom ggplot2 labs geom_smooth
+#' 
 #' @export
 #' @example inst/examples/ex_plot_rocTree.R
 plot.rocTree <- function(x, output = c("graph", "visNetwork"),

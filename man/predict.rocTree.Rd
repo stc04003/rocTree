@@ -16,6 +16,9 @@ If the covariate observation time is not supplied, covariates will be treated as
 
 \item{type}{is an optional character string specifying whether to predict the survival probability or the cumulative hazard rate.}
 
+\item{control}{a list of control parameters. See 'details' for important special
+features of control parameters. See \code{\link{rocTree}} for more details.}
+
 \item{...}{for future developments.}
 }
 \value{
