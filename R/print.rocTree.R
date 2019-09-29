@@ -32,8 +32,8 @@ print.rocTree <- function(x, digits = 5, tree = NULL, ...) {
             cat("Number of variables tried at each split:           ", x$control$mtry, "\n")
             ## cat("Size of subsample:                           ", x$parm@fsz, "\n")
             cat("Number of time points to evaluate CON:             ", x$control$K, "\n")
-            cat("Min. number of baseline obs. in a splittable node: ", x$control$minNode1, "\n")
-            cat("Min. number of baseline obs. in a terminal node:   ", x$control$minSplit1, "\n")
+            cat("Min. number of baseline obs. in a splittable node: ", x$control$minSplitNode, "\n")
+            cat("Min. number of baseline obs. in a terminal node:   ", x$control$minSplitTerm, "\n")
         }
     }
 }
