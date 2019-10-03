@@ -1,5 +1,5 @@
 # rocTree 1.1.0
-  * Rewrite tree/ensemble algorithms with RCpp
+  * Rewrite tree/ensemble algorithms with Rcpp
 	* Significantly speed improvement
 
 # rocTree Version 1.0.0

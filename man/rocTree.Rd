@@ -52,7 +52,7 @@ when \code{numFold = 0}, the unpruned survival tree will be presented. The defau
   \item{\code{disc}}{is a logical vector specifying whether the covariates in \code{formula} are discrete (\code{TRUE}) or continuous (\code{FALSE}).
 The length of \code{disc} should be the same as the number of covariates in \code{formula}. When not specified, the \code{rocTree()} function assumes continuous covariates for all.}
   \item{\code{K}}{is the number of time points on which the concordance measure is computed.
-A less refined time grids (smaller \code{K}) generally yields faster speed but a very small \code{K} is not recommanded. The default value is 20.}
+A less refined time grids (smaller \code{K}) generally yields faster speed but a very small \code{K} is not recommended. The default value is 20.}
 }
 }
 \examples{

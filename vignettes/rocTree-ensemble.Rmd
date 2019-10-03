@@ -18,7 +18,7 @@ vignette: >
 knitr::opts_chunk$set(prompt = TRUE, comment = "", collapse = TRUE)
 ```	
 In this vignette, we demonstrate how to use the `rocTree()` function in __`rocTree`__ package
-to fit the emsemble method.
+to fit the ensemble method.
 
 ## Simulated data
 

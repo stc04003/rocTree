@@ -76,8 +76,8 @@ The function `rocTree` returns an object of S3 class with the following major co
   * `p` indicate which covariate was split at the node. 
   * `left` indicate the row number for the left child (if the current node splittable).
   * `right` indicate the row number for the right child (if the current node splittable).
-  * `cutVal` indicate the covaraite value (after transformation) being split at the node.
-  * `cutOrd` indicate the rank of the covaraite value being split at the node.
+  * `cutVal` indicate the covariate value (after transformation) being split at the node.
+  * `cutOrd` indicate the rank of the covariate value being split at the node.
   * `nd` indicates the node number in display.
   * `is.terminal` describe the node characteristic; `0` if a node is internal, `1` if a node is a terminal node.
 
