@@ -11,6 +11,11 @@
 #include "TreeGrow.h"
 #include "TreePrediction.h"
 
+#ifndef OLD_WIN_R_BUILD
+#include <thread>
+#include <chrono>
+#endif
+
 //' @noRd
 // [[Rcpp::export]]
 SEXP rocForest_C(const arma::mat& mat1f0,
