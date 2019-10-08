@@ -8,6 +8,8 @@
 
 #include "Data.h"
 
+typedef unsigned int uint;
+
 class Tree {
 public:
 

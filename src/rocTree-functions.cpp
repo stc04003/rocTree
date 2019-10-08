@@ -1,6 +1,7 @@
 #include <RcppArmadillo.h>
 
 // [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::plugins(cpp11)]]
 
 #include "Data.h"
 #include "Data2.h"
