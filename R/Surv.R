@@ -1,11 +1,10 @@
 #' \code{Surv} function imported from \code{survival}
 #'
-#' This is a placeholder.
-#' 
+#' This function is imported from the \code{survival} package. See
+#' \code{\link[survival]{Surv}}.
+#'
 #' @importFrom survival Surv
 #' @name export_Surv
-#' @noRd
 #' @aliases Surv
 #' @export Surv
 NULL
-
