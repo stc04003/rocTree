@@ -21,9 +21,6 @@ if a tree is not specified.}
 The function prints an \code{rocTree} object. It is a method for the generic function print of class "\code{rocTree}".
 }
 \examples{
-library(rocTree)
-library(survival)
-
 set.seed(1)
 dat <- simu(100, 0, 1.3)
 

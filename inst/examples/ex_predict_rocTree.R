@@ -1,6 +1,3 @@
-library(rocTree)
-library(survival)
-
 set.seed(1)
 dat <- simu(100, 0, 1.3)
 

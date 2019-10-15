@@ -56,9 +56,6 @@ A less refined time grids (smaller \code{K}) generally yields faster speed but a
 }
 }
 \examples{
-library(rocTree)
-library(survival)
-
 set.seed(1)
 dat <- simu(100, 0, 1.3)
 

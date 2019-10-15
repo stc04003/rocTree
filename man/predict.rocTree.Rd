@@ -28,9 +28,6 @@ Returns a \code{data.frame} of the predicted survival probabilities or cumulativ
 The function gives predicted values with a \code{rocTree} fit.
 }
 \examples{
-library(rocTree)
-library(survival)
-
 set.seed(1)
 dat <- simu(100, 0, 1.3)
 
