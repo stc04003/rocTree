@@ -43,10 +43,8 @@ The \code{dgr_graph} options are available only when \code{type = tree}.}
 Plots an \code{rocTree} object. The function returns a \code{dgr_graph} object that is rendered in the RStudio Viewer or survival/hazard estimate at terminal nodes.
 }
 \examples{
-set.seed(1)
-dat <- simu(100, 0, 1.3)
-
-fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE)
+data(simDat)
+fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = simDat, ensemble = FALSE)
 
 ## Plot tree
 plot(fit)

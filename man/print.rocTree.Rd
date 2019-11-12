@@ -21,17 +21,16 @@ if a tree is not specified.}
 The function prints an \code{rocTree} object. It is a method for the generic function print of class "\code{rocTree}".
 }
 \examples{
-set.seed(1)
-dat <- simu(100, 0, 1.3)
+data(simDat)
 
 ## Fitting a pruned survival tree
-rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE)
+rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = simDat, ensemble = FALSE)
 
 ## Fitting a unpruned survival tree
-rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE,
+rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = simDat, ensemble = FALSE,
         control = list(numFold = 0))
 
 ## Fitting the ensemble algorithm (default)
-rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = TRUE)
+rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = simDat, ensemble = TRUE)
 
 }

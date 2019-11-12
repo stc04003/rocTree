@@ -28,10 +28,8 @@ Returns a \code{data.frame} of the predicted survival probabilities or cumulativ
 The function gives predicted values with a \code{rocTree} fit.
 }
 \examples{
-set.seed(1)
-dat <- simu(100, 0, 1.3)
-
-fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE)
+data(simDat)
+fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = simDat, ensemble = FALSE)
 
 ## testing data
 newdat <- dplyr::tibble(Time = sort(unique(dat$Time)), 

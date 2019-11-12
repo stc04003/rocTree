@@ -1,7 +1,5 @@
-set.seed(1)
-dat <- simu(100, 0, 1.3)
-
-fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = dat, ensemble = FALSE)
+data(simDat)
+fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = simDat, ensemble = FALSE)
 
 ## Plot tree
 plot(fit)
