@@ -15,5 +15,5 @@
 #'
 #' @docType data
 #' @name simDat
-#' @format A data frame with 5050 rows and 5 variables. The data also consists records of 100 hypothetical individuals.
+#' @format A data frame with 5050 rows and 5 variables.
 NULL
