@@ -3,6 +3,4 @@
 *.o
 *.so
 *~
-results/
-*.RData
 *.pdf
