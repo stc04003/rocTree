@@ -1,0 +1,110 @@
+
+R version 3.6.1 (2019-07-05) -- "Action of the Toes"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ## Make sure email is already validated
+> library(rhub)
+> 
+> ## Assume we are in the inst/example folder
+> setwd("..")
+> setwd("..")
+> 
+> check_for_cran()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-bbe7202cee29465c8a6399dcfdeefaed
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-287acd8598b64649aab30de0adeb12eb
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-0d9bc88dc3bd4550afd0c0bbefb2c16d
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-ad6c961b2eb2431dac4104a18d7dc9cc
+> check_on_centos()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-8fc7371cfca44f429aacad3252fdb9b7
+> check_on_debian()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-9eda378de8a2448783c485684e4b5dba
+> check_on_fedora()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-40b7b0c683f14e54bf4ede902e9caa3b
+> check_on_linux()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-1ba5aa6dd4ed4d02838ac8cf8b4ee109
+> check_on_macos()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-93fc5404cdef473e8bd82b439f72cc8e
+> check_on_solaris()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-2f5a2c22c6e04b0eba662b01e1c89d49
+> check_on_ubuntu()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-31994205f1b24464a907b16535fdb3d3
+> check_on_windows()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-389971ffd5594bafbbefd0bf430a28ac
+> check_tzones()
+NULL
+> check_with_rdevel()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-468e2432cc5e429f9c39e120279e7c75
+> check_with_roldrel()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-9c3d192699524765914b7231a8397d2a
+> check_with_rpatched()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-150c01d74c4545a0b5fb215bf4e9ec2a
+> check_with_rrelease()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-250c50a9200b46c4b80b832345c6211b
+> check_with_sanitizers()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-47fdc840430e403d94d8013608a0b3aa
+> check_with_valgrind()
+─  Building package
+─  Uploading package
+─  Preparing build, see status at
+   https://builder.r-hub.io/status/rocTree_1.1.0.tar.gz-8f0ed505959f4a07b6edb35738c89f10
+> 
+> proc.time()
+   user  system elapsed 
+  3.884   1.408   8.901 

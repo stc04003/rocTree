@@ -1,6 +1,10 @@
 ## Make sure email is already validated
 library(rhub)
 
+## Assume we are in the inst/example folder
+setwd("..")
+setwd("..")
+
 check_for_cran()
 check_on_centos()
 check_on_debian()
