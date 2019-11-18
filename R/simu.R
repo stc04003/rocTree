@@ -50,8 +50,6 @@ globalVariables(c("n", "cen", "Y", "Time", "id", "z2", "e", "u", "y", "z2", "u1"
 #' @param summary a logical value indicating whether a brief data summary will be printed.
 #' 
 #' @importFrom stats delete.response rexp rgamma rnorm runif rbinom uniroot
-#' @importFrom tibble as.tibble
-#' @importFrom dplyr "%>%" arrange select
 #' @importFrom MASS mvrnorm
 #' @importFrom stats dist quantile rlnorm
 #' @importFrom survival Surv survfit
@@ -84,7 +82,7 @@ simu <- function(n, cen, scenario, summary = FALSE) {
     ## if (!(scenario %in% paste(rep(1:3, each = 6), rep(1:7, 3), sep = ".")))
     ##     stop("See ?simu for scenario definition.")
     if (n > 1e4) stop("Sample size too large.")
-    dat <- as.tibble(eval(parse(text = paste("sim", scenario, "(n = ", n, ", cen = ", cen, ")", sep = ""))))
+    dat <- as.data.frame(eval(parse(text = paste("sim", scenario, "(n = ", n, ", cen = ", cen, ")", sep = ""))))
     if (summary) {
         cat("Summary results:\n")
         cat("Number of subjects:", n)
@@ -104,7 +102,7 @@ simu <- function(n, cen, scenario, summary = FALSE) {
     }
     attr(dat, "scenario") <- scenario
     attr(dat, "prepBy") <- "rocSimu"
-    return(dat %>% arrange(id, Time))
+    return(dat[order(dat$id, dat$Time),])
 }
 
 #' Function to generate the true hazard used in the simulation.
@@ -118,7 +116,7 @@ simu <- function(n, cen, scenario, summary = FALSE) {
 trueHaz <- function(dat) {
     if (attr(dat, "prepBy") != "rocSimu") stop("Inputed data must be prepared by \"simu\".")
     scenario <- attr(dat, "scenario")
-    dat <- dat %>% arrange(Time)
+    dat <- dat[order(dat$Time),]
     cumHaz <- eval(parse(text = paste("trueHaz", scenario, "(dat)", sep = "")))
     approxfun(x = dat$Time, y = cumHaz, method = "constant", yleft = 0, yright = max(cumHaz))
 }
@@ -131,7 +129,7 @@ trueHaz <- function(dat) {
 trueSurv <- function(dat) {
     if (attr(dat, "prepBy") != "rocSimu") stop("Inputed data must be prepared by \"simu\".")
     scenario <- attr(dat, "scenario")
-    dat <- dat %>% arrange(Time)
+    dat <- dat[order(dat$Time),]
     Surv <- eval(parse(text = paste("trueSurv", scenario, "(dat)", sep = "")))
     approxfun(x = dat$Time, y = Surv, method = "constant", yleft = 1, yright = min(Surv))
 }
@@ -144,7 +142,7 @@ trueSurv <- function(dat) {
 simuTest <- function(dat) {
     if (attr(dat, "prepBy") != "rocSimu") stop("Inputed data must be prepared by \"simu\".")
     scenario <- attr(dat, "scenario")
-    dat <- as.tibble(eval(parse(text = paste("simuTest", scenario, "(dat)", sep = ""))))
+    dat <- as.data.frame(eval(parse(text = paste("simuTest", scenario, "(dat)", sep = ""))))
     attr(dat, "prepBy") <- "rocSimu"
     attr(dat, "scenario") <- scenario
     return(dat)
@@ -322,20 +320,20 @@ sim2.3 <- function(n, cen = 0) {
 #' @noRd
 
 trueHaz1.1 <- function(dat) {
-    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    z <- dat[,grep("z", names(dat))]
     dat$Time^2 * exp(as.matrix(z) %*% rep(c(-.5, .5), 5))
 }
 trueSurv1.1 <- function(dat) {
-    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    z <- dat[,grep("z", names(dat))]
     exp(-dat$Time^2 * exp(as.matrix(z) %*% rep(c(-.5, .5), 5)))
 }
     
 trueHaz1.2 <- function(dat) {
-    z <- dat %>% select(paste("z", 1:10, sep = ""))
-    dat$Time^2 * exp(2 * rowSums(z[,1:2]))
-}
+    z <- dat[,grep("z", names(dat))]
+    dat$Time^2 * exp(2 * rowSums(z[,1:2]))}
+
 trueSurv1.2 <- function(dat) {
-    z <- dat %>% select(paste("z", 1:10, sep = ""))
+    z <- dat[,grep("z", names(dat))]
     exp(-dat$Time^2 * exp(2 * rowSums(z[,1:2])))
 }
 
