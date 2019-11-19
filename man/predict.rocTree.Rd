@@ -33,8 +33,8 @@ fit <- rocTree(Surv(Time, death) ~ z1 + z2, id = id, data = simDat, ensemble = F
 
 ## testing data
 newdat <- data.frame(Time = sort(unique(simDat$Time)), 
-                     z1 = 1 * (Time < median(Time)), 
                      z2 = runif(1))
+newdat$z1 <- 1 * (newdat$Time < median(newdat$Time))
 newdat
 
 ## Predict survival 
