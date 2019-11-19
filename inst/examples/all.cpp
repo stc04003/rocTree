@@ -1949,7 +1949,15 @@ void Tree::findBeta(arma::vec& iconAll, arma::vec& beta, arma::uvec& sizeTree)
   while( L > 1 ) {
     arma::vec iconSmallerTree = iconAll.head( L-1 );
     //arma::vec alphaTT = (iconAll(L-1) - iconSmallerTree)/(  arma::regspace<arma::uvec>(L-1,-1,1)  ); // L - 1 to L - (L-1)
-    arma::vec alphaTT = (iconAll(L-1) - iconSmallerTree)/(pow(double(L),1) - arma::pow(arma::regspace<arma::vec>(1,L-1),1)  ); // L - 1 to L - (L-1)
+    arma::vec alphaTT = (iconAll(L-1) - iconSmallerTree)/(pow(L,1) - arma::pow(arma::regspace<arma::vec>(1,L-1),1)  ); // L - 1 to L - (L-1)
+    Rcpp::Rcout << "Result 1" << std::endl;
+    Rcpp::Rcout << (iconAll(L-1) - iconSmallerTree)/(arma::regspace(L - 1, 1)) << std::endl;
+    Rcpp::Rcout << "Result 2" << std::endl;
+    Rcpp::Rcout << (iconAll(L-1) - iconSmallerTree)/(pow(L,1) - arma::pow(arma::regspace<arma::vec>(1,L-1),1)) << std::endl;
+    Rcpp::Rcout << "alphaTT" << std::endl;
+    Rcpp::Rcout << alphaTT << std::endl; 
+    // arma::vec alphaTT = (iconAll(L-1) - iconSmallerTree)/(pow(L,1) - arma::pow(arma::regspace<arma::vec>(1,L-1),1)  ); // L - 1 to L - (L-1)
+    // arma::vec alphaTT = (iconAll(L-1) - iconSmallerTree)/(double(L) - arma::pow(arma::regspace<arma::vec>(1,L-1),1)  ); // L - 1 to L - (L-1)
     alpha(q) = alphaTT.min();
     sizeTree(q) = alphaTT.index_min() + 1;
     L = sizeTree(q);
