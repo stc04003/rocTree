@@ -59,7 +59,7 @@ The argument `control` defaults to a list with the following values:
 * `minSplitTerm` is the minimum number of baseline observations in each terminal node; the default value is `15`.
 * `minSplitNode` is the minimum number of baseline observations in each splitable node; the default value is `30`. 
 * `disc` is a logical vector specifying whether the covariates in `formula` are discrete (`TRUE`) or continuous (`FALSE`). The length of `disc` should be the same as the number of covariates in `formula`. When not specified, the `rocTree()` function assumes continuous covariates for all.
-* `K` is the number of time points on which the concordance measure is computed. A less refined time grids (smaller `K`) generally yields faster speed but a very small `K` is not recommanded. The default value is 20.
+* `K` is the number of time points on which the concordance measure is computed. A less refined time grids (smaller `K`) generally yields faster speed but a very small `K` is not recommended. The default value is 20.
 
 ## Growing a survival tree
 
