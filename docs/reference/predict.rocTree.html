@@ -169,38 +169,26 @@ features of control parameters. See <code><a href='rocTree.html'>rocTree</a></co
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>rocTree</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>survival</span>)
-
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>1</span>)
-<span class='no'>dat</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='simu.html'>simu</a></span>(<span class='fl'>100</span>, <span class='fl'>0</span>, <span class='fl'>1.3</span>)
-
-<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rocTree.html'>rocTree</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>dat</span>, <span class='kw'>ensemble</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/utils/topics/data'>data</a></span>(<span class='no'>simDat</span>)
+<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rocTree.html'>rocTree</a></span>(<span class='fu'><a href='export_Surv.html'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>simDat</span>, <span class='kw'>ensemble</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
 <span class='co'>## testing data</span>
-<span class='no'>newdat</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/reexports.html'>tibble</a></span>(<span class='kw'>Time</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sort'>sort</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/unique'>unique</a></span>(<span class='no'>dat</span>$<span class='no'>Time</span>)),
-                        <span class='kw'>z1</span> <span class='kw'>=</span> <span class='fl'>1</span> * (<span class='no'>Time</span> <span class='kw'>&lt;</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/median'>median</a></span>(<span class='no'>Time</span>)),
-                        <span class='kw'>z2</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Uniform'>runif</a></span>(<span class='fl'>1</span>))
-<span class='no'>newdat</span></div><div class='output co'>#&gt; <span style='color: #949494;'># A tibble: 100 x 3</span><span>
-#&gt;      Time    z1    z2
-#&gt;     </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span>
-#&gt; </span><span style='color: #BCBCBC;'> 1</span><span> 0.071</span><span style='text-decoration: underline;'>2</span><span>     1 0.690
-#&gt; </span><span style='color: #BCBCBC;'> 2</span><span> 0.086</span><span style='text-decoration: underline;'>2</span><span>     1 0.690
-#&gt; </span><span style='color: #BCBCBC;'> 3</span><span> 0.119      1 0.690
-#&gt; </span><span style='color: #BCBCBC;'> 4</span><span> 0.130      1 0.690
-#&gt; </span><span style='color: #BCBCBC;'> 5</span><span> 0.141      1 0.690
-#&gt; </span><span style='color: #BCBCBC;'> 6</span><span> 0.143      1 0.690
-#&gt; </span><span style='color: #BCBCBC;'> 7</span><span> 0.151      1 0.690
-#&gt; </span><span style='color: #BCBCBC;'> 8</span><span> 0.154      1 0.690
-#&gt; </span><span style='color: #BCBCBC;'> 9</span><span> 0.157      1 0.690
-#&gt; </span><span style='color: #BCBCBC;'>10</span><span> 0.159      1 0.690
-#&gt; </span><span style='color: #949494;'># … with 90 more rows</span><span></div><div class='input'>
+<span class='no'>newdat</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/data.frame'>data.frame</a></span>(<span class='kw'>Time</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sort'>sort</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/unique'>unique</a></span>(<span class='no'>simDat</span>$<span class='no'>Time</span>)),
+                     <span class='kw'>z2</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Uniform'>runif</a></span>(<span class='fl'>1</span>))
+<span class='no'>newdat</span>$<span class='no'>z1</span> <span class='kw'>&lt;-</span> <span class='fl'>1</span> * (<span class='no'>newdat</span>$<span class='no'>Time</span> <span class='kw'>&lt;</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/median'>median</a></span>(<span class='no'>newdat</span>$<span class='no'>Time</span>))
+<span class='fu'><a href='https://www.rdocumentation.org/packages/utils/topics/head'>head</a></span>(<span class='no'>newdat</span>)</div><div class='output co'>#&gt;         Time      z2 z1
+#&gt; 1 0.07122299 0.80568  1
+#&gt; 2 0.08619285 0.80568  1
+#&gt; 3 0.11940614 0.80568  1
+#&gt; 4 0.12982798 0.80568  1
+#&gt; 5 0.14131532 0.80568  1
+#&gt; 6 0.14313760 0.80568  1</div><div class='input'>
 <span class='co'>## Predict survival </span>
 <span class='no'>pred</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>(<span class='no'>fit</span>, <span class='no'>newdat</span>)
 <span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot</a></span>(<span class='no'>pred</span>)</div><div class='img'><img src='predict.rocTree-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'>## Predict hazard</span>
 <span class='no'>pred</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>(<span class='no'>fit</span>, <span class='no'>newdat</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"hazard"</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot</a></span>(<span class='no'>pred</span>)</div><div class='img'><img src='predict.rocTree-2.png' alt='' width='700' height='433' /></div></span></pre>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot</a></span>(<span class='no'>pred</span>)</div><div class='img'><img src='predict.rocTree-2.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
