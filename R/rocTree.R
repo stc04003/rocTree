@@ -107,6 +107,8 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
         unlist(lapply(split(.x, sequence(1:length(unique(.Y)))), fecdf)))
     .X[,disc == 0] <- apply(.X[,disc == 0, drop = FALSE], 2, function(x)
         findInterval(x, cutoff)) + 1
+    ## Remove transformation
+    ## .X <- .X[,rep(1, ncol(.X))]
     .hk <- rep(control$h, control$K)
     .hk[.tk < control$h] <- .tk[.tk < control$h]
     .mat1f <- t(.D0 * mapply(function(x,h) K2(x, .Y0, h) / h, .tk, .hk))
