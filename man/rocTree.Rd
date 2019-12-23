@@ -43,6 +43,7 @@ Fits a "\code{rocTree}" model.
 The argument "control" defaults to a list with the following values:
 \describe{
   \item{\code{tau}}{is the maximum follow-up time; default value is the 90th percentile of the unique observed survival times.}
+  \item{\code{maxTree}}{is the number of survival trees to be used in the ensemble method (when \code{ensemble = TRUE}).}
   \item{\code{maxNode}}{is the maximum node number allowed to be in the tree; the default value is 500.}
   \item{\code{numFold}}{is the number of folds used in the cross-validation. When \code{numFold > 0}, the survival tree will be pruned;
 when \code{numFold = 0}, the unpruned survival tree will be presented. The default value is 10.}
