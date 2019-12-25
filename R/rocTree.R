@@ -104,7 +104,7 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
     disc <- rep(control$disc, .p)
     cutoff <- (1:control$nc) / (control$nc + 1)
     .tk <- quantile(unique(.Y0[.D0 > 0]), 1:control$K / (control$K + 1), names = FALSE)
-    .eps <- c(sapply(split(.id2, .id2), function(.x) 1:length(.x)))
+    .eps <- unlist(sapply(split(.id2, .id2), function(.x) 1:length(.x)))
     .X[order(.Y), disc == 0] <- apply(.X[, disc == 0, drop = FALSE], 2, function(.x)
         unlist(lapply(split(.x, .eps), fecdf)))
     ## unlist(lapply(split(.x, sequence(1:length(unique(.Y)))), fecdf)))
