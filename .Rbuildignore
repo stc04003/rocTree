@@ -10,6 +10,7 @@
 ^\.Rhistory$
 ^vignettes$
 ^\.git$
+^inst$
 cran-comments.md
 [.]o$
 \.Rcheck$
@@ -32,4 +33,3 @@ cran-comments.md
 ^simulation$
 ^test$
 ^working$
-^inst$
