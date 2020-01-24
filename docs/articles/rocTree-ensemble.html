@@ -90,7 +90,7 @@
       <h1>Fitting ROC-guided ensemble in <code>rocTree</code> package</h1>
                         <h4 class="author">Sy Han (Steven) Chiou</h4>
             
-            <h4 class="date">2019-11-18</h4>
+            <h4 class="date">2020-01-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/stc04003/rocTree/blob/master/vignettes/rocTree-ensemble.Rmd"><code>vignettes/rocTree-ensemble.Rmd</code></a></small>
       <div class="hidden name"><code>rocTree-ensemble.Rmd</code></div>
@@ -104,63 +104,58 @@
 <h2 class="hasAnchor">
 <a href="#simulated-data" class="anchor"></a>Simulated data</h2>
 <p>We will demonstrate fitting ensembles with a simulated data prepared by the <a href="https://www.sychiou.com/rocTree/articles/rocTree-sim.html"><code>simu</code></a> function.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(rocTree)
-Registered S3 methods overwritten by <span class="st">'ggplot2'</span>:
-<span class="st">  </span>method         from 
-  [.quosures     rlang
-  c.quosures     rlang
-  print.quosures rlang
-&gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(<span class="dv">2019</span>)
-&gt;<span class="st"> </span>dat &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simu.html">simu</a></span>(<span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">cen =</span> <span class="fl">0.25</span>, <span class="dt">sce =</span> <span class="fl">2.1</span>, <span class="dt">summary =</span> <span class="ot">TRUE</span>)
-Summary results:
-Number of subjects:<span class="st"> </span><span class="dv">100</span>
-Number of subjects experienced death:<span class="st"> </span><span class="dv">77</span>
-Number of covariates:<span class="st"> </span><span class="dv">2</span>
-Time independent covaraites:<span class="st"> </span>z1.
-Time dependent covaraites:<span class="st"> </span>z2.
-Number of unique observation times:<span class="st"> </span><span class="dv">100</span>
-Median survival time:<span class="st"> </span><span class="fl">0.3213932</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(rocTree)
+<span class="op">&gt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(<span class="dv">2019</span>)
+<span class="op">&gt;</span><span class="st"> </span>dat &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simu.html">simu</a></span>(<span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">cen =</span> <span class="fl">0.25</span>, <span class="dt">sce =</span> <span class="fl">2.1</span>, <span class="dt">summary =</span> <span class="ot">TRUE</span>)
+Summary results<span class="op">:</span>
+Number of subjects<span class="op">:</span><span class="st"> </span><span class="dv">100</span>
+Number of subjects experienced death<span class="op">:</span><span class="st"> </span><span class="dv">77</span>
+Number of covariates<span class="op">:</span><span class="st"> </span><span class="dv">2</span>
+Time independent covaraites<span class="op">:</span><span class="st"> </span>z1.
+Time dependent covaraites<span class="op">:</span><span class="st"> </span>z2.
+Number of unique observation times<span class="op">:</span><span class="st"> </span><span class="dv">100</span>
+Median survival time<span class="op">:</span><span class="st"> </span><span class="fl">0.3213932</span></code></pre></div>
 </div>
 <div id="the-ensembles" class="section level2">
 <h2 class="hasAnchor">
 <a href="#the-ensembles" class="anchor"></a>The ensembles</h2>
 <p>The ensemble method can be easily called by setting <code>ensemble = TRUE</code> (default) when fitting a <code><a href="../reference/rocTree.html">rocTree()</a></code>. Ensemble method improve the variance reduction of bagging by reducing the correlation between the trees via random selection of predictors in the tree- growing process. In the following, we apply the ensemble method with fully grown trees with small terminal nodes and without pruning. We first load the <code>survival</code> package to enable <code>Surv</code>. A total of 500 survival trees can be grown as follow:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(survival)
-&gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/system.time">system.time</a></span>(fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rocTree.html">rocTree</a></span>(<span class="kw"><a href="../reference/export_Surv.html">Surv</a></span>(Time, death) ~<span class="st"> </span>z1 +<span class="st"> </span>z2, <span class="dt">id =</span> id, <span class="dt">data =</span> dat, 
-+<span class="st">     </span><span class="dt">ensemble =</span> <span class="ot">TRUE</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(survival)
+<span class="op">&gt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/system.time">system.time</a></span>(fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rocTree.html">rocTree</a></span>(<span class="kw"><a href="../reference/export_Surv.html">Surv</a></span>(Time, death) <span class="op">~</span><span class="st"> </span>z1 <span class="op">+</span><span class="st"> </span>z2, <span class="dt">id =</span> id, <span class="dt">data =</span> dat, 
+<span class="op">+</span><span class="st">     </span><span class="dt">ensemble =</span> <span class="ot">TRUE</span>))
    user  system elapsed 
-  <span class="fl">1.380</span>   <span class="fl">0.016</span>   <span class="fl">1.392</span> </code></pre></div>
+  <span class="fl">0.992</span>   <span class="fl">0.012</span>   <span class="fl">1.015</span> </code></pre></div>
 <p>Some of the important parameters can be printed directly.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span>fit
-ROC-guided ensembles
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span>fit
+ROC<span class="op">-</span>guided ensembles
 
-Call:
-<span class="st"> </span><span class="kw"><a href="../reference/rocTree.html">rocTree</a></span>(<span class="dt">formula =</span> <span class="kw"><a href="../reference/export_Surv.html">Surv</a></span>(Time, death) ~<span class="st"> </span>z1 +<span class="st"> </span>z2, <span class="dt">data =</span> dat, <span class="dt">id =</span> id,      <span class="dt">ensemble =</span> <span class="ot">TRUE</span>) 
+Call<span class="op">:</span>
+<span class="st"> </span><span class="kw"><a href="../reference/rocTree.html">rocTree</a></span>(<span class="dt">formula =</span> <span class="kw"><a href="../reference/export_Surv.html">Surv</a></span>(Time, death) <span class="op">~</span><span class="st"> </span>z1 <span class="op">+</span><span class="st"> </span>z2, <span class="dt">data =</span> dat, <span class="dt">id =</span> id,      <span class="dt">ensemble =</span> <span class="ot">TRUE</span>) 
 
-Sample size:<span class="st">                                        </span>
-Number of independent variables:<span class="st">                    </span><span class="dv">100</span> 
-Number of trees:<span class="st">                                    </span><span class="dv">500</span> 
-Split rule:<span class="st">                                         </span>dCON 
-Number of variables tried at each split:<span class="st">            </span><span class="dv">2</span> 
-Number of time points to evaluate CON:<span class="st">              </span><span class="dv">20</span> 
-Min. number of baseline obs. in a splittable node:<span class="st">  </span><span class="dv">30</span> 
-Min. number of baseline obs. in a terminal node:<span class="st">    </span><span class="dv">15</span> </code></pre></div>
+Sample size<span class="op">:</span><span class="st">                                        </span>
+Number of independent variables<span class="op">:</span><span class="st">                    </span><span class="dv">100</span> 
+Number of trees<span class="op">:</span><span class="st">                                    </span><span class="dv">500</span> 
+Split rule<span class="op">:</span><span class="st">                                         </span>dCON 
+Number of variables tried at each split<span class="op">:</span><span class="st">            </span><span class="dv">2</span> 
+Number of time points to evaluate CON<span class="op">:</span><span class="st">              </span><span class="dv">20</span> 
+Min. number of baseline obs. <span class="cf">in</span> a splittable node<span class="op">:</span><span class="st">  </span><span class="dv">30</span> 
+Min. number of baseline obs. <span class="cf">in</span> a terminal node<span class="op">:</span><span class="st">    </span><span class="dv">15</span> </code></pre></div>
 <p>The function <code>rocTree</code> returns an object of S3 class. The 500 survival trees are stored in <code>fit$trees</code>. These survival trees can be printed and plotted with the generic function <code>print</code> and <code>plot</code>, respectively. For example, the first of the 500 survival trees can be printed/plotted as below.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(fit, <span class="dt">tree =</span> <span class="dv">1</span>)
- ROC-guided survival tree
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(fit, <span class="dt">tree =</span> <span class="dv">1</span>)
+ ROC<span class="op">-</span>guided survival tree
 
  node<span class="er">)</span>, split
-   *<span class="st"> </span>denotes terminal node
+   <span class="op">*</span><span class="st"> </span>denotes terminal node
   
 Root                          
- ¦--<span class="dv">2</span><span class="er">)</span> z1 &lt;=<span class="st"> </span><span class="fl">0.51741</span>          
- ¦   ¦--<span class="dv">4</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.60199</span>*<span class="st">     </span>
-<span class="st"> </span>¦   °--<span class="dv">5</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.60199</span>*<span class="st">      </span>
-<span class="st"> </span>°--<span class="dv">3</span><span class="er">)</span> z1 &gt;<span class="st"> </span><span class="fl">0.51741</span>           
-     ¦--<span class="dv">6</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.85075</span>      
-     ¦   ¦--<span class="dv">12</span><span class="er">)</span> z2 &lt;=<span class="st"> </span><span class="fl">0.29851</span>*
-<span class="st">     </span>¦   °--<span class="dv">13</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.29851</span>*<span class="st"> </span>
-<span class="st">     </span>°--<span class="dv">7</span><span class="er">)</span> z2 &gt;<span class="st"> </span><span class="fl">0.85075</span>*<span class="st">      </span>
+ ¦<span class="op">--</span><span class="dv">2</span><span class="er">)</span> z1 <span class="op">&lt;=</span><span class="st"> </span><span class="fl">0.51741</span>          
+ ¦   ¦<span class="op">--</span><span class="dv">4</span><span class="er">)</span> z2 <span class="op">&lt;=</span><span class="st"> </span><span class="fl">0.60199</span><span class="op">*</span><span class="st">     </span>
+<span class="st"> </span>¦   °<span class="op">--</span><span class="dv">5</span><span class="er">)</span> z2 <span class="op">&gt;</span><span class="st"> </span><span class="fl">0.60199</span><span class="op">*</span><span class="st">      </span>
+<span class="st"> </span>°<span class="op">--</span><span class="dv">3</span><span class="er">)</span> z1 <span class="op">&gt;</span><span class="st"> </span><span class="fl">0.51741</span>           
+     ¦<span class="op">--</span><span class="dv">6</span><span class="er">)</span> z2 <span class="op">&lt;=</span><span class="st"> </span><span class="fl">0.85075</span>      
+     ¦   ¦<span class="op">--</span><span class="dv">12</span><span class="er">)</span> z2 <span class="op">&lt;=</span><span class="st"> </span><span class="fl">0.29851</span><span class="op">*</span>
+<span class="st">     </span>¦   °<span class="op">--</span><span class="dv">13</span><span class="er">)</span> z2 <span class="op">&gt;</span><span class="st"> </span><span class="fl">0.29851</span><span class="op">*</span><span class="st"> </span>
+<span class="st">     </span>°<span class="op">--</span><span class="dv">7</span><span class="er">)</span> z2 <span class="op">&gt;</span><span class="st"> </span><span class="fl">0.85075</span><span class="op">*</span><span class="st">      </span>
 <span class="er">&gt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(fit, <span class="dt">tree =</span> <span class="dv">1</span>)</code></pre></div>
 <p></p>
 <div id="htmlwidget-c29becf8f97022ea6065" style="width:700px;height:432.632880098888px;" class="grViz html-widget"></div>
@@ -170,13 +165,13 @@ Root
 <h2 class="hasAnchor">
 <a href="#prediction" class="anchor"></a>Prediction</h2>
 <p>Suppose we have a new data that is generated as below:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span>newdat &lt;-<span class="st"> </span>dplyr::<span class="kw">tibble</span>(<span class="dt">Time =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sort">sort</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/unique">unique</a></span>(dat$Time)), 
-+<span class="st">                         </span><span class="dt">z1 =</span> <span class="dv">1</span> *<span class="st"> </span>(Time &lt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/median">median</a></span>(Time)), 
-+<span class="st">                         </span><span class="dt">z2 =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/Uniform">runif</a></span>(<span class="dv">1</span>))
-&gt;<span class="st"> </span>newdat
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span>newdat &lt;-<span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/reexports.html">tibble</a></span>(<span class="dt">Time =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sort">sort</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/unique">unique</a></span>(dat<span class="op">$</span>Time)), 
+<span class="op">+</span><span class="st">                         </span><span class="dt">z1 =</span> <span class="dv">1</span> <span class="op">*</span><span class="st"> </span>(Time <span class="op">&lt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/median">median</a></span>(Time)), 
+<span class="op">+</span><span class="st">                         </span><span class="dt">z2 =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/Uniform">runif</a></span>(<span class="dv">1</span>))
+<span class="op">&gt;</span><span class="st"> </span>newdat
 <span class="co"># A tibble: 100 x 3</span>
      Time    z1    z2
-    &lt;dbl&gt;<span class="st"> </span><span class="er">&lt;</span>dbl&gt;<span class="st"> </span><span class="er">&lt;</span>dbl&gt;
+    <span class="op">&lt;</span>dbl<span class="op">&gt;</span><span class="st"> </span><span class="er">&lt;</span>dbl<span class="op">&gt;</span><span class="st"> </span><span class="er">&lt;</span>dbl<span class="op">&gt;</span>
 <span class="st"> </span><span class="dv">1</span> <span class="fl">0.0168</span>     <span class="dv">1</span> <span class="fl">0.640</span>
  <span class="dv">2</span> <span class="fl">0.0315</span>     <span class="dv">1</span> <span class="fl">0.640</span>
  <span class="dv">3</span> <span class="fl">0.0417</span>     <span class="dv">1</span> <span class="fl">0.640</span>
@@ -189,24 +184,22 @@ Root
 <span class="dv">10</span> <span class="fl">0.105</span>      <span class="dv">1</span> <span class="fl">0.640</span>
 <span class="co"># … with 90 more rows</span></code></pre></div>
 <p>The predicted survival curve can be plotted with the following codes.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span>pred &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/predict">predict</a></span>(fit, newdat)
-&gt;<span class="st"> </span>pred
- Fitted survival probabilities:
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span>pred &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/predict">predict</a></span>(fit, newdat)
+<span class="op">&gt;</span><span class="st"> </span>pred
+ Fitted survival probabilities<span class="op">:</span>
 <span class="st">        </span>Time  Survival
 <span class="dv">1</span> <span class="fl">0.01676500</span> <span class="fl">1.0000000</span>
 <span class="dv">2</span> <span class="fl">0.03145121</span> <span class="fl">1.0000000</span>
 <span class="dv">3</span> <span class="fl">0.04165134</span> <span class="fl">0.9881193</span>
 <span class="dv">4</span> <span class="fl">0.06056327</span> <span class="fl">0.9576287</span>
 <span class="dv">5</span> <span class="fl">0.07110612</span> <span class="fl">0.9234714</span>
-&gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(pred)</code></pre></div>
+<span class="op">&gt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(pred)</code></pre></div>
 <p><img src="rocTree-ensemble_files/figure-html/pred-1.png" width="700"></p>
-<div id="refs" class="references">
-
-</div>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+
         <div id="tocnav">
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>

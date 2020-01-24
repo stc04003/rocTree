@@ -8,11 +8,13 @@
 
 <title>Roc-guided survival trees — rocTree • rocTree</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -30,10 +32,11 @@
 
 
 
-<meta property="og:title" content="Roc-guided survival trees — rocTree" />
 
+<meta property="og:title" content="Roc-guided survival trees — rocTree" />
 <meta property="og:description" content="Fits a &quot;rocTree&quot; model." />
 <meta name="twitter:card" content="summary" />
+
 
 
 
@@ -100,7 +103,6 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/stc04003/rocTree">
@@ -126,14 +128,12 @@
     </div>
 
     <div class="ref-description">
-    
     <p>Fits a "<code>rocTree</code>" model.</p>
-    
     </div>
 
     <pre class="usage"><span class='fu'>rocTree</span>(<span class='no'>formula</span>, <span class='no'>data</span>, <span class='no'>id</span>, <span class='no'>subset</span>, <span class='kw'>ensemble</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>splitBy</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"dCON"</span>,
   <span class='st'>"CON"</span>), <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>())</pre>
-    
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -177,15 +177,15 @@ in concordance measure, respectively. The default value is 'dCON'.</p></td>
 features of control parameters.</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>An object of S4 class "<code>rocTree</code>" representig the fit, with the following components:</p>
-    
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The argument "control" defaults to a list with the following values:</p><dl class='dl-horizontal'>
   <dt><code>tau</code></dt><dd><p>is the maximum follow-up time; default value is the 90th percentile of the unique observed survival times.</p></dd>
+  <dt><code>maxTree</code></dt><dd><p>is the number of survival trees to be used in the ensemble method (when <code>ensemble = TRUE</code>).</p></dd>
   <dt><code>maxNode</code></dt><dd><p>is the maximum node number allowed to be in the tree; the default value is 500.</p></dd>
   <dt><code>numFold</code></dt><dd><p>is the number of folds used in the cross-validation. When <code>numFold &gt; 0</code>, the survival tree will be pruned;
 when <code>numFold = 0</code>, the unpruned survival tree will be presented. The default value is 10.</p></dd>
@@ -197,15 +197,12 @@ The length of <code>disc</code> should be the same as the number of covariates i
   <dt><code>K</code></dt><dd><p>is the number of time points on which the concordance measure is computed.
 A less refined time grids (smaller <code>K</code>) generally yields faster speed but a very small <code>K</code> is not recommended. The default value is 20.</p></dd>
 </dl>
-    
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Sun Y. and Wang, M.C. (2018+). ROC-guided classification and survival trees. <em>Technical report</em>.</p>
-    
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>See <code><a href='print.rocTree.html'>print.rocTree</a></code> and <code><a href='plot.rocTree.html'>plot.rocTree</a></code> for printing and plotting an <code>rocTree</code>, respectively.</p></div>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/utils/topics/data'>data</a></span>(<span class='no'>simDat</span>)
@@ -239,35 +236,19 @@ A less refined time grids (smaller <code>K</code>) generally yields faster speed
 #&gt;      ¦   °--13) z2 &gt; 0.22388* 
 #&gt;      °--7) z2 &gt; 0.60199*      
 #&gt; </div><div class='input'>
+</div><span class='co'># NOT RUN {</span>
 <span class='co'>## Fitting the ensemble algorithm (default)</span>
-<span class='fu'>rocTree</span>(<span class='fu'><a href='export_Surv.html'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>simDat</span>, <span class='kw'>ensemble</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; ROC-guided ensembles
-#&gt; 
-#&gt; Call:
-#&gt;  rocTree(formula = Surv(Time, death) ~ z1 + z2, data = simDat,      id = id, ensemble = TRUE) 
-#&gt; 
-#&gt; Sample size:                                        
-#&gt; Number of independent variables:                    100 
-#&gt; Number of trees:                                    500 
-#&gt; Split rule:                                         dCON 
-#&gt; Number of variables tried at each split:            2 
-#&gt; Number of time points to evaluate CON:              20 
-#&gt; Min. number of baseline obs. in a splittable node:  30 
-#&gt; Min. number of baseline obs. in a terminal node:    15 </div><div class='input'>
-</div></pre>
+<span class='fu'>rocTree</span>(<span class='fu'><a href='export_Surv.html'>Surv</a></span>(<span class='no'>Time</span>, <span class='no'>death</span>) ~ <span class='no'>z1</span> + <span class='no'>z2</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='no'>id</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>simDat</span>, <span class='kw'>ensemble</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+<span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
       <li><a href="#value">Value</a></li>
-
       <li><a href="#details">Details</a></li>
-
       <li><a href="#references">References</a></li>
-
       <li><a href="#see-also">See also</a></li>
-      
       <li><a href="#examples">Examples</a></li>
     </ul>
 

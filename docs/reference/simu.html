@@ -8,11 +8,13 @@
 
 <title>Function to generate simulated data used in the manuscript. — simu • rocTree</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -30,8 +32,8 @@
 
 
 
-<meta property="og:title" content="Function to generate simulated data used in the manuscript. — simu" />
 
+<meta property="og:title" content="Function to generate simulated data used in the manuscript. — simu" />
 <meta property="og:description" content="This function is used to generate simulated data under various settings.
 Let \(Z\) be a \(p\)-dimensional vector of possible time-dependent covariates and
 \(\beta\) be the vector of regression coefficient.
@@ -72,6 +74,7 @@ The censoring times are generated from an independent uniform distribution over 
 where c was tuned to yield censoring percentages of 25% and 50%.
 " />
 <meta name="twitter:card" content="summary" />
+
 
 
 
@@ -138,7 +141,6 @@ where c was tuned to yield censoring percentages of 25% and 50%.
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/stc04003/rocTree">
@@ -164,7 +166,6 @@ where c was tuned to yield censoring percentages of 25% and 50%.
     </div>
 
     <div class="ref-description">
-    
     <p>This function is used to generate simulated data under various settings.
 Let \(Z\) be a \(p\)-dimensional vector of possible time-dependent covariates and
 \(\beta\) be the vector of regression coefficient.
@@ -204,7 +205,6 @@ $$\lambda(t|Z(t)) = 0.1 \cdot[1 + \sin\{Z_1(t) + Z_2\}],$$ where \(Z_1(t) = 2kt\
 The censoring times are generated from an independent uniform distribution over [0, c],
 where c was tuned to yield censoring percentages of 25% and 50%.
 </dl>
-    
     </div>
 
     <pre class="usage"><span class='fu'>simu</span>(<span class='no'>n</span>, <span class='no'>cen</span>, <span class='no'>scenario</span>, <span class='kw'>summary</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
@@ -212,7 +212,7 @@ where c was tuned to yield censoring percentages of 25% and 50%.
 <span class='fu'>trueHaz</span>(<span class='no'>dat</span>)
 
 <span class='fu'>trueSurv</span>(<span class='no'>dat</span>)</pre>
-    
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -238,7 +238,7 @@ This indicates the simulation scenario noted above.</p></td>
       <td><p>is a data.frame prepared by <code>simu</code>.</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p><code>simu</code> returns a <code>data.frame</code>.
@@ -249,7 +249,6 @@ The returned data.frame consists of columns:</p><dl class='dl-horizontal'>
 <dt>z1--z10</dt><dd><p>is the possible time-independent covariate.</p></dd>
 <dt>k, b, U</dt><dd><p>are the latent variables used to generate $Z_1(t)$ in Scenario 2.1 -- 2.5.</p></dd>
 </dl><p>The returned data.frame can be supply to <code>trueHaz</code> and <code>trueSurv</code> to generate the true cumulative hazard function and the survival function, respectively.</p>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>1</span>)
@@ -443,9 +442,7 @@ The returned data.frame consists of columns:</p><dl class='dl-horizontal'>
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
       <li><a href="#value">Value</a></li>
-      
       <li><a href="#examples">Examples</a></li>
     </ul>
 

@@ -89,7 +89,7 @@
       <h1>Generating simulated data in <code>rocTree</code> package</h1>
                         <h4 class="author">Sy Han (Steven) Chiou</h4>
             
-            <h4 class="date">2019-11-18</h4>
+            <h4 class="date">2020-01-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/stc04003/rocTree/blob/master/vignettes/rocTree-sim.Rmd"><code>vignettes/rocTree-sim.Rmd</code></a></small>
       <div class="hidden name"><code>rocTree-sim.Rmd</code></div>
@@ -138,14 +138,9 @@
 <h2 class="hasAnchor">
 <a href="#the-simu-function" class="anchor"></a>The <code>simu</code> function</h2>
 <p>The <code>simu</code> function can be used to generate survival times from the above scenarios. The complete list of arguments in <code>simu</code> are as follow:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(rocTree)
-Registered S3 methods overwritten by <span class="st">'ggplot2'</span>:
-<span class="st">  </span>method         from 
-  [.quosures     rlang
-  c.quosures     rlang
-  print.quosures rlang
-&gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/args">args</a></span>(simu)
-function (n, cen, scenario, <span class="dt">summary =</span> <span class="ot">FALSE</span>) 
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(rocTree)
+<span class="op">&gt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/args">args</a></span>(simu)
+<span class="cf">function</span> (n, cen, scenario, <span class="dt">summary =</span> <span class="ot">FALSE</span>) 
 <span class="ot">NULL</span></code></pre></div>
 <p>The arguments are as follows</p>
 <ul>
@@ -176,16 +171,16 @@ function (n, cen, scenario, <span class="dt">summary =</span> <span class="ot">F
 <h2 class="hasAnchor">
 <a href="#example-1" class="anchor"></a>Example 1</h2>
 <p>We first generate a small dataset with <code>n = 5</code>, 25% censoring rate, under scenario 1.2.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(<span class="dv">2019</span>)
-&gt;<span class="st"> </span>dat1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simu.html">simu</a></span>(<span class="dt">n =</span> <span class="dv">5</span>, <span class="dt">cen =</span> <span class="fl">0.25</span>, <span class="dt">sce =</span> <span class="fl">1.2</span>, <span class="dt">summary =</span> <span class="ot">TRUE</span>)
-Summary results:
-Number of subjects:<span class="st"> </span><span class="dv">5</span>
-Number of subjects experienced death:<span class="st"> </span><span class="dv">4</span>
-Number of covariates:<span class="st"> </span><span class="dv">10</span>
-Time independent covaraites:<span class="st"> </span>z1 z2 z3 z4 z5 z6 z7 z8 z9 z10
-Number of unique observation times:<span class="st"> </span><span class="dv">5</span>
-Median survival time:<span class="st"> </span><span class="fl">0.4231</span>
-&gt;<span class="st"> </span>dat1
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(<span class="dv">2019</span>)
+<span class="op">&gt;</span><span class="st"> </span>dat1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simu.html">simu</a></span>(<span class="dt">n =</span> <span class="dv">5</span>, <span class="dt">cen =</span> <span class="fl">0.25</span>, <span class="dt">sce =</span> <span class="fl">1.2</span>, <span class="dt">summary =</span> <span class="ot">TRUE</span>)
+Summary results<span class="op">:</span>
+Number of subjects<span class="op">:</span><span class="st"> </span><span class="dv">5</span>
+Number of subjects experienced death<span class="op">:</span><span class="st"> </span><span class="dv">4</span>
+Number of covariates<span class="op">:</span><span class="st"> </span><span class="dv">10</span>
+Time independent covaraites<span class="op">:</span><span class="st"> </span>z1 z2 z3 z4 z5 z6 z7 z8 z9 z10
+Number of unique observation times<span class="op">:</span><span class="st"> </span><span class="dv">5</span>
+Median survival time<span class="op">:</span><span class="st"> </span><span class="fl">0.4231</span>
+<span class="op">&gt;</span><span class="st"> </span>dat1
    id      Time death         z1          z2        z3         z4
 <span class="dv">1</span>   <span class="dv">1</span> <span class="fl">0.0931342</span>     <span class="dv">0</span> <span class="fl">0.76990155</span> <span class="fl">0.043218804</span> <span class="fl">0.7698180</span> <span class="fl">0.63545297</span>
 <span class="dv">2</span>   <span class="dv">1</span> <span class="fl">0.1464104</span>     <span class="dv">0</span> <span class="fl">0.76990155</span> <span class="fl">0.043218804</span> <span class="fl">0.7698180</span> <span class="fl">0.63545297</span>
@@ -218,7 +213,7 @@ Median survival time:<span class="st"> </span><span class="fl">0.4231</span>
 <span class="dv">13</span> <span class="fl">0.1710192</span> <span class="fl">0.62405627</span> <span class="fl">0.170301794</span> <span class="fl">0.01181090</span> <span class="fl">0.6711542</span> <span class="fl">0.2094706</span>
 <span class="dv">14</span> <span class="fl">0.1710192</span> <span class="fl">0.62405627</span> <span class="fl">0.170301794</span> <span class="fl">0.01181090</span> <span class="fl">0.6711542</span> <span class="fl">0.2094706</span>
 <span class="dv">15</span> <span class="fl">0.1318687</span> <span class="fl">0.45561955</span> <span class="fl">0.038503417</span> <span class="fl">0.78263931</span> <span class="fl">0.8071130</span> <span class="fl">0.1992966</span>
-&gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/class">class</a></span>(dat1)
+<span class="op">&gt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/class">class</a></span>(dat1)
 [<span class="dv">1</span>] <span class="st">"data.frame"</span></code></pre></div>
 <p>In this scenario, the covariate information was observed at <code>Time = 0.0931</code>, <code>0.146</code>, <code>0.340</code>, and <code>0.423</code> for subject #1, who died (<code>death = 1</code>) at <code>Time = 0.423</code>. Since the covariate are time-independent, its values is invariant to time.</p>
 </div>
@@ -226,17 +221,17 @@ Median survival time:<span class="st"> </span><span class="fl">0.4231</span>
 <h2 class="hasAnchor">
 <a href="#example-2" class="anchor"></a>Example 2</h2>
 <p>The following codes generate a small dataset with <code>n = 5</code>, 50% censoring rate, under scenario 2.1.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(<span class="dv">2019</span>)
-&gt;<span class="st"> </span>dat2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simu.html">simu</a></span>(<span class="dt">n =</span> <span class="dv">5</span>, <span class="dt">cen =</span> <span class="fl">0.5</span>, <span class="dt">sce =</span> <span class="fl">2.1</span>, <span class="dt">summary =</span> <span class="ot">TRUE</span>)
-Summary results:
-Number of subjects:<span class="st"> </span><span class="dv">5</span>
-Number of subjects experienced death:<span class="st"> </span><span class="dv">1</span>
-Number of covariates:<span class="st"> </span><span class="dv">2</span>
-Time independent covaraites:<span class="st"> </span>z1.
-Time dependent covaraites:<span class="st"> </span>z2.
-Number of unique observation times:<span class="st"> </span><span class="dv">5</span>
-Median survival time:<span class="st"> </span><span class="ot">NA</span>
-&gt;<span class="st"> </span>dat2
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(<span class="dv">2019</span>)
+<span class="op">&gt;</span><span class="st"> </span>dat2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simu.html">simu</a></span>(<span class="dt">n =</span> <span class="dv">5</span>, <span class="dt">cen =</span> <span class="fl">0.5</span>, <span class="dt">sce =</span> <span class="fl">2.1</span>, <span class="dt">summary =</span> <span class="ot">TRUE</span>)
+Summary results<span class="op">:</span>
+Number of subjects<span class="op">:</span><span class="st"> </span><span class="dv">5</span>
+Number of subjects experienced death<span class="op">:</span><span class="st"> </span><span class="dv">1</span>
+Number of covariates<span class="op">:</span><span class="st"> </span><span class="dv">2</span>
+Time independent covaraites<span class="op">:</span><span class="st"> </span>z1.
+Time dependent covaraites<span class="op">:</span><span class="st"> </span>z2.
+Number of unique observation times<span class="op">:</span><span class="st"> </span><span class="dv">5</span>
+Median survival time<span class="op">:</span><span class="st"> </span><span class="ot">NA</span>
+<span class="op">&gt;</span><span class="st"> </span>dat2
    id        Time death z1         z2 e          u
 <span class="dv">1</span>   <span class="dv">1</span> <span class="fl">0.008826172</span>     <span class="dv">0</span>  <span class="dv">0</span> <span class="fl">0.76990155</span> <span class="dv">0</span> <span class="fl">0.10792722</span>
 <span class="dv">2</span>   <span class="dv">1</span> <span class="fl">0.101672586</span>     <span class="dv">1</span>  <span class="dv">0</span> <span class="fl">0.76990155</span> <span class="dv">0</span> <span class="fl">0.10792722</span>
@@ -254,13 +249,11 @@ Median survival time:<span class="st"> </span><span class="ot">NA</span>
 <span class="dv">14</span>  <span class="dv">5</span> <span class="fl">0.136815371</span>     <span class="dv">0</span>  <span class="dv">1</span> <span class="fl">0.05048374</span> <span class="dv">1</span> <span class="fl">0.43387271</span>
 <span class="dv">15</span>  <span class="dv">5</span> <span class="fl">0.474006872</span>     <span class="dv">0</span>  <span class="dv">0</span> <span class="fl">0.05048374</span> <span class="dv">1</span> <span class="fl">0.43387271</span></code></pre></div>
 <p>In this scenario, the covariate information was observed at <code>Time = 0.00883</code> and <code>0.102</code> for subject #1, who died (<code>death = 1</code>) at <code>Time = 0.102</code>. Similarly, the covariate information was observed at <code>Time = 0.00883</code>, <code>0.102</code>, <code>0.105</code>, and <code>0.137</code> for subject #2, who was censored (<code>death = 0</code>) at <code>Time 0.137</code>. Moreover, <code>z1</code> is a time-dependent covariate and its value changed from 1 (at <code>Time = 0.00883</code>) to 0 ( at <code>Time</code> <span class="math inline">\(\ge\)</span> <code>0.102</code>) for subject #2.</p>
-<div id="refs" class="references">
-
-</div>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+
         <div id="tocnav">
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>

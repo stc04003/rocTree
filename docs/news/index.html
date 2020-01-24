@@ -8,11 +8,13 @@
 
 <title>Changelog • rocTree</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -30,7 +32,9 @@
 
 
 
+
 <meta property="og:title" content="Changelog" />
+
 
 
 
@@ -97,7 +101,6 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/stc04003/rocTree">
@@ -126,6 +129,11 @@
 <a href="#roctree-1-1-0" class="anchor"></a>rocTree 1.1.0<small> 2019-10-10 </small>
 </h1>
 <ul>
+<li>
+<p>Resolve CRAN error: “calling math functions such as log pow sqrt with integer arguments is not portable.”</p>
+<h1 id="roctree-1.1.0-1" class="page-header">rocTree 1.1.0<small> 2019-10-10 </small>
+</h1>
+</li>
 <li>Rewrite tree/ensemble algorithms with Rcpp
 <ul>
 <li>Significantly speed improvement</li>
@@ -137,47 +145,47 @@
 <h1 class="page-header">
 <a href="#roctree-0-99-9" class="anchor"></a>rocTree 0.99-9<small> Unreleased </small>
 </h1>
-<div class="sourceCode"><pre class="sourceCode R"><code class="sourceCode r">*<span class="st"> </span>Modified dCON
-*<span class="st"> </span>Added forest
-*<span class="st"> </span>Slight speed improvement.
-*<span class="st"> </span>Rebuild with roxygen2</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode R"><code class="sourceCode r"><span class="op">*</span><span class="st"> </span>Modified dCON
+<span class="op">*</span><span class="st"> </span>Added forest
+<span class="op">*</span><span class="st"> </span>Slight speed improvement.
+<span class="op">*</span><span class="st"> </span>Rebuild with roxygen2</code></pre></div>
 </div>
     <div id="roctree-0-99-5" class="section level1">
 <h1 class="page-header">
 <a href="#roctree-0-99-5" class="anchor"></a>rocTree 0.99-5<small> Unreleased </small>
 </h1>
-<div class="sourceCode"><pre class="sourceCode R"><code class="sourceCode r">*<span class="st"> </span>Modified the print funciton; tree now print with data.tree package, but the old way can still be called.
-*<span class="st"> </span>Added the plot function (from DiagrammeR); tree can be plotted in seveal ways.
-*<span class="st"> </span>Added plot saving feature.</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode R"><code class="sourceCode r"><span class="op">*</span><span class="st"> </span>Modified the print funciton; tree now print with data.tree package, but the old way can still be called.
+<span class="op">*</span><span class="st"> </span>Added the plot <span class="cf">function</span> (from DiagrammeR); tree can be plotted <span class="cf">in</span> seveal ways.
+<span class="op">*</span><span class="st"> </span>Added plot saving feature.</code></pre></div>
 </div>
     <div id="roctree-0-99-4" class="section level1">
 <h1 class="page-header">
 <a href="#roctree-0-99-4" class="anchor"></a>rocTree 0.99-4<small> Unreleased </small>
 </h1>
-<div class="sourceCode"><pre class="sourceCode R"><code class="sourceCode r">*<span class="st"> </span>Added the print function; tree can be printed in two ways determined by the logical value of top2bottom</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode R"><code class="sourceCode r"><span class="op">*</span><span class="st"> </span>Added the print <span class="cf">function</span>; tree can be printed <span class="cf">in</span> two ways determined by the logical value of top2bottom</code></pre></div>
 </div>
     <div id="roctree-0-99-3" class="section level1">
 <h1 class="page-header">
 <a href="#roctree-0-99-3" class="anchor"></a>rocTree 0.99-3<small> Unreleased </small>
 </h1>
-<div class="sourceCode"><pre class="sourceCode R"><code class="sourceCode r">*<span class="st"> </span>Fixed folding in cross validation; now the folding are generated based on percentile as in caret::createFolds</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode R"><code class="sourceCode r"><span class="op">*</span><span class="st"> </span>Fixed folding <span class="cf">in</span> cross validation; now the folding are generated based on percentile as <span class="cf">in</span> caret<span class="op">::</span>createFolds</code></pre></div>
 </div>
     <div id="roctree-0-99-2" class="section level1">
 <h1 class="page-header">
 <a href="#roctree-0-99-2" class="anchor"></a>rocTree 0.99-2<small> Unreleased </small>
 </h1>
-<div class="sourceCode"><pre class="sourceCode R"><code class="sourceCode r">*<span class="st"> </span>Added plot.rocTree to plot hazard functions for the final terminal nodes.
-*<span class="st"> </span>Added and cleaned dfFinal and ndFinal.
-*<span class="st"> </span>Added an additional smoothing parameter for plots.</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode R"><code class="sourceCode r"><span class="op">*</span><span class="st"> </span>Added plot.rocTree to plot hazard functions <span class="cf">for</span> the final terminal nodes.
+<span class="op">*</span><span class="st"> </span>Added and cleaned dfFinal and ndFinal.
+<span class="op">*</span><span class="st"> </span>Added an additional smoothing parameter <span class="cf">for</span> plots.</code></pre></div>
 </div>
     <div id="roctree-0-99-1" class="section level1">
 <h1 class="page-header">
 <a href="#roctree-0-99-1" class="anchor"></a>rocTree 0.99-1<small> Unreleased </small>
 </h1>
-<div class="sourceCode"><pre class="sourceCode R"><code class="sourceCode r">*<span class="st"> </span>Added parallel computing for VC.
-*<span class="st"> </span>Added rocTree.prune.
-*<span class="st"> </span>Drafted the help pages.
-*<span class="st"> </span>Improved speed in data preparation.</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode R"><code class="sourceCode r"><span class="op">*</span><span class="st"> </span>Added parallel computing <span class="cf">for</span> VC.
+<span class="op">*</span><span class="st"> </span>Added rocTree.prune.
+<span class="op">*</span><span class="st"> </span>Drafted the help pages.
+<span class="op">*</span><span class="st"> </span>Improved speed <span class="cf">in</span> data preparation.</code></pre></div>
 </div>
   </div>
 

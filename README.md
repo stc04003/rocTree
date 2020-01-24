@@ -2,7 +2,7 @@
 **rocTree**
 -----------
 
-[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active) [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.4.0-6666ff.svg)](https://cran.r-project.org/) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/rocTree)](https://cran.r-project.org/package=rocTree) [![packageversion](https://img.shields.io/badge/Package%20version-1.1.0-orange.svg?style=flat-square)](commits/master) [![Travis-CI Build Status](https://travis-ci.org/stc04003/rocTree.svg?branch=master)](https://travis-ci.org/stc04003/rocTree) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/stc04003/rocTree?branch=master&svg=true)](https://ci.appveyor.com/project/stc04003/rocTree) [![Last-changedate](https://img.shields.io/badge/last%20change-2019--09--29-yellowgreen.svg)](/commits/master)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active) [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.4.0-6666ff.svg)](https://cran.r-project.org/) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/rocTree)](https://cran.r-project.org/package=rocTree) [![packageversion](https://img.shields.io/badge/Package%20version-1.1.0-orange.svg?style=flat-square)](commits/master) [![Travis-CI Build Status](https://travis-ci.org/stc04003/rocTree.svg?branch=master)](https://travis-ci.org/stc04003/rocTree) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/stc04003/rocTree?branch=master&svg=true)](https://ci.appveyor.com/project/stc04003/rocTree) [![Last-changedate](https://img.shields.io/badge/last%20change-2020--01--24-yellowgreen.svg)](/commits/master)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 ### ROC-guided survival trees and ensembles
@@ -37,4 +37,11 @@ The `rocTree` provides implementations to a unified framework for tree-structure
 Reference
 ---------
 
-Yifei Sun, Sy Han Chiou, Mei-Cheng Wang. ROC-Guided Survival Trees and Ensembles. [arXiv:1809.05627](https://arxiv.org/abs/1809.05627).
+Yifei Sun, Sy Han Chiou, Mei-Cheng Wang. ROC-Guided Survival Trees and Ensembles, (2019+). [doi: 10.1111/biom.13213](https://www.ncbi.nlm.nih.gov/pubmed/31880315).
+
+Disclaimer
+----------
+
+The `rocTree` package does not implement the works proposed by Drs. Hossain, Hassan, and Bailey (reference below), though they share similar names.
+
+Hossain, MM; Hassan, MR; Bailey, J, ROC-tree: A novel decision tree induction algorithm based on receiver operating characteristics to classify gene expression data, (2008), 130, 2008, 2 pp. 455--465

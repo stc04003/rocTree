@@ -60,4 +60,10 @@ martingale estimating equations.
 
 ## Reference
 
-Yifei Sun, Sy Han Chiou, Mei-Cheng Wang. ROC-Guided Survival Trees and Ensembles. [arXiv:1809.05627](https://arxiv.org/abs/1809.05627).
+Yifei Sun, Sy Han Chiou, Mei-Cheng Wang. ROC-Guided Survival Trees and Ensembles, \emph{Biometrics} (2019+). [doi: 10.1111/biom.13213](https://www.ncbi.nlm.nih.gov/pubmed/31880315).
+
+## Disclaimer
+
+The `rocTree` package does not implement the works proposed by Drs. Hossain, Hassan, and Bailey (reference below), though they share similar names. 
+
+Hossain, MM; Hassan, MR; Bailey, J, ROC-tree: A novel decision tree induction algorithm based on receiver operating characteristics to classify gene expression data, \emph{Society for Industrial and Applied Mathematics - 8th SIAM International Conference on Data Mining} (2008), \emph{Proceedings in Applied Mathematics} 130, 2008, 2 pp. 455--465
