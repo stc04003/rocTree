@@ -165,7 +165,7 @@ rocTree.control <- function(l) {
     l.name <- names(l)    
     if (!all(l.name %in% names(dl)))
         warning("unknown names in control are ignored: ", l.name[!(l.name %in% names(dl))])
-    dl[names(dl) %in% l.name] <- l[l.name %in% names(dl)]
+    dl[match(l.name, names(dl))] <- l
     ## if (is.null(dl$hN)) dl$hN <- dl$tau / 20
     return(dl)
 }
