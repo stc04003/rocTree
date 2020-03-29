@@ -78,6 +78,8 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
     .X <- stats::model.matrix(formula, data = mf)
     if (any(colnames(.X) == "(Intercept)"))
         .X <- .X[,!(colnames(.X) == "(Intercept)"), drop = FALSE]
+    if (length(grep("`", colnames(.X))) > 0)
+        .X <- .X[,-grep("`", colnames(.X))]  
     .id <- model.extract(mf, id)
     names(.id) <- names(.Y) <- names(.D) <- rownames(.X) <- NULL
     if (is.null(.id)) {
