@@ -83,7 +83,7 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
     .id <- model.extract(mf, id)
     names(.id) <- names(.Y) <- names(.D) <- rownames(.X) <- NULL
     if (is.null(.id) | length(.id) == length(unique(.id))) {
-        .id <- .id2 <- 1:length(.Y)
+        .id <- 1:length(.Y)
         .n0 <- length(unique(.id))
         .X <- .X[rep(1:.n0, rank(.Y)),]
         .id <- .id[rep(1:.n0, rank(.Y))]
@@ -92,12 +92,11 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
         .D <- rep(0, sum(1:.n0))
         .D[cumsum((1:.n0)[rank(.Y)])] <- .Dtmp
         .Y <- .Y[.ind]
-        ord <- order(.Y)
-    } else {
-        tmp <- aggregate(.Y ~ .id, FUN = max)
-        ord <- unlist(sapply(tmp$.id[order(tmp$.Y)], function(x) which(.id == x)), use.names = F)
-        .id2 <- rep(1:length(unique(.id)), table(.id)[unique(.id[ord])])
-    }
+        ## ord <- order(.Y)
+    } 
+    tmp <- aggregate(.Y ~ .id, FUN = max)
+    ord <- unlist(sapply(tmp$.id[order(tmp$.Y)], function(x) which(.id == x)), use.names = F)
+    .id2 <- rep(1:length(unique(.id)), table(.id)[unique(.id[ord])])
     ## .Y, .id, .X, .D are original data
     ## .Y2, .id2, .X2, .D2 are ordered data
     ## data.frame(.Y = .Y[ord], .D = .D[ord], .id = .id[ord], .id2 = .id2, .X[ord,])
