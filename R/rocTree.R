@@ -91,7 +91,7 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
         .Dtmp <- .D
         .D <- rep(0, sum(1:.n0))
         .D[cumsum((1:.n0)[rank(.Y)])] <- .Dtmp
-        .Y <- .Y[.ind]
+        .Y <- as.numeric(sort(.Y)[.ind])
         ## ord <- order(.Y)
     } 
     tmp <- aggregate(.Y ~ .id, FUN = max)
