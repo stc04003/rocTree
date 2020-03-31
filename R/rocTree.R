@@ -82,8 +82,16 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
         .X <- .X[,-grep("`", colnames(.X))]  
     .id <- model.extract(mf, id)
     names(.id) <- names(.Y) <- names(.D) <- rownames(.X) <- NULL
-    if (is.null(.id)) {
+    if (is.null(.id) | length(.id) == length(unique(.id))) {
         .id <- .id2 <- 1:length(.Y)
+        .n0 <- length(unique(.id))
+        .X <- .X[rep(1:.n0, rank(.Y)),]
+        .id <- .id[rep(1:.n0, rank(.Y))]
+        .ind <- unlist(sapply(1:.n0, function(x) 1:x)[rank(.Y)])
+        .Dtmp <- .D
+        .D <- rep(0, sum(1:.n0))
+        .D[cumsum((1:.n0)[rank(.Y)])] <- .Dtmp
+        .Y <- .Y[.ind]
         ord <- order(.Y)
     } else {
         tmp <- aggregate(.Y ~ .id, FUN = max)
