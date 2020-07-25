@@ -62,6 +62,8 @@ std::shared_ptr<Tree> TreeGrow::trainCV(const arma::umat& mat1Z,
     Tree::findBeta(iconAll, beta, sizeTree); 
     arma::vec iconBeta = prune(beta, mat1Z, mat1f, mat2Zf, range0, e);
     uint qo = iconBeta.index_max();
+    // Rcpp::Rcout << "iconBeta" << iconBeta << std::endl;
+    // Rcpp::Rcout << "qo" << qo << std::endl;
     arma::uvec nodeSetFinal = nodeSetList(sizeTree(qo)-1);
     tr->cut(nodeSetFinal);
   }

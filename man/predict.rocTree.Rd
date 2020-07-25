@@ -4,8 +4,7 @@
 \alias{predict.rocTree}
 \title{Predicting based on a \code{rocTree} model.}
 \usage{
-\method{predict}{rocTree}(object, newdata, type = c("survival",
-  "hazard"), control = list(), ...)
+\method{predict}{rocTree}(object, newdata, type = c("survival", "hazard"), control = list(), ...)
 }
 \arguments{
 \item{object}{is an \code{rocTree} object.}

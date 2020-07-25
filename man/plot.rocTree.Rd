@@ -4,11 +4,20 @@
 \alias{plot.rocTree}
 \title{Plotting an \code{rocTree} object}
 \usage{
-\method{plot}{rocTree}(x, output = c("graph", "visNetwork"),
-  digits = 4, tree = 1L, rankdir = c("TB", "BT", "LR", "RL"),
-  shape = "ellipse", nodeOnly = FALSE, savePlot = FALSE,
-  file_name = "pic.pdf", file_type = "pdf", type = c("tree",
-  "survival", "hazard"), ...)
+\method{plot}{rocTree}(
+  x,
+  output = c("graph", "visNetwork"),
+  digits = 4,
+  tree = 1L,
+  rankdir = c("TB", "BT", "LR", "RL"),
+  shape = "ellipse",
+  nodeOnly = FALSE,
+  savePlot = FALSE,
+  file_name = "pic.pdf",
+  file_type = "pdf",
+  type = c("tree", "survival", "hazard"),
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class "\code{rocTree}", usually returned by the rocTree function.}

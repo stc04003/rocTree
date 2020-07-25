@@ -4,8 +4,15 @@
 \alias{rocTree}
 \title{Roc-guided survival trees}
 \usage{
-rocTree(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCON",
-  "CON"), control = list())
+rocTree(
+  formula,
+  data,
+  id,
+  subset,
+  ensemble = TRUE,
+  splitBy = c("dCON", "CON"),
+  control = list()
+)
 }
 \arguments{
 \item{formula}{is a formula object, with the response on the left of a '~' operator,
