@@ -114,9 +114,11 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
     .eps <- unlist(sapply(split(.id2, .id2), function(.x) 1:length(.x)))
     .X[order(.Y), disc == 0] <- apply(.X[, disc == 0, drop = FALSE], 2, function(.x)
         unlist(lapply(split(.x, .eps), fecdf)))
-    ## unlist(lapply(split(.x, sequence(1:length(unique(.Y)))), fecdf)))
-    .X[,disc == 0] <- apply(.X[,disc == 0, drop = FALSE], 2, function(x)
-        findInterval(x, cutoff)) + 1
+    .X[order(.Y), disc != 0] <- apply(.X[, disc != 0, drop = FALSE], 2, function(.x)
+        .x / max(.x))
+    ## .X[,disc == 0] <- apply(.X[,disc == 0, drop = FALSE], 2, function(x)
+    ##     findInterval(x, cutoff)) + 1
+    .X <- apply(.X, 2, function(x) findInterval(x, cutoff)) + 1
     ## Remove transformation
     ## .X <- .X[,rep(1, ncol(.X))]
     .hk <- rep(control$h, control$K)
