@@ -108,7 +108,11 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
     if (is.function(control$mtry)) control$mtry <- control$mtry(.p)
     if (is.function(control$tau)) control$tau <- control$tau(.Y0)
     if (is.function(control$h)) control$h <- control$h(control$tau)
-    disc <- rep(control$disc, .p)
+    if (length(control$disc) == 1) {
+        disc <- rep(control$disc, .p)
+        tmp <- as.numeric(which(apply(.X0, 2, function(x) length(unique(x))) <= 3))
+        if (length(tmp) > 0) disc[tmp] <- TRUE
+    } else disc <- control$disc[1:.p]
     cutoff <- (1:control$nc) / (control$nc + 1)
     .tk <- quantile(unique(.Y0[.D0 > 0]), 1:control$K / (control$K + 1), names = FALSE)
     .eps <- unlist(sapply(split(.id2, .id2), function(.x) 1:length(.x)))
