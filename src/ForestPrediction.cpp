@@ -15,6 +15,7 @@ void ForestPrediction::transformZ(const arma::mat& z,
   arma::vec::const_iterator bb = breaks.begin();
   arma::vec::const_iterator be = breaks.end();
   for(int p = 0; p < P; p++) {
+    // Rcpp::Rcout << disc(p);
     if(disc(p) == 0) {
       arma::uvec ind = arma::cumsum(arma::regspace<arma::uvec>(0,n-1));
       arma::vec zp = matX.col(p);
