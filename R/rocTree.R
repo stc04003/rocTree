@@ -116,12 +116,12 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
     cutoff <- (1:control$nc) / (control$nc + 1)
     .tk <- quantile(unique(.Y0[.D0 > 0]), 1:control$K / (control$K + 1), names = FALSE)
     .eps <- unlist(sapply(split(.id2, .id2), function(.x) 1:length(.x)))
-    if (any(disc == 0)) 
-        .X[order(.Y), disc == 0] <- apply(.X[, disc == 0, drop = FALSE], 2, function(.x)
+     if (any(!disc))
+        .X[order(.Y), !disc] <- apply(.X[, !disc, drop = FALSE], 2, function(.x)
             unlist(lapply(split(.x, .eps), fecdf)))
-    if (any(disc != 0)) 
-        .X[order(.Y), disc != 0] <- apply(.X[, disc != 0, drop = FALSE], 2, function(.x)
-            .x / max(.x))
+    if (any(disc)) 
+            .X[order(.Y), disc] <- apply(.X[, disc, drop = FALSE], 2, function(.x)
+                .x / max(.x))
     ## .X[,disc == 0] <- apply(.X[,disc == 0, drop = FALSE], 2, function(x)
     ##     findInterval(x, cutoff)) + 1
     .X <- apply(.X, 2, function(x) findInterval(x, cutoff)) + 1
@@ -135,6 +135,10 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
     .zt <- make_mat2_t(.Y0[.D0 == 1], .Y, .id2, .X)
     .zy <- t(.mat1Z[.D0 == 1,])
     .range0  <- apply(.X, 2, range)
+    if (sum(disc) > 0) {
+        .range0[1, disc] <- 0
+        .range0[2, disc] <- as.numeric(apply(.X[,disc], 2, function(x) length(unique(x))))
+    }
     if (ensemble) {
         out <- rocForest_C(.mat1f, .mat1Z, .mat2k, .range0, .zt, .zy, .D0,
                            which(c("dCON", "CON") %in% splitBy),
