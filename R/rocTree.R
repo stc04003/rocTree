@@ -137,7 +137,7 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
     .range0  <- apply(.X, 2, range)
     if (sum(disc) > 0) {
         .range0[1, disc] <- 0
-        .range0[2, disc] <- as.numeric(apply(.X[,disc], 2, function(x) length(unique(x))))
+        .range0[2, disc] <- as.numeric(apply(.X[,disc, drop = FALSE], 2, function(x) length(unique(x))))
     }
     if (ensemble) {
         out <- rocForest_C(.mat1f, .mat1Z, .mat2k, .range0, .zt, .zy, .D0,
