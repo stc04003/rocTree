@@ -197,7 +197,7 @@ arma::vec predict_rocTree_C(const arma::mat& zraw0,
 			    const arma::mat& matX, 
 			    const arma::uvec& disc,
 			    const arma::vec& breaks) {
-  arma::umat z0(zraw0.n_rows, arma::sum(e0));
+  arma::umat z0(zraw0.n_rows, e0.n_elem); //arma::sum(e0));
   ForestPrediction::transformZ(zraw0, z0, matX, e0, breaks, disc);
   arma::umat nodeSize2 = treeobj[2];
   arma::uvec nodeLabel2 = treeobj[1];

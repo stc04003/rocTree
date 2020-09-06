@@ -24,7 +24,7 @@ void ForestPrediction::transformZ(const arma::mat& z,
       for(int i = 0; i < n; i++) {
         if(e(i) == 1) {
           arma::vec zpref = arma::sort(zp.elem( ind ));
-          double z2ecdf = (std::lower_bound(zpref.begin(), zpref.end(), z(p,i) ) - zpref.begin())/(n-i+0.0);
+          double z2ecdf = (std::lower_bound(zpref.begin(), zpref.end(), z(p,i)) - zpref.begin())/(n-i+0.0);
           z2(p,j) = std::distance(bb, std::upper_bound(bb, be, z2ecdf ) ) + 1 ;
           j++;
         }
