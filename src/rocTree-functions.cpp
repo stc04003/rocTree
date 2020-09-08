@@ -79,6 +79,7 @@ SEXP predict_rocForest_C(const arma::mat& zraw0,
 			 const arma::vec& breaks) {
   arma::umat z0(zraw0.n_rows, e0.n_elem); //arma::sum(e0));
   ForestPrediction::transformZ(zraw0, z0, matX, e0, breaks, disc);
+  // Rcpp::Rcout << z0;
   arma::vec sy = ForestPrediction::getSurvival(z0,
                                                y0,
                                                e0,

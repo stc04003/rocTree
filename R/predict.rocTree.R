@@ -38,6 +38,11 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"),
     raw <- newdata[findInt(object$data$.Y0, unlist(newdata[object$rName])), object$vNames]
     rownames(raw) <- NULL
     cutoff <- (1:control$nc) / (control$nc + 1)
+    for (i in which(object$disc)) {
+        xx <- as.factor(object$data$.X0)
+        raw[,i] <- xx[match(raw[,i], xx)]
+        raw[,i] <- as.numeric(as.factor(raw[,i]))        
+    }
     if (type %in% "survival") {
         if (object$ensemble)
             pred <- predict_rocForest_C(t(raw), object$data$.Y0, object$data$.D0, object,
