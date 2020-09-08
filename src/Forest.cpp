@@ -237,10 +237,9 @@ arma::ivec Forest::find_split_DICON(size_t nd,
     int nj = indY.size();
     int nel = 0;
     // int nelr = arma::sum(e( indY ) );
-    arma::uvec rangeCut = arma::regspace<arma::uvec>(ranges(nd, p, 0),
-                                                     ranges(nd, p, 1));
-     //arma::vec den = (fLSum + fRSum)%(SLSum + SRSum);
-     //den( arma::find(den == 0) ).ones();
+    arma::uvec rangeCut = arma::regspace<arma::uvec>(ranges(nd, p, 0), ranges(nd, p, 1));
+    //arma::vec den = (fLSum + fRSum)%(SLSum + SRSum);
+    //den( arma::find(den == 0) ).ones();
     for(auto cu : rangeCut) {
       while(j < nj) {
         int indYj = indY(j);

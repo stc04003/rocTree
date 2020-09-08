@@ -192,13 +192,13 @@ invisible(clusterEvalQ(NULL, library(rpart)))
 invisible(clusterEvalQ(NULL, library(ranger)))
 invisible(clusterEvalQ(NULL, library(randomForestSRC)))
 
-sim1.100.0 <- parSapply(NULL, 1:50, function(z) do(500, 0, 1))
-sim2.100.0 <- parSapply(NULL, 1:100, function(z) do(500, 0, 2))
-sim3.100.0 <- parSapply(NULL, 1:100, function(z) do(500, 0, 3))
+sim1.200.025 <- parSapply(NULL, 1:100, function(z) do(200, 0.25, 1))
+sim2.200.025 <- parSapply(NULL, 1:100, function(z) do(200, 0.25, 2))
+sim3.200.025 <- parSapply(NULL, 1:100, function(z) do(200, 0.25, 3))
 
 stopCluster(cl)
 
 ## With transformation
-rowMeans(sim1.100.0) # 0.09120784 0.06411867
-rowMeans(sim2.100.0) # 0.10937177 0.08108885
-rowMeans(sim3.100.0) # 0.1380290 0.1176399
+rowMeans(sim1.200.025) # 0.09120784 0.06411867
+rowMeans(sim2.200.025) # 0.10937177 0.08108885
+rowMeans(sim3.200.025) # 0.1380290 0.1176399

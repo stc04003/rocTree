@@ -157,7 +157,9 @@ SEXP rocTree_C(const arma::mat& mat1f0,
   int K = mat1f0.n_rows;
   TreeGrow tg(numFold, K, spCriterion, maxNode, minNode1, minSplit1);
   std::shared_ptr<Tree> tr2 = tg.trainCV(mat1Z0, mat1f0, mat2Zf0, r0, e0);
+  // Rcpp::Rcout << "3";
   const arma::uvec& vars0 = tr2->get_split_vars();
+  // Rcpp::Rcout << "4";
   arma::umat treeMat(vars0.n_elem,5);
   treeMat.col(0) = vars0;
   treeMat.col(1) = tr2->get_split_values();

@@ -50,9 +50,10 @@ std::shared_ptr<Tree> TreeGrow::trainCV(const arma::umat& mat1Z,
   arma::mat fmat = arma::zeros<arma::mat>(K, MAX_NODE);
   arma::umat Smat = arma::zeros<arma::umat>(K, MAX_NODE);
   std::shared_ptr<Tree> tr = grow(mat1Z, mat1f, mat2Zf, range0, fmat, Smat, e);
-  if (NUM_FOLD > 1) {
-    const arma::uvec& isl = tr->get_isLeaf();
-    uint numLeaf = arma::sum(isl);
+  const arma::uvec& isl = tr->get_isLeaf();
+  uint numLeaf = arma::sum(isl);
+  // Rcpp::Rcout << numLeaf; 
+  if (NUM_FOLD > 1 & numLeaf > 1) {
     arma::field<arma::uvec> nodeSetList(numLeaf);
     arma::vec iconAll(numLeaf);
     tr->findOptimalSizekSubtree(fmat, Smat, iconAll, nodeSetList, numLeaf);
@@ -129,7 +130,6 @@ std::shared_ptr<Tree> TreeGrow::grow(const arma::umat& mat1Z,
   }
   return tr;
 }
-
 
 
 std::shared_ptr<Tree> TreeGrow::grow(const arma::umat& mat1Z,
@@ -553,6 +553,7 @@ arma::ivec TreeGrow::find_split_DICON(size_t nd,
     arma::uvec jv = arma::zeros<arma::uvec>(K);
     int nj = indY.size();
     arma::uvec rangeCut = arma::regspace<arma::uvec>(ranges(nd, p, 0), ranges(nd, p, 1));
+    // Rcpp::Rcout << rangeCut;
     int nel = 0;
     // int nelr = arma::sum(e( indY ) );
     for(auto cu : rangeCut) {
@@ -581,14 +582,22 @@ arma::ivec TreeGrow::find_split_DICON(size_t nd,
           }
         }
       }
+      
+      // Rcpp::Rcout << "cu" << cu << "a" << SRSum(0) << "b" << SLSum(0) << "    ";
+      // Rcpp::Rcout << "a" << SLSum;
+      // Rcpp::Rcout << "b" << SRSum;
+      
       if( (SLSum(0) < MIN_NODE1 || SRSum(0) < MIN_NODE1) ) {
         dICONTemp = 0;
       } else {
         dICONTemp = arma::sum(abs(fLSum%SRSum - fRSum%SLSum) );
       }
-      if(dICONTemp>dICONmax) {
+      // Rcpp::Rcout << "dICONTemp" << dICONTemp;
+      // Rcpp::Rcout << "dICONmax" << dICONmax;
+      if(dICONTemp > dICONmax) {
         dICONmax = dICONTemp;
         varsp = p;
+	// Rcpp::Rcout << cu;
         cutsp = cu;
         fmat.col(ndcount + 1) = fLSum;
         fmat.col(ndcount + 2) = fRSum;
