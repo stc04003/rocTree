@@ -90,14 +90,10 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
         .D <- rep(0, sum(1:.n0))
         .D[cumsum((1:.n0)[rank(.Y)])] <- .Dtmp
         .Y <- as.numeric(sort(.Y)[.ind])
-        ## ord <- order(.Y)
     } 
     tmp <- aggregate(.Y ~ .id, FUN = max)
     ord <- unlist(sapply(tmp$.id[order(tmp$.Y)], function(x) which(.id == x)), use.names = F)
     .id2 <- rep(1:length(unique(.id)), table(.id)[unique(.id[ord])])
-    ## .Y, .id, .X, .D are original data
-    ## .Y2, .id2, .X2, .D2 are ordered data
-    ## data.frame(.Y = .Y[ord], .D = .D[ord], .id = .id[ord], .id2 = .id2, .X[ord,])
     .p <- ncol(.X)
     .n <- length(unique(.id))
     .Y <- .Y[ord]
@@ -116,18 +112,13 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
     cutoff <- (1:control$nc) / (control$nc + 1)
     .tk <- quantile(unique(.Y0[.D0 > 0]), 1:control$K / (control$K + 1), names = FALSE)
     .eps <- unlist(sapply(split(.id2, .id2), function(.x) 1:length(.x)))
-     if (any(!disc))
-         .X[order(.Y), !disc] <- apply(.X[, !disc, drop = FALSE], 2, function(.x)
-             unlist(lapply(split(.x, .eps), fecdf)))
-    if (any(disc)) 
-        .X[, disc] <- apply(.X[, disc, drop = FALSE], 2, function(.x)
-            .x / max(.x))
-    ## .X[order(.Y), disc] <- apply(.X[, disc, drop = FALSE], 2, function(.x)
-    ##         .x / max(.x))
-    ## .X[,disc == 0] <- apply(.X[,disc == 0, drop = FALSE], 2, function(x)
-    ##     findInterval(x, cutoff)) + 1
-    .X <- apply(.X, 2, function(x) findInterval(x, cutoff)) + 1
-
+    for (i in which(disc)) .X[,i] <- as.factor(.X[,i])    
+    if (any(!disc)) {
+        .X[order(.Y), !disc] <- apply(.X[, !disc, drop = FALSE], 2, function(.x)
+            unlist(lapply(split(.x, .eps), fecdf)))
+        .X[, !disc] <-
+            apply(.X[, !disc, drop = FALSE], 2, function(x) findInterval(x, cutoff)) + 1
+    }
     .hk <- rep(control$h, control$K)
     .hk[.tk < control$h] <- .tk[.tk < control$h]
     .mat1f <- t(.D0 * mapply(function(x,h) K2(x, .Y0, h) / h, .tk, .hk))
@@ -136,10 +127,6 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
     .zt <- make_mat2_t(.Y0[.D0 == 1], .Y, .id2, .X)
     .zy <- t(.mat1Z[.D0 == 1,])
     .range0  <- apply(.X, 2, range)
-    ## if (sum(disc) > 0) {
-    ##     .range0[1, disc] <- 0
-    ##     .range0[2, disc] <- as.numeric(apply(.X[,disc, drop = FALSE], 2, function(x) length(unique(x))))
-    ## }
     if (ensemble) {
         out <- rocForest_C(.mat1f, .mat1Z, .mat2k, .range0, .zt, .zy, .D0,
                            which(c("dCON", "CON") %in% splitBy),
@@ -148,7 +135,7 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
                            control$minSplitNode,
                            control$maxNode,
                            control$mtry)
-        out$Frame <- lapply(out$trees, cleanTreeMat, cutoff = cutoff)
+        out$Frame <- lapply(out$trees, cleanTreeMat, cutoff = cutoff, .X0 = .X0, disc = disc)
     } else {
         out <- rocTree_C(.mat1f, .mat1Z, .mat2k, .range0, .zt, .zy, .D0,
                          which(c("dCON", "CON") %in% splitBy),
@@ -156,7 +143,7 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
                          control$minSplitTerm,
                          control$minSplitNode,
                          control$maxNode)
-        out$Frame <- cleanTreeMat(out$treeMat, cutoff = cutoff)
+        out$Frame <- cleanTreeMat(out$treeMat, cutoff = cutoff, .X0 = .X0, disc = disc)
     }
     out$call <- Call
     out$data <- list(.Y = .Y, .D = .D, .X = .X0, .Y0 = .Y0, .D0 = .D0,
@@ -200,7 +187,7 @@ is.rocTree <- function(x) inherits(x, "rocTree")
 #' Clean the `treeMat` from tree and forests; make it easier to read and compatible with print function
 #' @keywords internal
 #' @noRd
-cleanTreeMat <- function(treeMat, cutoff) {
+cleanTreeMat <- function(treeMat, cutoff, .X0, disc) {
     ## prepraing treeMat
     ## Remove 0 rows and redefine child nodes
     ## 0 rows were produced from prunning
@@ -219,6 +206,12 @@ cleanTreeMat <- function(treeMat, cutoff) {
     }
     if (nrow(treeMat) > 1) {
         treeMat$cutVal <- cutoff[ifelse(treeMat$cutOrd > 0, treeMat$cutOrd, NA)]
+        if (sum(treeMat$p %in% which(disc))) {
+            for (i in which(disc)) {
+                ind <- which(treeMat$p == i)
+                treeMat$cutVal[ind] <- as.numeric(levels(as.factor(.X0[,i]))[treeMat$cutOrd[ind]])
+            }
+        }        
         if (nrow(treeMat) <= 3) {
             treeMat$nd <- 1:3
         } else {
@@ -235,3 +228,39 @@ cleanTreeMat <- function(treeMat, cutoff) {
     treeMat$cutOrd <- ifelse(treeMat$is.terminal == 1, NA, treeMat$cutOrd)
     return(treeMat)
 }
+
+## cleanTreeMat <- function(treeMat, cutoff) {
+##     ## prepraing treeMat
+##     ## Remove 0 rows and redefine child nodes
+##     ## 0 rows were produced from prunning
+##     treeMat <- data.frame(treeMat)
+##     names(treeMat) <- c("p", "cutOrd", "left", "right", "is.terminal")
+##     treeMat$p <- ifelse(treeMat$is.terminal == 1, NA, treeMat$p + 1)
+##     ## treeMat$p + (1 - treeMat$is.terminal)
+##     treeMat$left <- ifelse(treeMat$left == 0, NA, treeMat$left + 1)
+##     treeMat$right <- ifelse(treeMat$right == 0, NA, treeMat$right + 1)
+##     mv <- rowSums(treeMat[,2:5], na.rm = TRUE) == 0
+##     if (sum(mv) > 0) {
+##         treeMat <- treeMat[-which(mv),]
+##         treeMat$left <- match(treeMat$left, rownames(treeMat))
+##         treeMat$right <- match(treeMat$right, rownames(treeMat))
+##         rownames(treeMat) <- NULL
+##     }
+##     if (nrow(treeMat) > 1) {
+##         treeMat$cutVal <- cutoff[ifelse(treeMat$cutOrd > 0, treeMat$cutOrd, NA)]
+##         if (nrow(treeMat) <= 3) {
+##             treeMat$nd <- 1:3
+##         } else {
+##             nd <- 1:3
+##             for (i in 2:(nrow(treeMat) - 2)) {
+##                 if (treeMat$is.terminal[i] == 0) nd <- c(nd, 2 * nd[i], 2 * nd[i] + 1)
+##             }
+##             treeMat$nd <- nd
+##         }
+##     } else {
+##         treeMat$cutVal <- NA
+##         treeMat$nd <- 1
+##     }
+##     treeMat$cutOrd <- ifelse(treeMat$is.terminal == 1, NA, treeMat$cutOrd)
+##     return(treeMat)
+## }
