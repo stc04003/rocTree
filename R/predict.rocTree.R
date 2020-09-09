@@ -41,15 +41,18 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"),
     for (i in which(object$disc)) {
         xx <- as.factor(object$data$.X0)
         raw[,i] <- xx[match(raw[,i], xx)]
-        raw[,i] <- as.numeric(as.factor(raw[,i]))        
+        raw[,i] <- as.numeric(as.factor(raw[,i]))
+        .X <- object$data$.X
+        .X[,i] <- xx[match(.X[,i], xx)]
+        .X[,i] <- as.numeric(as.factor(.X[,i]))
     }
     if (type %in% "survival") {
         if (object$ensemble)
             pred <- predict_rocForest_C(t(raw), object$data$.Y0, object$data$.D0, object,
-                                        object$data$.X, object$disc, cutoff)
+                                        .X, object$disc, cutoff)
         else
             pred <- predict_rocTree_C(t(raw), object$data$.Y0, object$data$.D0, object,
-                                      object$data$.X, object$disc, cutoff)
+                                      .X, object$disc, cutoff)
         object$survFun <- stepfun(object$data$.Y0, c(1, pred))
         object$pred <- data.frame(Time = unlist(newdata[,object$rName]),
                                   Survival = object$survFun(unlist(newdata[,object$rName])))

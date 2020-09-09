@@ -228,39 +228,3 @@ cleanTreeMat <- function(treeMat, cutoff, .X0, disc) {
     treeMat$cutOrd <- ifelse(treeMat$is.terminal == 1, NA, treeMat$cutOrd)
     return(treeMat)
 }
-
-## cleanTreeMat <- function(treeMat, cutoff) {
-##     ## prepraing treeMat
-##     ## Remove 0 rows and redefine child nodes
-##     ## 0 rows were produced from prunning
-##     treeMat <- data.frame(treeMat)
-##     names(treeMat) <- c("p", "cutOrd", "left", "right", "is.terminal")
-##     treeMat$p <- ifelse(treeMat$is.terminal == 1, NA, treeMat$p + 1)
-##     ## treeMat$p + (1 - treeMat$is.terminal)
-##     treeMat$left <- ifelse(treeMat$left == 0, NA, treeMat$left + 1)
-##     treeMat$right <- ifelse(treeMat$right == 0, NA, treeMat$right + 1)
-##     mv <- rowSums(treeMat[,2:5], na.rm = TRUE) == 0
-##     if (sum(mv) > 0) {
-##         treeMat <- treeMat[-which(mv),]
-##         treeMat$left <- match(treeMat$left, rownames(treeMat))
-##         treeMat$right <- match(treeMat$right, rownames(treeMat))
-##         rownames(treeMat) <- NULL
-##     }
-##     if (nrow(treeMat) > 1) {
-##         treeMat$cutVal <- cutoff[ifelse(treeMat$cutOrd > 0, treeMat$cutOrd, NA)]
-##         if (nrow(treeMat) <= 3) {
-##             treeMat$nd <- 1:3
-##         } else {
-##             nd <- 1:3
-##             for (i in 2:(nrow(treeMat) - 2)) {
-##                 if (treeMat$is.terminal[i] == 0) nd <- c(nd, 2 * nd[i], 2 * nd[i] + 1)
-##             }
-##             treeMat$nd <- nd
-##         }
-##     } else {
-##         treeMat$cutVal <- NA
-##         treeMat$nd <- 1
-##     }
-##     treeMat$cutOrd <- ifelse(treeMat$is.terminal == 1, NA, treeMat$cutOrd)
-##     return(treeMat)
-## }
