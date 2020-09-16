@@ -38,11 +38,11 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"),
     raw <- newdata[findInt(object$data$.Y0, unlist(newdata[object$rName])), object$vNames]
     rownames(raw) <- NULL
     cutoff <- (1:control$nc) / (control$nc + 1)
+    .X <- object$data$.X
     for (i in which(object$disc)) {
-        xx <- as.factor(object$data$.X0)
+        xx <- as.factor(object$data$.X0[,i])
         raw[,i] <- xx[match(raw[,i], xx)]
         raw[,i] <- as.numeric(as.factor(raw[,i]))
-        .X <- object$data$.X
         .X[,i] <- xx[match(.X[,i], xx)]
         .X[,i] <- as.numeric(as.factor(.X[,i]))
     }
@@ -70,12 +70,12 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"),
         if (object$ensemble)
             pred <- predict_rocForestHZ_C(t(raw[knots,]), t0, 
                                           object$data$.Y0, object$data$.D0, .mat1f2,
-                                          control$h, object, object$data$.X,
+                                          control$h, object, .X,
                                           object$disc, cutoff)
         else
             pred <- predict_rocTreeHZ_C(t(raw[knots,]), t0, 
                                           object$data$.Y0, object$data$.D0, .mat1f2,
-                                          control$h, object, object$data$.X,
+                                          control$h, object, .X,
                                           object$disc, cutoff)
         object$hazFun <- stepfun(t0, c(1, pred))
         object$pred <- data.frame(Time = t0, hazard = object$hazFun(t0))
