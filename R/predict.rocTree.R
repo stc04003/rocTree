@@ -39,12 +39,16 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"),
     rownames(raw) <- NULL
     cutoff <- (1:control$nc) / (control$nc + 1)
     .X <- object$data$.X
+    ## for (i in which(object$disc)) {
+    ##     xx <- as.factor(object$data$.X0[,i])
+    ##     raw[,i] <- xx[match(raw[,i], xx)]
+    ##     raw[,i] <- as.numeric(as.factor(raw[,i]))
+    ##     .X[,i] <- xx[match(.X[,i], xx)]
+    ##     .X[,i] <- as.numeric(as.factor(.X[,i]))
+    ## }
     for (i in which(object$disc)) {
-        xx <- as.factor(object$data$.X0[,i])
-        raw[,i] <- xx[match(raw[,i], xx)]
-        raw[,i] <- as.numeric(as.factor(raw[,i]))
-        .X[,i] <- xx[match(.X[,i], xx)]
-        .X[,i] <- as.numeric(as.factor(.X[,i]))
+        raw[,i] <- with(object$discClass[[i]], value[match(raw[,i], level)])
+        .X[,i] <- with(object$discClass[[i]], value[match(.X[,i], level)])
     }
     if (type %in% "survival") {
         if (object$ensemble)

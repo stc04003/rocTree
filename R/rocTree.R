@@ -112,7 +112,13 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
     cutoff <- (1:control$nc) / (control$nc + 1)
     .tk <- quantile(unique(.Y0[.D0 > 0]), 1:control$K / (control$K + 1), names = FALSE)
     .eps <- unlist(sapply(split(.id2, .id2), function(.x) 1:length(.x)))
-    for (i in which(disc)) .X[,i] <- as.factor(.X[,i])    
+    discClass <- rep(list(NULL), length(disc))
+    for (i in which(disc)) {
+        tmp <- as.factor(.X[,i])
+        discClass[[i]] <- data.frame(value = sort(unique(c(tmp))),
+                                     level = levels(tmp))
+        .X[,i] <- as.factor(.X[,i])
+    }
     if (any(!disc)) {
         .X[order(.Y), !disc] <- apply(.X[, !disc, drop = FALSE], 2, function(.x)
             unlist(lapply(split(.x, .eps), fecdf)))
@@ -153,6 +159,7 @@ rocTree <- function(formula, data, id, subset, ensemble = TRUE, splitBy = c("dCO
     out$ensemble <- ensemble
     out$splitBy <- splitBy
     out$disc <- disc
+    out$discClass <- discClass
     out$control <- control
     class(out) <- "rocTree"
     return(out)

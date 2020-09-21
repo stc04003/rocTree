@@ -2,7 +2,6 @@
 #include "globals.h"
 #include <algorithm>
 
-
 void ForestPrediction::transformZ(const arma::mat& z,
                                   arma::umat& z2,
                                   const arma::mat& matX,
@@ -14,12 +13,13 @@ void ForestPrediction::transformZ(const arma::mat& z,
   int n = e.n_elem;
   arma::vec::const_iterator bb = breaks.begin();
   arma::vec::const_iterator be = breaks.end();
+  // Rcpp::Rcout << 1;
   for(int p = 0; p < P; p++) {
-    // Rcpp::Rcout << disc(p);
     if(disc(p) == 0) {
       arma::uvec ind = arma::cumsum(arma::regspace<arma::uvec>(0,n-1));
       arma::vec zp = matX.col(p);
       // BE CAREFUL
+      // Rcpp::Rcout << 2;
       int j = 0;
       for(int i = 0; i < n; i++) {
         if(e(i) == 1) {
@@ -31,11 +31,16 @@ void ForestPrediction::transformZ(const arma::mat& z,
         ind = ind + 1;
         if(ind.n_elem > 0) ind.shed_row(0);
       }
+      // Rcpp::Rcout << 3;
     } else {
-      z2.row(p) = arma::conv_to<arma::urowvec>::from(z.row(p));
+      // z2.row(p) = arma::conv_to<arma::urowvec>::from(z.row(p)(arma::find(e == 1));
+      arma::rowvec zpp = z.row(p);
+      z2.row(p) = arma::conv_to<arma::urowvec>::from(zpp(arma::find(e == 1)));
     }
   }
 }
+
+// arma::find(e == 1)
 
 void ForestPrediction::transformZH(const arma::mat& z,  // z on tg
                                    const arma::vec& tg, //grid of time point
@@ -70,7 +75,8 @@ void ForestPrediction::transformZH(const arma::mat& z,  // z on tg
         if(ind.n_elem > 0) ind.shed_row(0);
       }
     } else {
-      z2.row(p) = arma::conv_to<arma::urowvec>::from(z.row(p));
+      arma::rowvec zpp = z.row(p);
+      z2.row(p) = arma::conv_to<arma::urowvec>::from(zpp(arma::find(e == 1)));
     }
   }
 }
@@ -147,8 +153,6 @@ arma::vec ForestPrediction::getSurvival(const arma::umat& zt2,
   w.replace(arma::datum::nan, 0);
   return exp(-cumsum(w));
 }
-
-
 
 arma::vec ForestPrediction::getHazard(const arma::umat& ztvec,
                                       const arma::vec& tg,
