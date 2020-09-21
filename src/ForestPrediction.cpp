@@ -84,7 +84,7 @@ void ForestPrediction::transformZH(const arma::mat& z,  // z on tg
 // The new version
 arma::vec ForestPrediction::getSurvival(const arma::umat& zt2,
                                         const arma::vec& y,
-                                        const arma::uvec& e,
+                                        const arma::uvec& e1,
                                         const arma::field<arma::uvec>&& nodeSizeB0,
                                         const arma::umat&& nodeLabelB0,
                                         const arma::field<arma::uvec>&& tnd3B0,

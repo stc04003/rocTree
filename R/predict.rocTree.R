@@ -48,7 +48,7 @@ predict.rocTree <- function(object, newdata, type = c("survival", "hazard"),
     ## }
     for (i in which(object$disc)) {
         raw[,i] <- with(object$discClass[[i]], value[match(raw[,i], level)])
-        .X[,i] <- with(object$discClass[[i]], value[match(.X[,i], level)])
+        ## .X[,i] <- with(object$discClass[[i]], value[match(.X[,i], level)])
     }
     if (type %in% "survival") {
         if (object$ensemble)
