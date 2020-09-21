@@ -30,7 +30,8 @@ void TreePrediction::transformZ(const arma::mat& z,
         if(ind.n_elem > 0){ ind.shed_row(0);}
       }
     } else {
-      z2.row(p) = arma::conv_to<arma::urowvec>::from(z.row(p));
+      arma::rowvec zpp = z.row(p);
+      z2.row(p) = arma::conv_to<arma::urowvec>::from(zpp(arma::find(e == 1)));
     }
   }
 }
@@ -68,7 +69,8 @@ void TreePrediction::transformZH(const arma::mat& z,  // z on tg
         if(ind.n_elem > 0){ ind.shed_row(0);}
       }
     } else {
-      z2.row(p) = arma::conv_to<arma::urowvec>::from(z.row(p));
+      arma::rowvec zpp = z.row(p);
+      z2.row(p) = arma::conv_to<arma::urowvec>::from(zpp(arma::find(e == 1)));
     }
   }
 }
